@@ -25,10 +25,18 @@ public abstract class FileConfig<T> extends Config<T> {
         return this.config != null;
     }
 
+    public abstract byte[] create() throws IOException;
+
     public abstract void load() throws IOException;
 
-    protected String loadRaw() throws IOException {
-        return Files.readString(this.file.toPath());
+    protected byte[] loadRaw() throws IOException {
+        if (!Files.exists(this.file.toPath())) {
+            Files.createFile(this.file.toPath());
+
+            Files.write(this.file.toPath(), this.create());
+        }
+
+        return Files.readAllBytes(this.file.toPath());
     }
 
     @Override
@@ -37,10 +45,14 @@ public abstract class FileConfig<T> extends Config<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        Files.writeString(this.file.toPath(), this.saveRaw());
+        if (!Files.exists(this.file.toPath())) {
+            Files.createFile(this.file.toPath());
+        }
+
+        Files.write(this.file.toPath(), this.saveRaw());
     }
 
-    protected abstract String saveRaw() throws IOException;
+    protected abstract byte[] saveRaw() throws IOException;
 
     @Override
     public void close() throws IOException {

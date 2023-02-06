@@ -19,6 +19,15 @@ public class SmileConfig<T> extends FileConfig<T> {
     }
 
     @Override
+    public byte[] create() throws IOException {
+        if (this.closed) {
+            throw new RuntimeException("Config is already closed");
+        }
+
+        return this.bjsl.emptyBytes();
+    }
+
+    @Override
     public void load() throws IOException {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
@@ -28,8 +37,8 @@ public class SmileConfig<T> extends FileConfig<T> {
     }
 
     @Override
-    public String saveRaw() throws IOException {
-        return this.bjsl.stringify(this.config);
+    public byte[] saveRaw() throws IOException {
+        return this.bjsl.byteify(this.config);
     }
 
     @Override
