@@ -44,6 +44,10 @@ public abstract class FileConfig<T> extends Config<T> {
 
     @Override
     public void close() throws IOException {
+        if (this.closed) {
+            throw new RuntimeException("Config is already closed");
+        }
+
         this.closed = true;
     }
 

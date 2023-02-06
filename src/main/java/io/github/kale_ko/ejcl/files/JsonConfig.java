@@ -20,6 +20,10 @@ public class JsonConfig<T> extends FileConfig<T> {
 
     @Override
     public void load() throws IOException {
+        if (this.closed) {
+            throw new RuntimeException("Config is already closed");
+        }
+
         this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
     }
 
