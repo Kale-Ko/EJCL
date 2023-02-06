@@ -8,13 +8,13 @@ import io.github.kale_ko.bjsl.parsers.TomlParser;
 public class TomlConfig<T> extends FileConfig<T> {
     protected BJSL<TomlParser> bjsl;
 
-    protected TomlConfig(Class<T> clazz, File file, BJSL<TomlParser> bjsl) {
+    public TomlConfig(Class<T> clazz, File file, BJSL<TomlParser> bjsl) {
         super(clazz, file);
 
         this.bjsl = bjsl;
     }
 
-    protected TomlConfig(Class<T> clazz, File file) {
+    public TomlConfig(Class<T> clazz, File file) {
         this(clazz, file, new BJSL<TomlParser>(new TomlParser.Builder().build()));
     }
 
