@@ -1,0 +1,33 @@
+package io.github.kale_ko.ejcl.files;
+
+import java.io.File;
+import java.io.IOException;
+import io.github.kale_ko.bjsl.BJSL;
+import io.github.kale_ko.bjsl.parsers.TomlParser;
+
+public class TomlConfig<T> extends FileConfig<T> {
+    protected BJSL<TomlParser> bjsl;
+
+    protected TomlConfig(Class<T> clazz, File file, BJSL<TomlParser> bjsl) {
+        super(clazz, file);
+
+        this.bjsl = bjsl;
+    }
+
+    protected TomlConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<TomlParser>(new TomlParser.Builder().build()));
+    }
+
+    @Override
+    public void load() throws IOException {
+        this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
+    }
+
+    @Override
+    public String saveRaw() throws IOException {
+        return this.bjsl.stringify(this.config);
+    }
+
+    @Override
+    public void close() throws IOException {}
+}
