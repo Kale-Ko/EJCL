@@ -8,13 +8,13 @@ import io.github.kale_ko.bjsl.parsers.YamlParser;
 public class YamlConfig<T> extends FileConfig<T> {
     protected BJSL<YamlParser> bjsl;
 
-    protected YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
+    public YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
         super(clazz, file);
 
         this.bjsl = bjsl;
     }
 
-    protected YamlConfig(Class<T> clazz, File file) {
+    public YamlConfig(Class<T> clazz, File file) {
         this(clazz, file, new BJSL<YamlParser>(new YamlParser.Builder().build()));
     }
 

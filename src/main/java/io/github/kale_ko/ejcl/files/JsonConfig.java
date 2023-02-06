@@ -8,13 +8,13 @@ import io.github.kale_ko.bjsl.parsers.JsonParser;
 public class JsonConfig<T> extends FileConfig<T> {
     protected BJSL<JsonParser> bjsl;
 
-    protected JsonConfig(Class<T> clazz, File file, BJSL<JsonParser> bjsl) {
+    public JsonConfig(Class<T> clazz, File file, BJSL<JsonParser> bjsl) {
         super(clazz, file);
 
         this.bjsl = bjsl;
     }
 
-    protected JsonConfig(Class<T> clazz, File file) {
+    public JsonConfig(Class<T> clazz, File file) {
         this(clazz, file, new BJSL<JsonParser>(new JsonParser.Builder().build()));
     }
 
