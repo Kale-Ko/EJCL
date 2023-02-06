@@ -1,0 +1,33 @@
+package io.github.kale_ko.ejcl.files;
+
+import java.io.File;
+import java.io.IOException;
+import io.github.kale_ko.bjsl.BJSL;
+import io.github.kale_ko.bjsl.parsers.YamlParser;
+
+public class YamlConfig<T> extends FileConfig<T> {
+    protected BJSL<YamlParser> bjsl;
+
+    protected YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
+        super(clazz, file);
+
+        this.bjsl = bjsl;
+    }
+
+    protected YamlConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<YamlParser>(new YamlParser.Builder().build()));
+    }
+
+    @Override
+    public void load() throws IOException {
+        this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
+    }
+
+    @Override
+    public String saveRaw() throws IOException {
+        return this.bjsl.stringify(this.config);
+    }
+
+    @Override
+    public void close() throws IOException {}
+}
