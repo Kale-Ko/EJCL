@@ -9,6 +9,10 @@ public abstract class Config<T> implements Closeable {
     protected T config = null;
 
     protected Config(Class<T> clazz) {
+        if (clazz.isArray() || clazz.isInterface() || clazz.isEnum()) {
+            throw new RuntimeException("clazz must be an object");
+        }
+
         this.clazz = clazz;
     }
 
