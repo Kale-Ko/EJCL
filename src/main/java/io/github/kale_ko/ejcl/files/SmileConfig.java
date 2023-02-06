@@ -8,13 +8,13 @@ import io.github.kale_ko.bjsl.parsers.SmileParser;
 public class SmileConfig<T> extends FileConfig<T> {
     protected BJSL<SmileParser> bjsl;
 
-    protected SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
+    public SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
         super(clazz, file);
 
         this.bjsl = bjsl;
     }
 
-    protected SmileConfig(Class<T> clazz, File file) {
+    public SmileConfig(Class<T> clazz, File file) {
         this(clazz, file, new BJSL<SmileParser>(new SmileParser.Builder().build()));
     }
 
