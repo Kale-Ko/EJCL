@@ -1,14 +1,14 @@
-package io.github.kale_ko.ejcl.files;
+package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.SmileParser;
+import io.github.kale_ko.bjsl.parsers.YamlParser;
 
-public class SmileConfig<T> extends FileConfig<T> {
-    protected BJSL<SmileParser> bjsl;
+public class YamlConfig<T> extends FileConfig<T> {
+    protected BJSL<YamlParser> bjsl;
 
-    public SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
+    public YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
         super(clazz, file);
 
         if (bjsl == null) {
@@ -18,8 +18,8 @@ public class SmileConfig<T> extends FileConfig<T> {
         this.bjsl = bjsl;
     }
 
-    public SmileConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<SmileParser>(new SmileParser.Builder().build()));
+    public YamlConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<YamlParser>(new YamlParser.Builder().build()));
     }
 
     @Override

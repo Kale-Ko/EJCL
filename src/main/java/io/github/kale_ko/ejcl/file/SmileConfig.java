@@ -1,14 +1,14 @@
-package io.github.kale_ko.ejcl.files;
+package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.JsonParser;
+import io.github.kale_ko.bjsl.parsers.SmileParser;
 
-public class JsonConfig<T> extends FileConfig<T> {
-    protected BJSL<JsonParser> bjsl;
+public class SmileConfig<T> extends FileConfig<T> {
+    protected BJSL<SmileParser> bjsl;
 
-    public JsonConfig(Class<T> clazz, File file, BJSL<JsonParser> bjsl) {
+    public SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
         super(clazz, file);
 
         if (bjsl == null) {
@@ -18,8 +18,8 @@ public class JsonConfig<T> extends FileConfig<T> {
         this.bjsl = bjsl;
     }
 
-    public JsonConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<JsonParser>(new JsonParser.Builder().build()));
+    public SmileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<SmileParser>(new SmileParser.Builder().build()));
     }
 
     @Override
