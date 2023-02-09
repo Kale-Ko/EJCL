@@ -2,6 +2,9 @@ package io.github.kale_ko.ejcl.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import io.github.kale_ko.ejcl.Config;
 
@@ -10,10 +13,34 @@ public abstract class FileConfig<T> extends Config<T> {
 
     protected boolean closed = false;
 
+    @SuppressWarnings("unchecked")
     protected FileConfig(Class<T> clazz, File file) {
         super(clazz);
 
         this.file = file;
+
+        try {
+            for (Constructor<?> constructor : clazz.getConstructors()) {
+                if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
+                    this.config = (T) constructor.newInstance();
+
+                    break;
+                }
+            }
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        if (this.config == null) {
+            try {
+                Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+                unsafeField.setAccessible(true);
+                sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+                this.config = (T) unsafe.allocateInstance(clazz);
+            } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public File getFile() {
