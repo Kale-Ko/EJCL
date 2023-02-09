@@ -8,7 +8,30 @@ import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 
+/**
+ * Contains methods useful for getting/setting nested values
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class PathResolver {
+    /**
+     * Create a path resolver
+     * 
+     * @since 1.0.0
+     */
+    private PathResolver() {}
+
+    /**
+     * Resolve a value on an element
+     * 
+     * @param element
+     *        The element to resolve on
+     * @param path
+     *        The path to resolve to
+     * @return The value resolved
+     * @since 1.0.0
+     */
     public static Object resolve(ParsedElement element, String path) {
         String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
 
@@ -55,6 +78,17 @@ public class PathResolver {
         return null;
     }
 
+    /**
+     * Update a value on an element
+     * 
+     * @param element
+     *        The element to update on
+     * @param path
+     *        The path to update
+     * @param value
+     *        The value to update to
+     * @since 1.0.0
+     */
     public static void update(ParsedElement element, String path, Object value) {
         String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
         String valueKey = keys[keys.length - 1];
@@ -109,10 +143,28 @@ public class PathResolver {
         }
     }
 
+    /**
+     * Get all the keys in an element
+     * 
+     * @param element
+     *        The element to get the keys of
+     * @return A list of all the keys
+     * @since 1.0.0
+     */
     public static List<String> getKeys(ParsedElement element) {
         return getKeys(element, "");
     }
 
+    /**
+     * Get all the keys in an element
+     * 
+     * @param element
+     *        The element to get the keys of
+     * @param path
+     *        The current path
+     * @return A list of all the keys
+     * @since 1.0.0
+     */
     protected static List<String> getKeys(ParsedElement element, String path) {
         List<String> keys = new ArrayList<String>();
 
