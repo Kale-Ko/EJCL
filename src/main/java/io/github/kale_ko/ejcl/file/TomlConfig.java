@@ -1,14 +1,14 @@
-package io.github.kale_ko.ejcl.files;
+package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.PropertiesParser;
+import io.github.kale_ko.bjsl.parsers.TomlParser;
 
-public class PropertiesConfig<T> extends FileConfig<T> {
-    protected BJSL<PropertiesParser> bjsl;
+public class TomlConfig<T> extends FileConfig<T> {
+    protected BJSL<TomlParser> bjsl;
 
-    public PropertiesConfig(Class<T> clazz, File file, BJSL<PropertiesParser> bjsl) {
+    public TomlConfig(Class<T> clazz, File file, BJSL<TomlParser> bjsl) {
         super(clazz, file);
 
         if (bjsl == null) {
@@ -18,8 +18,8 @@ public class PropertiesConfig<T> extends FileConfig<T> {
         this.bjsl = bjsl;
     }
 
-    public PropertiesConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<PropertiesParser>(new PropertiesParser.Builder().build()));
+    public TomlConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<TomlParser>(new TomlParser.Builder().build()));
     }
 
     @Override
@@ -28,7 +28,7 @@ public class PropertiesConfig<T> extends FileConfig<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        return this.bjsl.emptyBytes();
+        return new byte[0]; // Strange behaviour using normal method
     }
 
     @Override
