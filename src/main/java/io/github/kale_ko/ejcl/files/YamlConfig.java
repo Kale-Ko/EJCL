@@ -11,6 +11,10 @@ public class YamlConfig<T> extends FileConfig<T> {
     public YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
         super(clazz, file);
 
+        if (bjsl == null) {
+            throw new NullPointerException("Bjsl can not be null");
+        }
+
         this.bjsl = bjsl;
     }
 
