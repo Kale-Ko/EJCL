@@ -1,14 +1,14 @@
-package io.github.kale_ko.ejcl.files;
+package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.YamlParser;
+import io.github.kale_ko.bjsl.parsers.JsonParser;
 
-public class YamlConfig<T> extends FileConfig<T> {
-    protected BJSL<YamlParser> bjsl;
+public class JsonConfig<T> extends FileConfig<T> {
+    protected BJSL<JsonParser> bjsl;
 
-    public YamlConfig(Class<T> clazz, File file, BJSL<YamlParser> bjsl) {
+    public JsonConfig(Class<T> clazz, File file, BJSL<JsonParser> bjsl) {
         super(clazz, file);
 
         if (bjsl == null) {
@@ -18,8 +18,8 @@ public class YamlConfig<T> extends FileConfig<T> {
         this.bjsl = bjsl;
     }
 
-    public YamlConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<YamlParser>(new YamlParser.Builder().build()));
+    public JsonConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<JsonParser>(new JsonParser.Builder().build()));
     }
 
     @Override
