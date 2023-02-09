@@ -1,4 +1,4 @@
-package io.github.kale_ko.ejcl.files;
+package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
