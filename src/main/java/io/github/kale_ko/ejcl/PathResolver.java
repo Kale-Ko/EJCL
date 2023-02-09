@@ -91,17 +91,17 @@ public class PathResolver {
         }
 
         if (resolved != null) {
-            if (resolved instanceof ParsedObject object) {
-                if (object.get(valueKey).isPrimitive()) {
-                    object.set(valueKey, ParsedPrimitive.from(value));
+            if (resolved.isObject()) {
+                if (resolved.asObject().get(valueKey).isPrimitive()) {
+                    resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
                 }
-            } else if (resolved instanceof ParsedArray array) {
+            } else if (resolved.isArray()) {
                 if (valueKey.startsWith("[") && valueKey.endsWith("]")) {
                     Integer resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9])\\]", "$1"));
 
                     if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
-                        if (array.get(resolvedValueKey).isPrimitive()) {
-                            array.set(resolvedValueKey, ParsedPrimitive.from(value));
+                        if (resolved.asArray().get(resolvedValueKey).isPrimitive()) {
+                            resolved.asArray().set(resolvedValueKey, ParsedPrimitive.from(value));
                         }
                     }
                 }

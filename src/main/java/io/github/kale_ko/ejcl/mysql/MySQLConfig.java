@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -128,7 +128,7 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + table + " (path varchar(512) CHARACTER SET utf8, value varchar(512) CHARACTER SET utf8) CHARACTER SET utf8;");
+            this.execute("CREATE TABLE IF NOT EXISTS ? (path varchar(512) CHARACTER SET utf8, value varchar(512) CHARACTER SET utf8) CHARACTER SET utf8;", table);
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -147,7 +147,7 @@ public class MySQLConfig<T> extends Config<T> {
         List<String> keys = PathResolver.getKeys(object);
 
         try {
-            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
+            ResultSet existsResult = this.query("SELECT * FROM ?", this.table);
 
             while (existsResult.next()) {
                 if (keys.contains(existsResult.getString("path"))) {
@@ -179,7 +179,7 @@ public class MySQLConfig<T> extends Config<T> {
 
         try {
             List<String> exists = new ArrayList<String>();
-            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
+            ResultSet existsResult = this.query("SELECT * FROM ?", this.table);
 
             while (existsResult.next()) {
                 exists.add(existsResult.getString("path"));
@@ -188,26 +188,28 @@ public class MySQLConfig<T> extends Config<T> {
             existsResult.getStatement().close();
             existsResult.close();
 
-            List<String> queries = new ArrayList<String>();
-
             for (String key : keys) {
                 String value = PathResolver.resolve(object, key).toString();
 
                 if (!exists.contains(key)) {
-                    queries.add("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
+                    this.execute("INSERT INTO ? (path, value) VALUES (?, ?);", this.table, key, value);
                 } else {
-                    queries.add("UPDATE " + this.table + " SET value=\"" + value + "\" WHERE path=\"" + key + "\";");
+                    this.execute("UPDATE ? SET value=? WHERE path=?;", this.table, value, key);
                 }
             }
-
-            this.executeBatch(queries.toArray(new String[] {}));
         } catch (SQLException e) {
             throw new IOException(e);
         }
     }
 
-    protected boolean execute(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected boolean execute(String query, String... params) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+
+        int i = 0;
+        for (String param : params) {
+            statement.setString(i, param);
+            i++;
+        }
 
         boolean result = statement.execute(query);
         statement.close();
@@ -215,19 +217,14 @@ public class MySQLConfig<T> extends Config<T> {
         return result;
     }
 
-    protected void executeBatch(String[] queries) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected ResultSet query(String query, String... params) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
 
-        for (String query : queries) {
-            statement.addBatch(query);
+        int i = 0;
+        for (String param : params) {
+            statement.setString(i, param);
+            i++;
         }
-        statement.executeBatch();
-
-        statement.close();
-    }
-
-    protected ResultSet query(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
 
         return statement.executeQuery(query);
     }
