@@ -17,22 +17,99 @@ import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.Config;
 import io.github.kale_ko.ejcl.PathResolver;
 
+/**
+ * A MySQL Config for storing data on a MySQL server
+ *
+ * @param <T>
+ *        The type of the data being stored
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class MySQLConfig<T> extends Config<T> {
+    /**
+     * The ObjectProcessor to use for serialization/deserialization
+     * 
+     * @since 1.0.0
+     */
     protected ObjectProcessor processor;
 
+    /**
+     * The host of the server
+     * 
+     * @since 1.0.0
+     */
     protected String host;
+
+    /**
+     * The port of the server
+     * 
+     * @since 1.0.0
+     */
     protected int port;
 
+    /**
+     * The database on the server
+     * 
+     * @since 1.0.0
+     */
     protected String database;
+
+    /**
+     * The table of the database
+     * 
+     * @since 1.0.0
+     */
     protected String table;
 
+    /**
+     * The username to the server
+     * 
+     * @since 1.0.0
+     */
     protected String username;
+
+    /**
+     * The password to the server
+     * 
+     * @since 1.0.0
+     */
     protected String password;
 
+    /**
+     * The connection to the server
+     * 
+     * @since 1.0.0
+     */
     protected Connection connection;
 
+    /**
+     * If this config is closed
+     * 
+     * @since 1.0.0
+     */
     protected boolean closed = false;
 
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @param username
+     *        The username to the server
+     * @param password
+     *        The password to the server
+     * @since 1.0.0
+     */
     @SuppressWarnings("unchecked")
     public MySQLConfig(Class<T> clazz, ObjectProcessor processor, String host, int port, String database, String table, String username, String password) {
         super(clazz);
@@ -87,23 +164,87 @@ public class MySQLConfig<T> extends Config<T> {
         }
     }
 
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @param username
+     *        The username to the server
+     * @param password
+     *        The password to the server
+     * @since 1.0.0
+     */
     public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
         this(clazz, new ObjectProcessor.Builder().build(), host, port, database, table, username, password);
     }
 
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @since 1.0.0
+     */
     public MySQLConfig(Class<T> clazz, ObjectProcessor processor, String host, int port, String database, String table) {
         this(clazz, processor, host, port, database, table, null, null);
     }
 
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @since 1.0.0
+     */
     public MySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
         this(clazz, new ObjectProcessor.Builder().build(), host, port, database, table, null, null);
     }
 
+    /**
+     * Get if the config is loaded
+     * 
+     * @return If the config is loaded
+     * @since 1.0.0
+     */
     @Override
     public boolean getLoaded() {
         return this.config != null;
     }
 
+    /**
+     * Connect to the server
+     * 
+     * @throws IOException
+     *         On connect error
+     * @since 1.0.0
+     */
     public void connect() throws IOException {
         try {
             Properties properties = new Properties();
@@ -134,6 +275,13 @@ public class MySQLConfig<T> extends Config<T> {
         }
     }
 
+    /**
+     * Load the config from the server
+     * 
+     * @throws IOException
+     *         On load error
+     * @since 1.0.0
+     */
     public void load() throws IOException {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
@@ -164,6 +312,13 @@ public class MySQLConfig<T> extends Config<T> {
         this.config = this.processor.toObject(object, this.clazz);
     }
 
+    /**
+     * Save the config to the server
+     * 
+     * @throws IOException
+     *         On save error
+     * @since 1.0.0
+     */
     @Override
     public void save() throws IOException {
         if (this.closed) {
@@ -202,6 +357,18 @@ public class MySQLConfig<T> extends Config<T> {
         }
     }
 
+    /**
+     * Execute a mysql statement
+     * 
+     * @param query
+     *        The base query
+     * @param params
+     *        Any parameters to be safely passed
+     * @return If the statement was successful
+     * @throws SQLException
+     *         On sql error
+     * @since 1.0.0
+     */
     protected boolean execute(String query, String... params) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query);
 
@@ -217,6 +384,18 @@ public class MySQLConfig<T> extends Config<T> {
         return result;
     }
 
+    /**
+     * Execute a mysql query
+     * 
+     * @param query
+     *        The base query
+     * @param params
+     *        Any parameters to be safely passed
+     * @return The result of the query
+     * @throws SQLException
+     *         On sql error
+     * @since 1.0.0
+     */
     protected ResultSet query(String query, String... params) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query);
 
@@ -229,6 +408,13 @@ public class MySQLConfig<T> extends Config<T> {
         return statement.executeQuery(query);
     }
 
+    /**
+     * Close the config
+     * 
+     * @throws IOException
+     *         On close error
+     * @since 1.0.0
+     */
     @Override
     public void close() throws IOException {
         if (this.closed) {
@@ -244,6 +430,12 @@ public class MySQLConfig<T> extends Config<T> {
         }
     }
 
+    /**
+     * Get if the config is closed
+     * 
+     * @return If the config is closed
+     * @since 1.0.0
+     */
     public boolean isClosed() {
         return this.closed;
     }
