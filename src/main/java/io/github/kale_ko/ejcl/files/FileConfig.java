@@ -17,6 +17,10 @@ public abstract class FileConfig<T> extends Config<T> {
     protected FileConfig(Class<T> clazz, File file) {
         super(clazz);
 
+        if (file == null) {
+            throw new NullPointerException("File can not be null");
+        }
+
         this.file = file;
 
         try {
@@ -27,9 +31,7 @@ public abstract class FileConfig<T> extends Config<T> {
                     break;
                 }
             }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-            e.printStackTrace();
-        }
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {        }
 
         if (this.config == null) {
             try {
@@ -37,9 +39,11 @@ public abstract class FileConfig<T> extends Config<T> {
                 unsafeField.setAccessible(true);
                 sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
                 this.config = (T) unsafe.allocateInstance(clazz);
-            } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
-                e.printStackTrace();
-            }
+            } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {            }
+        }
+
+        if (this.config == null) {
+            throw new RuntimeException("Could not instantiate new config");
         }
     }
 
