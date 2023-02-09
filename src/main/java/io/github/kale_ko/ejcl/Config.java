@@ -9,6 +9,10 @@ public abstract class Config<T> implements Closeable {
     protected T config = null;
 
     protected Config(Class<T> clazz) {
+        if (clazz == null) {
+            throw new NullPointerException("Clazz can not be null");
+        }
+
         if (clazz.isArray() || clazz.isInterface() || clazz.isEnum()) {
             throw new RuntimeException("clazz must be an object");
         }
@@ -21,9 +25,7 @@ public abstract class Config<T> implements Closeable {
             try {
                 this.load();
             } catch (IOException e) {
-                e.printStackTrace();
-
-                return null;
+                throw new RuntimeException(e);
             }
         }
 
@@ -31,6 +33,10 @@ public abstract class Config<T> implements Closeable {
     }
 
     public void set(T value) {
+        if (value == null) {
+            throw new NullPointerException("Value can not be null");
+        }
+
         this.config = value;
     }
 
