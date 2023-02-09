@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.github.kale_ko.ejcl"},{"l":"io.github.kale_ko.ejcl.file"},{"l":"io.github.kale_ko.ejcl.mysql"}];updateSearchResults();
