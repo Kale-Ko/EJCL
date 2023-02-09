@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
@@ -36,6 +37,19 @@ public class MySQLConfig<T> extends Config<T> {
     public MySQLConfig(Class<T> clazz, ObjectProcessor processor, String host, int port, String database, String table, String username, String password) {
         super(clazz);
 
+        if (processor == null) {
+            throw new NullPointerException("Processor can not be null");
+        }
+        if (host == null) {
+            throw new NullPointerException("Host can not be null");
+        }
+        if (database == null) {
+            throw new NullPointerException("Database can not be null");
+        }
+        if (table == null) {
+            throw new NullPointerException("Table can not be null");
+        }
+
         this.processor = processor;
 
         this.host = host;
@@ -56,7 +70,6 @@ public class MySQLConfig<T> extends Config<T> {
                 }
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-            e.printStackTrace();
         }
 
         if (this.config == null) {
@@ -66,8 +79,11 @@ public class MySQLConfig<T> extends Config<T> {
                 sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
                 this.config = (T) unsafe.allocateInstance(clazz);
             } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
-                e.printStackTrace();
             }
+        }
+
+        if (this.config == null) {
+            throw new RuntimeException("Could not instantiate new config");
         }
     }
 
@@ -122,22 +138,25 @@ public class MySQLConfig<T> extends Config<T> {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
+        if (this.connection == null) {
+            throw new RuntimeException("Config is not connected");
+        }
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
 
         List<String> keys = PathResolver.getKeys(object);
 
         try {
-            for (String key : keys) {
-                ResultSet existsResult = this.query("SELECT * FROM " + this.table + " WHERE path=\"" + key + "\"");
+            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
 
-                while (existsResult.next()) {
-                    PathResolver.update(object, key, existsResult.getString("value"));
+            while (existsResult.next()) {
+                if (keys.contains(existsResult.getString("path"))) {
+                    PathResolver.update(object, existsResult.getString("path"), existsResult.getString("value"));
                 }
-
-                existsResult.getStatement().close();
-                existsResult.close();
             }
+
+            existsResult.getStatement().close();
+            existsResult.close();
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -150,26 +169,38 @@ public class MySQLConfig<T> extends Config<T> {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
+        if (this.connection == null) {
+            throw new RuntimeException("Config is not connected");
+        }
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
 
         List<String> keys = PathResolver.getKeys(object);
 
         try {
+            List<String> exists = new ArrayList<String>();
+            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
+
+            while (existsResult.next()) {
+                exists.add(existsResult.getString("path"));
+            }
+
+            existsResult.getStatement().close();
+            existsResult.close();
+
+            List<String> queries = new ArrayList<String>();
+
             for (String key : keys) {
                 String value = PathResolver.resolve(object, key).toString();
 
-                ResultSet existsResult = this.query("SELECT path FROM " + this.table + " WHERE path=\"" + key + "\"");
-
-                if (!existsResult.next()) {
-                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
+                if (!exists.contains(key)) {
+                    queries.add("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
                 } else {
-                    this.execute("UPDATE " + this.table + " SET value=\"" + value + "\" WHERE path=\"" + key + "\";");
+                    queries.add("UPDATE " + this.table + " SET value=\"" + value + "\" WHERE path=\"" + key + "\";");
                 }
-
-                existsResult.getStatement().close();
-                existsResult.close();
             }
+
+            this.executeBatch(queries.toArray(new String[] {}));
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -182,6 +213,17 @@ public class MySQLConfig<T> extends Config<T> {
         statement.close();
 
         return result;
+    }
+
+    protected void executeBatch(String[] queries) throws SQLException {
+        Statement statement = this.connection.createStatement();
+
+        for (String query : queries) {
+            statement.addBatch(query);
+        }
+        statement.executeBatch();
+
+        statement.close();
     }
 
     protected ResultSet query(String query) throws SQLException {

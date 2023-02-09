@@ -11,6 +11,10 @@ public class TomlConfig<T> extends FileConfig<T> {
     public TomlConfig(Class<T> clazz, File file, BJSL<TomlParser> bjsl) {
         super(clazz, file);
 
+        if (bjsl == null) {
+            throw new NullPointerException("Bjsl can not be null");
+        }
+
         this.bjsl = bjsl;
     }
 

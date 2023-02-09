@@ -11,6 +11,10 @@ public class SmileConfig<T> extends FileConfig<T> {
     public SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
         super(clazz, file);
 
+        if (bjsl == null) {
+            throw new NullPointerException("Bjsl can not be null");
+        }
+
         this.bjsl = bjsl;
     }
 

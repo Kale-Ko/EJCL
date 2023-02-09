@@ -11,6 +11,10 @@ public class JsonConfig<T> extends FileConfig<T> {
     public JsonConfig(Class<T> clazz, File file, BJSL<JsonParser> bjsl) {
         super(clazz, file);
 
+        if (bjsl == null) {
+            throw new NullPointerException("Bjsl can not be null");
+        }
+
         this.bjsl = bjsl;
     }
 
