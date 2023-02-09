@@ -11,6 +11,10 @@ public class PropertiesConfig<T> extends FileConfig<T> {
     public PropertiesConfig(Class<T> clazz, File file, BJSL<PropertiesParser> bjsl) {
         super(clazz, file);
 
+        if (bjsl == null) {
+            throw new NullPointerException("Bjsl can not be null");
+        }
+
         this.bjsl = bjsl;
     }
 
