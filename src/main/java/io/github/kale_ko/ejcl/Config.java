@@ -1,6 +1,5 @@
 package io.github.kale_ko.ejcl;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -13,7 +12,7 @@ import java.io.IOException;
  * @version 1.0.0
  * @since 1.0.0
  */
-public abstract class Config<T> implements Closeable {
+public abstract class Config<T> {
     /**
      * The class of the data being stored
      * 
