@@ -1,4 +1,4 @@
-# BJSL
+# EJCL
 
 A semi-advanced Java configuration library with support for local files, mysql, and more.
 
