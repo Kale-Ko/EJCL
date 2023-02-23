@@ -372,7 +372,7 @@ public class MySQLConfig<T> extends Config<T> {
     protected boolean execute(String query, String... params) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query);
 
-        int i = 0;
+        int i = 1;
         for (String param : params) {
             statement.setString(i, param);
             i++;
@@ -399,7 +399,7 @@ public class MySQLConfig<T> extends Config<T> {
     protected ResultSet query(String query, String... params) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query);
 
-        int i = 0;
+        int i = 1;
         for (String param : params) {
             statement.setString(i, param);
             i++;
