@@ -308,19 +308,15 @@ public class MySQLConfig<T> extends Config<T> {
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
 
-        List<String> keys = PathResolver.getKeys(object);
-
         try {
-            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
+            ResultSet result = this.query("SELECT path,value FROM " + this.table);
 
-            while (existsResult.next()) {
-                if (keys.contains(existsResult.getString("path"))) {
-                    PathResolver.update(object, existsResult.getString("path"), existsResult.getString("value"));
-                }
+            while (result.next()) {
+                PathResolver.update(object, result.getString("path"), result.getString("value"));
             }
 
-            existsResult.getStatement().close();
-            existsResult.close();
+            result.getStatement().close();
+            result.close();
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -351,7 +347,7 @@ public class MySQLConfig<T> extends Config<T> {
 
         try {
             List<String> exists = new ArrayList<String>();
-            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
+            ResultSet existsResult = this.query("SELECT path FROM " + this.table);
 
             while (existsResult.next()) {
                 exists.add(existsResult.getString("path"));
