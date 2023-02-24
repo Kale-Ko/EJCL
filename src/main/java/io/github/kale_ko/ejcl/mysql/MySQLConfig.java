@@ -361,8 +361,11 @@ public class MySQLConfig<T> extends Config<T> {
             existsResult.close();
 
             for (String key : keys) {
-                System.out.println(key);
                 String value = PathResolver.resolve(object, key).toString();
+
+                if (value == null) {
+                    continue;
+                }
 
                 if (!exists.contains(key)) {
                     this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
