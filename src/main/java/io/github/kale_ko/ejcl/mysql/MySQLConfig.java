@@ -295,7 +295,7 @@ public class MySQLConfig<T> extends Config<T> {
         List<String> keys = PathResolver.getKeys(object);
 
         try {
-            ResultSet existsResult = this.query("SELECT * FROM ?", this.table);
+            ResultSet existsResult = this.query("SELECT * FROM " + this.table );
 
             while (existsResult.next()) {
                 if (keys.contains(existsResult.getString("path"))) {
@@ -334,7 +334,7 @@ public class MySQLConfig<T> extends Config<T> {
 
         try {
             List<String> exists = new ArrayList<String>();
-            ResultSet existsResult = this.query("SELECT * FROM ?", this.table);
+            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
 
             while (existsResult.next()) {
                 exists.add(existsResult.getString("path"));
@@ -347,9 +347,9 @@ public class MySQLConfig<T> extends Config<T> {
                 String value = PathResolver.resolve(object, key).toString();
 
                 if (!exists.contains(key)) {
-                    this.execute("INSERT INTO ? (path, value) VALUES (?, ?);", this.table, key, value);
+                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (?, ?);", key, value);
                 } else {
-                    this.execute("UPDATE ? SET value=? WHERE path=?;", this.table, value, key);
+                    this.execute("UPDATE " + this.table + " SET value=? WHERE path=?;", value, key);
                 }
             }
         } catch (SQLException e) {
