@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -81,6 +82,13 @@ public class MySQLConfig<T> extends Config<T> {
      * @since 1.0.0
      */
     protected Connection connection;
+
+    /**
+     * When the config expires next
+     * 
+     * @since 1.1.0
+     */
+    protected long configExpires = -1l;
 
     /**
      * If this config is closed
@@ -235,7 +243,15 @@ public class MySQLConfig<T> extends Config<T> {
      */
     @Override
     public boolean getLoaded() {
-        return this.config != null;
+        if (this.config == null) {
+            return false;
+        }
+
+        if (Instant.now().getEpochSecond() >= configExpires) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -310,6 +326,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         this.config = this.processor.toObject(object, this.clazz);
+        this.configExpires = Instant.now().getEpochSecond() + 5;
     }
 
     /**
@@ -347,9 +364,9 @@ public class MySQLConfig<T> extends Config<T> {
                 String value = PathResolver.resolve(object, key).toString();
 
                 if (!exists.contains(key)) {
-                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (" + key + ", " + value + ");");
+                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
                 } else {
-                    this.execute("UPDATE " + this.table + " SET value=" + value + " WHERE path=" + key + ";");
+                    this.execute("UPDATE " + this.table + " SET value=\"" + value + "\" WHERE path=\"" + key + "\";");
                 }
             }
         } catch (SQLException e) {
