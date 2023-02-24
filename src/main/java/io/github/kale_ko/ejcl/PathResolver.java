@@ -126,8 +126,18 @@ public class PathResolver {
 
         if (resolved != null) {
             if (resolved.isObject()) {
-                if (resolved.asObject().get(valueKey).isPrimitive()) {
-                    resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
+                if (resolved.asObject().has(valueKey)) {
+                    if (resolved.asObject().get(valueKey).isPrimitive()) {
+                        resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
+                    }
+                } else {
+                    if (value instanceof String string && string.startsWith("{obj},")) {
+                        resolved.asObject().set(valueKey, ParsedObject.create());
+                    } else if (value instanceof String string && string.startsWith("{arr},")) {
+                        resolved.asObject().set(valueKey, ParsedArray.create());
+                    } else {
+                        resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
+                    }
                 }
             } else if (resolved.isArray()) {
                 if (valueKey.startsWith("[") && valueKey.endsWith("]")) {
@@ -136,6 +146,14 @@ public class PathResolver {
                     if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
                         if (resolved.asArray().get(resolvedValueKey).isPrimitive()) {
                             resolved.asArray().set(resolvedValueKey, ParsedPrimitive.from(value));
+                        }
+                    } else {
+                        if (value instanceof String string && string.startsWith("{obj},")) {
+                            resolved.asArray().add(ParsedObject.create());
+                        } else if (value instanceof String string && string.startsWith("{arr},")) {
+                            resolved.asArray().add(ParsedArray.create());
+                        } else {
+                            resolved.asArray().add(ParsedPrimitive.from(value));
                         }
                     }
                 }
