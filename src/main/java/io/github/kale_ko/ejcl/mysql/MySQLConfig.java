@@ -361,16 +361,16 @@ public class MySQLConfig<T> extends Config<T> {
             existsResult.close();
 
             for (String key : keys) {
-                String value = PathResolver.resolve(object, key).toString();
+                Object value = PathResolver.resolve(object, key);
 
                 if (value == null) {
                     continue;
                 }
 
                 if (!exists.contains(key)) {
-                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value + "\");");
+                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value.toString() + "\");");
                 } else {
-                    this.execute("UPDATE " + this.table + " SET value=\"" + value + "\" WHERE path=\"" + key + "\";");
+                    this.execute("UPDATE " + this.table + " SET value=\"" + value.toString() + "\" WHERE path=\"" + key + "\";");
                 }
             }
         } catch (SQLException e) {
