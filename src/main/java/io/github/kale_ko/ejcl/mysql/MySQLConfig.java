@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -347,9 +347,9 @@ public class MySQLConfig<T> extends Config<T> {
                 String value = PathResolver.resolve(object, key).toString();
 
                 if (!exists.contains(key)) {
-                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (?, ?);", key, value);
+                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (" + key + ", " + value + ");");
                 } else {
-                    this.execute("UPDATE " + this.table + " SET value=? WHERE path=?;", value, key);
+                    this.execute("UPDATE " + this.table + " SET value=" + value + " WHERE path=" + key + ";");
                 }
             }
         } catch (SQLException e) {
@@ -362,21 +362,13 @@ public class MySQLConfig<T> extends Config<T> {
      * 
      * @param query
      *        The base query
-     * @param params
-     *        Any parameters to be safely passed
      * @return If the statement was successful
      * @throws SQLException
      *         On sql error
      * @since 1.0.0
      */
-    protected boolean execute(String query, String... params) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-
-        int i = 1;
-        for (String param : params) {
-            statement.setString(i, param);
-            i++;
-        }
+    protected boolean execute(String query) throws SQLException {
+        Statement statement = this.connection.createStatement();
 
         boolean result = statement.execute(query);
         statement.close();
@@ -389,23 +381,17 @@ public class MySQLConfig<T> extends Config<T> {
      * 
      * @param query
      *        The base query
-     * @param params
-     *        Any parameters to be safely passed
      * @return The result of the query
      * @throws SQLException
      *         On sql error
      * @since 1.0.0
      */
-    protected ResultSet query(String query, String... params) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
+    protected ResultSet query(String query) throws SQLException {
+        Statement statement = this.connection.createStatement();
 
-        int i = 1;
-        for (String param : params) {
-            statement.setString(i, param);
-            i++;
-        }
+        ResultSet results = statement.executeQuery(query);
 
-        return statement.executeQuery(query);
+        return results;
     }
 
     /**
