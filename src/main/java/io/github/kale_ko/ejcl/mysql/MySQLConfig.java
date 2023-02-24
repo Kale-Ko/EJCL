@@ -269,7 +269,7 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS ? (path varchar(512) CHARACTER SET utf8, value varchar(512) CHARACTER SET utf8) CHARACTER SET utf8;", table);
+            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(512) CHARACTER SET utf8, value varchar(512) CHARACTER SET utf8) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -295,7 +295,7 @@ public class MySQLConfig<T> extends Config<T> {
         List<String> keys = PathResolver.getKeys(object);
 
         try {
-            ResultSet existsResult = this.query("SELECT * FROM " + this.table );
+            ResultSet existsResult = this.query("SELECT * FROM " + this.table);
 
             while (existsResult.next()) {
                 if (keys.contains(existsResult.getString("path"))) {
