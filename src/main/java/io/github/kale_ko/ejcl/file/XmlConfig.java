@@ -3,26 +3,26 @@ package io.github.kale_ko.ejcl.file;
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.PropertiesParser;
+import io.github.kale_ko.bjsl.parsers.XmlParser;
 
 /**
- * A Properties File Config for storing Properties data in a File
+ * A Xml File Config for storing Xml data in a File
  *
  * @param <T>
  *        The type of the data being stored
  * @version 1.0.0
  * @since 1.0.0
  */
-public class PropertiesConfig<T> extends FileConfig<T> {
+public class XmlConfig<T> extends FileConfig<T> {
     /**
      * The parser/processor to use for parsing and serialization
      *
      * @since 1.0.0
      */
-    protected BJSL<PropertiesParser> bjsl;
+    protected BJSL<XmlParser> bjsl;
 
     /**
-     * Create a new JsonConfig
+     * Create a new XmlConfig
      *
      * @param clazz
      *        The class of the data being stored
@@ -32,7 +32,7 @@ public class PropertiesConfig<T> extends FileConfig<T> {
      *        The parser/processor to use for parsing and serialization
      * @since 1.0.0
      */
-    public PropertiesConfig(Class<T> clazz, File file, BJSL<PropertiesParser> bjsl) {
+    public XmlConfig(Class<T> clazz, File file, BJSL<XmlParser> bjsl) {
         super(clazz, file);
 
         if (bjsl == null) {
@@ -43,7 +43,7 @@ public class PropertiesConfig<T> extends FileConfig<T> {
     }
 
     /**
-     * Create a new JsonConfig
+     * Create a new XmlConfig
      *
      * @param clazz
      *        The class of the data being stored
@@ -51,8 +51,8 @@ public class PropertiesConfig<T> extends FileConfig<T> {
      *        The file where data is being stored
      * @since 1.0.0
      */
-    public PropertiesConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<PropertiesParser>(new PropertiesParser.Builder().build()));
+    public XmlConfig(Class<T> clazz, File file) {
+        this(clazz, file, new BJSL<XmlParser>(new XmlParser.Builder().build()));
     }
 
     /**
