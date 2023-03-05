@@ -17,14 +17,14 @@ import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 public class PathResolver {
     /**
      * Create a path resolver
-     * 
+     *
      * @since 1.0.0
      */
     private PathResolver() {}
 
     /**
      * Resolve a value on an element
-     * 
+     *
      * @param element
      *        The element to resolve on
      * @param path
@@ -80,7 +80,7 @@ public class PathResolver {
 
     /**
      * Update a value on an element
-     * 
+     *
      * @param element
      *        The element to update on
      * @param path
@@ -163,7 +163,7 @@ public class PathResolver {
 
     /**
      * Get all the keys in an element
-     * 
+     *
      * @param element
      *        The element to get the keys of
      * @return A list of all the keys
@@ -175,7 +175,7 @@ public class PathResolver {
 
     /**
      * Get all the keys in an element
-     * 
+     *
      * @param element
      *        The element to get the keys of
      * @param path
