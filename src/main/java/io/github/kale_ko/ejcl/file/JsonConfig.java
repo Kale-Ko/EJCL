@@ -16,7 +16,7 @@ import io.github.kale_ko.bjsl.parsers.JsonParser;
 public class JsonConfig<T> extends FileConfig<T> {
     /**
      * The parser/processor to use for parsing and serialization
-     * 
+     *
      * @since 1.0.0
      */
     protected BJSL<JsonParser> bjsl;
@@ -57,7 +57,7 @@ public class JsonConfig<T> extends FileConfig<T> {
 
     /**
      * Create a blank config file
-     * 
+     *
      * @throws IOException
      *         On create error
      * @return The config bytes
@@ -74,7 +74,7 @@ public class JsonConfig<T> extends FileConfig<T> {
 
     /**
      * Load the config from file
-     * 
+     *
      * @throws IOException
      *         On load error
      * @since 1.0.0
@@ -90,7 +90,7 @@ public class JsonConfig<T> extends FileConfig<T> {
 
     /**
      * Save the config to bytes
-     * 
+     *
      * @throws IOException
      *         On save error
      * @return The config bytes

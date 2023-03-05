@@ -15,14 +15,14 @@ import java.io.IOException;
 public abstract class Config<T> {
     /**
      * The class of the data being stored
-     * 
+     *
      * @since 1.0.0
      */
     protected Class<T> clazz;
 
     /**
      * The data being stored
-     * 
+     *
      * @since 1.0.0
      */
     protected T config = null;
@@ -48,7 +48,7 @@ public abstract class Config<T> {
 
     /**
      * Get the data being stored
-     * 
+     *
      * @return The data being stored
      * @since 1.0.0
      */
@@ -66,7 +66,7 @@ public abstract class Config<T> {
 
     /**
      * Set the data being stored
-     * 
+     *
      * @param value
      *        The data to be stored
      * @since 1.0.0
@@ -81,7 +81,7 @@ public abstract class Config<T> {
 
     /**
      * Get if the config is loaded
-     * 
+     *
      * @return If the config is loaded
      * @since 1.0.0
      */
@@ -89,7 +89,7 @@ public abstract class Config<T> {
 
     /**
      * Load the config
-     * 
+     *
      * @throws IOException
      *         On load error
      * @since 1.0.0
@@ -98,7 +98,7 @@ public abstract class Config<T> {
 
     /**
      * Save the config
-     * 
+     *
      * @throws IOException
      *         On save error
      * @since 1.0.0
@@ -107,7 +107,7 @@ public abstract class Config<T> {
 
     /**
      * Close the config
-     * 
+     *
      * @throws IOException
      *         On close error
      * @since 1.0.0
@@ -116,7 +116,7 @@ public abstract class Config<T> {
 
     /**
      * Get if the config is closed
-     * 
+     *
      * @return If the config is closed
      * @since 1.0.0
      */

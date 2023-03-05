@@ -19,14 +19,14 @@ import io.github.kale_ko.ejcl.Config;
 public abstract class FileConfig<T> extends Config<T> {
     /**
      * The file where data is being stored
-     * 
+     *
      * @since 1.0.0
      */
     protected File file;
 
     /**
      * If this config is closed
-     * 
+     *
      * @since 1.0.0
      */
     protected boolean closed = false;
@@ -78,7 +78,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Get the file where data is being stored
-     * 
+     *
      * @return The file where data is being stored
      * @since 1.0.0
      */
@@ -88,7 +88,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Get if the config is loaded
-     * 
+     *
      * @return If the config is loaded
      * @since 1.0.0
      */
@@ -99,7 +99,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Create a blank config file
-     * 
+     *
      * @throws IOException
      *         On create error
      * @return The config bytes
@@ -109,7 +109,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Load the config from file
-     * 
+     *
      * @throws IOException
      *         On load error
      * @since 1.0.0
@@ -119,7 +119,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Load the config from file
-     * 
+     *
      * @throws IOException
      *         On load error
      * @return The file bytes
@@ -137,7 +137,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Save the config to file
-     * 
+     *
      * @throws IOException
      *         On save error
      * @since 1.0.0
@@ -157,7 +157,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Save the config to bytes
-     * 
+     *
      * @throws IOException
      *         On save error
      * @return The config bytes
@@ -167,7 +167,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Close the config
-     * 
+     *
      * @throws IOException
      *         On close error
      * @since 1.0.0
@@ -183,7 +183,7 @@ public abstract class FileConfig<T> extends Config<T> {
 
     /**
      * Get if the config is closed
-     * 
+     *
      * @return If the config is closed
      * @since 1.0.0
      */
