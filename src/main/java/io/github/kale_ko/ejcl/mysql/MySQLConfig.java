@@ -29,70 +29,70 @@ import io.github.kale_ko.ejcl.PathResolver;
 public class MySQLConfig<T> extends Config<T> {
     /**
      * The ObjectProcessor to use for serialization/deserialization
-     * 
+     *
      * @since 1.0.0
      */
     protected ObjectProcessor processor;
 
     /**
      * The host of the server
-     * 
+     *
      * @since 1.0.0
      */
     protected String host;
 
     /**
      * The port of the server
-     * 
+     *
      * @since 1.0.0
      */
     protected int port;
 
     /**
      * The database on the server
-     * 
+     *
      * @since 1.0.0
      */
     protected String database;
 
     /**
      * The table of the database
-     * 
+     *
      * @since 1.0.0
      */
     protected String table;
 
     /**
      * The username to the server
-     * 
+     *
      * @since 1.0.0
      */
     protected String username;
 
     /**
      * The password to the server
-     * 
+     *
      * @since 1.0.0
      */
     protected String password;
 
     /**
      * The connection to the server
-     * 
+     *
      * @since 1.0.0
      */
     protected Connection connection;
 
     /**
      * When the config expires next
-     * 
+     *
      * @since 1.1.0
      */
     protected long configExpires = -1l;
 
     /**
      * If this config is closed
-     * 
+     *
      * @since 1.0.0
      */
     protected boolean closed = false;
@@ -237,7 +237,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Get if the config is loaded
-     * 
+     *
      * @return If the config is loaded
      * @since 1.0.0
      */
@@ -256,7 +256,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Connect to the server
-     * 
+     *
      * @throws IOException
      *         On connect error
      * @since 1.0.0
@@ -293,7 +293,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Load the config from the server
-     * 
+     *
      * @throws IOException
      *         On load error
      * @since 1.0.0
@@ -327,7 +327,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Save the config to the server
-     * 
+     *
      * @throws IOException
      *         On save error
      * @since 1.0.0
@@ -376,7 +376,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Execute a mysql statement
-     * 
+     *
      * @param query
      *        The base query
      * @return If the statement was successful
@@ -395,7 +395,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Execute a mysql query
-     * 
+     *
      * @param query
      *        The base query
      * @return The result of the query
@@ -413,7 +413,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Close the config
-     * 
+     *
      * @throws IOException
      *         On close error
      * @since 1.0.0
@@ -435,7 +435,7 @@ public class MySQLConfig<T> extends Config<T> {
 
     /**
      * Get if the config is closed
-     * 
+     *
      * @return If the config is closed
      * @since 1.0.0
      */
