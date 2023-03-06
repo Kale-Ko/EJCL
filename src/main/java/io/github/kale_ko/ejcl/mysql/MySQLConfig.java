@@ -251,6 +251,16 @@ public class MySQLConfig<T> extends Config<T> {
             return false;
         }
 
+        try {
+            if (this.connection.isClosed()) {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            return false;
+        }
+
         return true;
     }
 
@@ -302,8 +312,13 @@ public class MySQLConfig<T> extends Config<T> {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
-        if (this.connection == null) {
-            throw new RuntimeException("Config is not connected");
+
+        try {
+            if (this.connection == null || this.connection.isClosed()) {
+                this.connect();
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
         }
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
