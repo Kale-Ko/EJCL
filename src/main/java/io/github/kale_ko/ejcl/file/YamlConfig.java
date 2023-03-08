@@ -73,19 +73,25 @@ public class YamlConfig<T> extends FileConfig<T> {
     }
 
     /**
-     * Load the config from file
+     * Load the config
      *
+     * @param save
+     *        Weather to save the config after loaded (To update the template)
      * @throws IOException
      *         On load error
-     * @since 1.0.0
+     * @since 1.3.0
      */
     @Override
-    public void load() throws IOException {
+    public void load(boolean save) throws IOException {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
 
         this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
+
+        if (save) {
+            this.save();
+        }
     }
 
     /**
