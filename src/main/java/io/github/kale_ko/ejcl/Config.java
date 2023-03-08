@@ -94,7 +94,20 @@ public abstract class Config<T> {
      *         On load error
      * @since 1.0.0
      */
-    public abstract void load() throws IOException;
+    public void load() throws IOException {
+        load(true);
+    }
+
+    /**
+     * Load the config
+     *
+     * @param save
+     *        Weather to save the config after loaded (To update the template)
+     * @throws IOException
+     *         On load error
+     * @since 1.3.0
+     */
+    public abstract void load(boolean save) throws IOException;
 
     /**
      * Save the config

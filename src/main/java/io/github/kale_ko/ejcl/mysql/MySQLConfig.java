@@ -302,13 +302,16 @@ public class MySQLConfig<T> extends Config<T> {
     }
 
     /**
-     * Load the config from the server
+     * Load the config
      *
+     * @param save
+     *        Weather to save the config after loaded (To update the template)
      * @throws IOException
      *         On load error
-     * @since 1.0.0
+     * @since 1.3.0
      */
-    public void load() throws IOException {
+    @Override
+    public void load(boolean save) throws IOException {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
@@ -338,6 +341,10 @@ public class MySQLConfig<T> extends Config<T> {
 
         this.config = this.processor.toObject(object, this.clazz);
         this.configExpires = Instant.now().getEpochSecond() + 5;
+
+        if (save) {
+            this.save();
+        }
     }
 
     /**
