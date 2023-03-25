@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.github.kale_ko.ejcl"},{"l":"io.github.kale_ko.ejcl.file"},{"l":"io.github.kale_ko.ejcl.mysql"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.github.kale_ko.ejcl"},{"l":"io.github.kale_ko.ejcl.file"},{"l":"io.github.kale_ko.ejcl.file.bjsl"},{"l":"io.github.kale_ko.ejcl.file.simple"},{"l":"io.github.kale_ko.ejcl.memory"},{"l":"io.github.kale_ko.ejcl.mysql"}];updateSearchResults();

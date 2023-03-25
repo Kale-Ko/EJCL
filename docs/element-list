@@ -1,3 +1,6 @@
 io.github.kale_ko.ejcl
 io.github.kale_ko.ejcl.file
+io.github.kale_ko.ejcl.file.bjsl
+io.github.kale_ko.ejcl.file.simple
+io.github.kale_ko.ejcl.memory
 io.github.kale_ko.ejcl.mysql
