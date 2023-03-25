@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
@@ -23,17 +22,10 @@ import io.github.kale_ko.ejcl.PathResolver;
  *
  * @param <T>
  *        The type of the data being stored
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public class MySQLConfig<T> extends Config<T> {
-    /**
-     * The ObjectProcessor to use for serialization/deserialization
-     *
-     * @since 1.0.0
-     */
-    protected ObjectProcessor processor;
-
     /**
      * The host of the server
      *
@@ -102,8 +94,6 @@ public class MySQLConfig<T> extends Config<T> {
      *
      * @param clazz
      *        The class of the data being stored
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
      * @param host
      *        The host of the server
      * @param port
@@ -116,11 +106,13 @@ public class MySQLConfig<T> extends Config<T> {
      *        The username to the server
      * @param password
      *        The password to the server
-     * @since 1.0.0
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @since 2.0.0
      */
     @SuppressWarnings("unchecked")
-    public MySQLConfig(Class<T> clazz, ObjectProcessor processor, String host, int port, String database, String table, String username, String password) {
-        super(clazz);
+    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+        super(clazz, processor);
 
         if (processor == null) {
             throw new NullPointerException("Processor can not be null");
@@ -134,8 +126,6 @@ public class MySQLConfig<T> extends Config<T> {
         if (table == null) {
             throw new NullPointerException("Table can not be null");
         }
-
-        this.processor = processor;
 
         this.host = host;
         this.port = port;
@@ -189,10 +179,10 @@ public class MySQLConfig<T> extends Config<T> {
      *        The username to the server
      * @param password
      *        The password to the server
-     * @since 1.0.0
+     * @since 2.0.0
      */
     public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
-        this(clazz, new ObjectProcessor.Builder().build(), host, port, database, table, username, password);
+        this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -200,20 +190,20 @@ public class MySQLConfig<T> extends Config<T> {
      *
      * @param clazz
      *        The class of the data being stored
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
      * @param processor
      *        The ObjectProcessor to use for serialization/deserialization
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    public MySQLConfig(Class<T> clazz, ObjectProcessor processor, String host, int port, String database, String table) {
-        this(clazz, processor, host, port, database, table, null, null);
+    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, ObjectProcessor processor) {
+        this(clazz, host, port, database, table, null, null, processor);
     }
 
     /**
@@ -229,10 +219,60 @@ public class MySQLConfig<T> extends Config<T> {
      *        The database on the server
      * @param table
      *        The table of the database
-     * @since 1.0.0
+     * @since 2.0.0
      */
     public MySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
-        this(clazz, new ObjectProcessor.Builder().build(), host, port, database, table, null, null);
+        this(clazz, host, port, database, table, null, null, new ObjectProcessor.Builder().build());
+    }
+
+    /**
+     * Get a path being stored
+     *
+     * @param path
+     *        The path to get
+     * @return The value being stored
+     * @since 2.0.0
+     */
+    @Override
+    public Object get(String path) {
+        Object value = null;
+
+        try {
+            ResultSet result = this.query("SELECT path,value FROM " + this.table + " WHERE path=\"" + path + "\"");
+
+            while (result.next()) {
+                value = result.getString("value");
+            }
+
+            result.getStatement().close();
+            result.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(new IOException(e));
+        }
+
+        super.set(path, value);
+
+        return value;
+    }
+
+    /**
+     * Set a path being stored
+     *
+     * @param path
+     *        The path to set
+     * @param value
+     *        The value to set
+     * @since 2.0.0
+     */
+    @Override
+    public void set(String path, Object value) {
+        try {
+            super.set(path, value);
+
+            this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
+        } catch (SQLException e) {
+            throw new RuntimeException(new IOException(e));
+        }
     }
 
     /**
@@ -295,7 +335,7 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(512) CHARACTER SET utf8, value varchar(512) CHARACTER SET utf8) CHARACTER SET utf8;");
+            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8, value varchar(1024) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -367,32 +407,14 @@ public class MySQLConfig<T> extends Config<T> {
 
         List<String> keys = PathResolver.getKeys(object);
 
-        try {
-            List<String> exists = new ArrayList<String>();
-            ResultSet existsResult = this.query("SELECT path FROM " + this.table);
-
-            while (existsResult.next()) {
-                exists.add(existsResult.getString("path"));
-            }
-
-            existsResult.getStatement().close();
-            existsResult.close();
-
-            for (String key : keys) {
+        for (String key : keys) {
+            try {
                 Object value = PathResolver.resolve(object, key);
 
-                if (value == null) {
-                    continue;
-                }
-
-                if (!exists.contains(key)) {
-                    this.execute("INSERT INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + value.toString() + "\");");
-                } else {
-                    this.execute("UPDATE " + this.table + " SET value=\"" + value.toString() + "\" WHERE path=\"" + key + "\";");
-                }
+                this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
-        } catch (SQLException e) {
-            throw new IOException(e);
         }
     }
 
