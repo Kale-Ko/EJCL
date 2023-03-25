@@ -1,58 +1,42 @@
-package io.github.kale_ko.ejcl.file;
+package io.github.kale_ko.ejcl.file.bjsl;
 
 import java.io.File;
 import java.io.IOException;
-import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.SmileParser;
+import io.github.kale_ko.bjsl.elements.ParsedObject;
+import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.ejcl.file.FileConfig;
 
 /**
- * A Smile File Config for storing Smile data in a File
+ * A Element File Config for storing ParsedObjects in a File
  *
- * @param <T>
- *        The type of the data being stored
- * @version 1.0.0
- * @since 1.0.0
+ * @version 2.0.0
+ * @since 2.0.0
  */
-public class SmileConfig<T> extends FileConfig<T> {
+public class ElementFileConfig extends FileConfig<ParsedObject> {
     /**
      * The parser/processor to use for parsing and serialization
      *
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    protected BJSL<SmileParser> bjsl;
+    protected Parser<?, ?> parser;
 
     /**
-     * Create a new JsonConfig
+     * Create a new ElementFileConfig
      *
-     * @param clazz
-     *        The class of the data being stored
      * @param file
      *        The file where data is being stored
-     * @param bjsl
+     * @param parser
      *        The parser/processor to use for parsing and serialization
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    public SmileConfig(Class<T> clazz, File file, BJSL<SmileParser> bjsl) {
-        super(clazz, file);
+    public ElementFileConfig(File file, Parser<?, ?> parser) {
+        super(ParsedObject.class, file);
 
-        if (bjsl == null) {
-            throw new NullPointerException("Bjsl can not be null");
+        if (parser == null) {
+            throw new NullPointerException("Parser can not be null");
         }
 
-        this.bjsl = bjsl;
-    }
-
-    /**
-     * Create a new JsonConfig
-     *
-     * @param clazz
-     *        The class of the data being stored
-     * @param file
-     *        The file where data is being stored
-     * @since 1.0.0
-     */
-    public SmileConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<SmileParser>(new SmileParser.Builder().build()));
+        this.parser = parser;
     }
 
     /**
@@ -69,7 +53,7 @@ public class SmileConfig<T> extends FileConfig<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        return this.bjsl.emptyBytes();
+        return this.parser.emptyBytes();
     }
 
     /**
@@ -87,7 +71,7 @@ public class SmileConfig<T> extends FileConfig<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
+        this.config = this.parser.toElement(this.loadRaw()).asObject();
 
         if (save) {
             this.save();
@@ -104,6 +88,6 @@ public class SmileConfig<T> extends FileConfig<T> {
      */
     @Override
     public byte[] saveRaw() throws IOException {
-        return this.bjsl.byteify(this.config);
+        return this.parser.toBytes(this.config);
     }
 }

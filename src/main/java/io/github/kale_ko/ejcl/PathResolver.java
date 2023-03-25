@@ -87,9 +87,10 @@ public class PathResolver {
      *        The path to update
      * @param value
      *        The value to update to
+     * @return element for chaining
      * @since 1.0.0
      */
-    public static void update(ParsedElement element, String path, Object value) {
+    public static ParsedElement update(ParsedElement element, String path, Object value) {
         String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
         String valueKey = keys[keys.length - 1];
         keys = Arrays.copyOf(keys, keys.length - 1);
@@ -159,6 +160,8 @@ public class PathResolver {
                 }
             }
         }
+
+        return element;
     }
 
     /**
