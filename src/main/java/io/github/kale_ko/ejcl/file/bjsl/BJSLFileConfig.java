@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.file.FileConfig;
 
 /**
@@ -30,17 +31,38 @@ public class BJSLFileConfig<T> extends FileConfig<T> {
      *        The file where data is being stored
      * @param parser
      *        The parser/processor to use for parsing and serialization
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
      * @since 2.0.0
      */
-    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {
+    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser, ObjectProcessor processor) {
         super(clazz, file);
 
         if (parser == null) {
             throw new NullPointerException("Parser can not be null");
         }
+        if (processor == null) {
+            throw new NullPointerException("Processor can not be null");
+        }
 
         this.parser = parser;
+        this.processor = processor;
     }
+
+    /**
+     * Create a new BJSLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @param parser
+     *        The parser/processor to use for parsing and serialization
+     * @since 2.0.0
+     */
+    // public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {d u
+    //     this(clazz, file, parser, new ObjectProcessor.Builder().build());
+    // }
 
     /**
      * Create a blank config file
