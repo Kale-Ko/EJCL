@@ -1,6 +1,7 @@
 package io.github.kale_ko.ejcl;
 
 import java.io.IOException;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 
 /**
  * An abstract class that all configs extend from
@@ -9,7 +10,7 @@ import java.io.IOException;
  *
  * @param <T>
  *        The type of the data being stored
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public abstract class Config<T> {
@@ -19,6 +20,13 @@ public abstract class Config<T> {
      * @since 1.0.0
      */
     protected Class<T> clazz;
+
+    /**
+     * The ObjectProcessor to use for serialization/deserialization
+     *
+     * @since 2.0.0
+     */
+    protected ObjectProcessor processor;
 
     /**
      * The data being stored
@@ -32,9 +40,11 @@ public abstract class Config<T> {
      *
      * @param clazz
      *        The class of the data being stored
-     * @since 1.0.0
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @since 2.0.0
      */
-    protected Config(Class<T> clazz) {
+    protected Config(Class<T> clazz, ObjectProcessor processor) {
         if (clazz == null) {
             throw new NullPointerException("Clazz can not be null");
         }
@@ -44,6 +54,19 @@ public abstract class Config<T> {
         }
 
         this.clazz = clazz;
+
+        this.processor = processor;
+    }
+
+    /**
+     * Create a new Config
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @since 1.0.0
+     */
+    protected Config(Class<T> clazz) {
+        this(clazz, new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -65,6 +88,30 @@ public abstract class Config<T> {
     }
 
     /**
+     * Get a path being stored
+     *
+     * @param path
+     *        The path to get
+     * @return The value being stored
+     * @since 2.0.0
+     */
+    public Object get(String path) {
+        if (path == null) {
+            throw new NullPointerException("Path can not be null");
+        }
+
+        if (!this.getLoaded()) {
+            try {
+                this.load();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return PathResolver.resolve(this.processor.toElement(this.config), path);
+    }
+
+    /**
      * Set the data being stored
      *
      * @param value
@@ -77,6 +124,26 @@ public abstract class Config<T> {
         }
 
         this.config = value;
+    }
+
+    /**
+     * Set a path being stored
+     *
+     * @param path
+     *        The path to set
+     * @param value
+     *        The value to set
+     * @since 2.0.0
+     */
+    public void set(String path, Object value) {
+        if (path == null) {
+            throw new NullPointerException("Path can not be null");
+        }
+        if (value == null) {
+            throw new NullPointerException("Value can not be null");
+        }
+
+        this.set(this.processor.toObject(PathResolver.update(this.processor.toElement(this.config), path, value), this.clazz));
     }
 
     /**

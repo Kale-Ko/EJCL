@@ -1,58 +1,45 @@
-package io.github.kale_ko.ejcl.file;
+package io.github.kale_ko.ejcl.file.bjsl;
 
 import java.io.File;
 import java.io.IOException;
-import io.github.kale_ko.bjsl.BJSL;
-import io.github.kale_ko.bjsl.parsers.XmlParser;
+import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.ejcl.file.FileConfig;
 
 /**
- * A Xml File Config for storing Xml data in a File
+ * A BJSL File Config for storing BJSL data in a File
  *
  * @param <T>
  *        The type of the data being stored
- * @version 1.0.0
- * @since 1.0.0
+ * @version 2.0.0
+ * @since 2.0.0
  */
-public class XmlConfig<T> extends FileConfig<T> {
+public class BJSLFileConfig<T> extends FileConfig<T> {
     /**
      * The parser/processor to use for parsing and serialization
      *
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    protected BJSL<XmlParser> bjsl;
+    protected Parser<?, ?> parser;
 
     /**
-     * Create a new XmlConfig
+     * Create a new BJSLConfig
      *
      * @param clazz
      *        The class of the data being stored
      * @param file
      *        The file where data is being stored
-     * @param bjsl
+     * @param parser
      *        The parser/processor to use for parsing and serialization
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    public XmlConfig(Class<T> clazz, File file, BJSL<XmlParser> bjsl) {
+    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {
         super(clazz, file);
 
-        if (bjsl == null) {
-            throw new NullPointerException("Bjsl can not be null");
+        if (parser == null) {
+            throw new NullPointerException("Parser can not be null");
         }
 
-        this.bjsl = bjsl;
-    }
-
-    /**
-     * Create a new XmlConfig
-     *
-     * @param clazz
-     *        The class of the data being stored
-     * @param file
-     *        The file where data is being stored
-     * @since 1.0.0
-     */
-    public XmlConfig(Class<T> clazz, File file) {
-        this(clazz, file, new BJSL<XmlParser>(new XmlParser.Builder().build()));
+        this.parser = parser;
     }
 
     /**
@@ -69,7 +56,7 @@ public class XmlConfig<T> extends FileConfig<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        return this.bjsl.emptyBytes();
+        return this.parser.emptyBytes();
     }
 
     /**
@@ -87,7 +74,7 @@ public class XmlConfig<T> extends FileConfig<T> {
             throw new RuntimeException("Config is already closed");
         }
 
-        this.config = this.bjsl.parse(this.loadRaw(), this.clazz);
+        this.config = this.processor.toObject(this.parser.toElement(this.loadRaw()), this.clazz);
 
         if (save) {
             this.save();
@@ -104,6 +91,6 @@ public class XmlConfig<T> extends FileConfig<T> {
      */
     @Override
     public byte[] saveRaw() throws IOException {
-        return this.bjsl.byteify(this.config);
+        return this.parser.toBytes(this.processor.toElement(this.config));
     }
 }
