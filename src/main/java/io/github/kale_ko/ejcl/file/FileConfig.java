@@ -6,14 +6,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.Config;
 
 /**
- * A File Config for storing data in a File
+ * A File Config for storing data in a file
  *
  * @param <T>
  *        The type of the data being stored
- * @version 1.0.0
+ * @version 2.0.0
  * @since 1.0.0
  */
 public abstract class FileConfig<T> extends Config<T> {
@@ -42,7 +43,7 @@ public abstract class FileConfig<T> extends Config<T> {
      */
     @SuppressWarnings("unchecked")
     protected FileConfig(Class<T> clazz, File file) {
-        super(clazz);
+        super(clazz, new ObjectProcessor.Builder().build());
 
         if (file == null) {
             throw new NullPointerException("File can not be null");
