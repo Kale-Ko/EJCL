@@ -2,6 +2,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 
 import java.io.File;
 import io.github.kale_ko.bjsl.parsers.XmlParser;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 
 /**
  * A XML File Config for storing XML data in a File
@@ -21,10 +22,12 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *        The file where data is being stored
      * @param parser
      *        The parser/processor to use for parsing and serialization
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
      * @since 2.0.0
      */
-    public XmlFileConfig(Class<T> clazz, File file, XmlParser parser) {
-        super(clazz, file, parser);
+    public XmlFileConfig(Class<T> clazz, File file, XmlParser parser, ObjectProcessor processor) {
+        super(clazz, file, parser, processor);
     }
 
     /**
@@ -34,9 +37,11 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *        The class of the data being stored
      * @param file
      *        The file where data is being stored
-     * @since 1.0.0
+     * @param parser
+     *        The parser/processor to use for parsing and serialization
+     * @since 2.0.0
      */
-    public XmlFileConfig(Class<T> clazz, File file) {
-        this(clazz, file, new XmlParser.Builder().setPrettyPrint(true).build());
+    public XmlFileConfig(Class<T> clazz, File file, XmlParser parser) {
+        super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 }
