@@ -79,6 +79,52 @@ public class PathResolver {
     }
 
     /**
+     * Resolve an element on an element
+     *
+     * @param element
+     *        The element to resolve on
+     * @param path
+     *        The path to resolve to
+     * @return The value resolved
+     * @since 1.0.0
+     */
+    public static ParsedElement resolveElement(ParsedElement element, String path) {
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+
+        ParsedElement resolved = element;
+
+        for (String key : keys) {
+            if (resolved.isObject()) {
+                if (resolved.asObject().has(key)) {
+                    resolved = resolved.asObject().get(key);
+                } else {
+                    resolved = null;
+                    break;
+                }
+            } else if (resolved.isArray()) {
+                if (key.startsWith("[") && key.endsWith("]")) {
+                    int index = Integer.parseInt(key.replaceAll("\\[([0-9])\\]", "$1"));
+
+                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                        resolved = resolved.asArray().get(index);
+                    } else {
+                        resolved = null;
+                        break;
+                    }
+                } else {
+                    resolved = null;
+                    break;
+                }
+            } else {
+                resolved = null;
+                break;
+            }
+        }
+
+        return resolved;
+    }
+
+    /**
      * Update a value on an element
      *
      * @param element
@@ -156,6 +202,72 @@ public class PathResolver {
                         } else {
                             resolved.asArray().add(ParsedPrimitive.from(value));
                         }
+                    }
+                }
+            }
+        }
+
+        return element;
+    }
+
+    /**
+     * Update an element on an element
+     *
+     * @param element
+     *        The element to update on
+     * @param path
+     *        The path to update
+     * @param value
+     *        The value to update to
+     * @return element for chaining
+     * @since 1.0.0
+     */
+    public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value) {
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+        String valueKey = keys[keys.length - 1];
+        keys = Arrays.copyOf(keys, keys.length - 1);
+
+        ParsedElement resolved = element;
+
+        for (String key : keys) {
+            if (resolved.isObject()) {
+                if (resolved.asObject().has(key)) {
+                    resolved = resolved.asObject().get(key);
+                } else {
+                    resolved = null;
+                    break;
+                }
+            } else if (resolved.isArray()) {
+                if (key.startsWith("[") && key.endsWith("]")) {
+                    int index = Integer.parseInt(key.replaceAll("\\[([0-9])\\]", "$1"));
+
+                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                        resolved = resolved.asArray().get(index);
+                    } else {
+                        resolved = null;
+                        break;
+                    }
+                } else {
+                    resolved = null;
+                    break;
+                }
+            } else {
+                resolved = null;
+                break;
+            }
+        }
+
+        if (resolved != null) {
+            if (resolved.isObject()) {
+                resolved.asObject().set(valueKey, value);
+            } else if (resolved.isArray()) {
+                if (valueKey.startsWith("[") && valueKey.endsWith("]")) {
+                    Integer resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9])\\]", "$1"));
+
+                    if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
+                        resolved.asArray().set(resolvedValueKey, value);
+                    } else {
+                        resolved.asArray().add(value);
                     }
                 }
             }
