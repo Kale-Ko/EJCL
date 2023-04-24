@@ -33,6 +33,22 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path) {
+        return resolve(element, path, true);
+    }
+
+    /**
+     * Resolve a value on an element
+     *
+     * @param element
+     *        The element to resolve on
+     * @param path
+     *        The path to resolve to
+     * @param returnObjArrValues
+     *        Weather or not to return the keys of objects and arrays when queried
+     * @return The value resolved
+     * @since 1.0.0
+     */
+    public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
         String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
 
         ParsedElement resolved = element;
@@ -67,9 +83,9 @@ public class PathResolver {
 
         if (resolved == null) {
             return null;
-        } else if (resolved.isObject()) {
+        } else if (resolved.isObject() && returnObjArrValues) {
             return "{obj}," + String.join(",", resolved.asObject().getKeys());
-        } else if (resolved.isArray()) {
+        } else if (resolved.isArray() && returnObjArrValues) {
             return "{arr}," + resolved.asArray().getSize();
         } else if (resolved.isPrimitive()) {
             return resolved.asPrimitive().get();
@@ -285,7 +301,21 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static List<String> getKeys(ParsedElement element) {
-        return getKeys(element, "");
+        return getKeys(element, true);
+    }
+
+    /**
+     * Get all the keys in an element
+     *
+     * @param element
+     *        The element to get the keys of
+     * @param returnObjArrKeys
+     *        Weather or not to return the keys for objects and arrays
+     * @return A list of all the keys
+     * @since 1.0.0
+     */
+    public static List<String> getKeys(ParsedElement element, boolean returnObjArrKeys) {
+        return getKeys(element, "", returnObjArrKeys);
     }
 
     /**
@@ -295,34 +325,36 @@ public class PathResolver {
      *        The element to get the keys of
      * @param path
      *        The current path
+     * @param returnObjArrKeys
+     *        Weather or not to return the keys for objects and arrays
      * @return A list of all the keys
      * @since 1.0.0
      */
-    protected static List<String> getKeys(ParsedElement element, String path) {
+    protected static List<String> getKeys(ParsedElement element, String path, boolean returnObjArrKeys) {
         List<String> keys = new ArrayList<String>();
 
         if (element.isObject()) {
             ParsedObject object = element.asObject();
 
             for (String key : object.getKeys()) {
-                keys.add(path + key);
-
                 if (object.get(key).isObject()) {
-                    keys.addAll(getKeys(object.get(key), path + key + "."));
+                    keys.addAll(getKeys(object.get(key), path + key + ".", returnObjArrKeys));
                 } else if (object.get(key).isArray()) {
-                    keys.addAll(getKeys(object.get(key), path + key));
+                    keys.addAll(getKeys(object.get(key), path + key, returnObjArrKeys));
+                } else if (returnObjArrKeys || object.get(key).isPrimitive()) {
+                    keys.add(path + key);
                 }
             }
         } else if (element.isArray()) {
             ParsedArray array = element.asArray();
 
             for (int i = 0; i < array.getSize(); i++) {
-                keys.add(path + "[" + i + "]");
-
                 if (array.get(i).isObject()) {
-                    keys.addAll(getKeys(array.get(i), path + "[" + i + "]" + "."));
+                    keys.addAll(getKeys(array.get(i), path + "[" + i + "]" + ".", returnObjArrKeys));
                 } else if (array.get(i).isArray()) {
-                    keys.addAll(getKeys(array.get(i), path + "[" + i + "]"));
+                    keys.addAll(getKeys(array.get(i), path + "[" + i + "]", returnObjArrKeys));
+                } else if (returnObjArrKeys || array.get(i).isPrimitive()) {
+                    keys.add(path + "[" + i + "]");
                 }
             }
         }

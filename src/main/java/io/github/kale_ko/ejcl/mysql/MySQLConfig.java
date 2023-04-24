@@ -335,7 +335,7 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8, value varchar(1024) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -405,11 +405,11 @@ public class MySQLConfig<T> extends Config<T> {
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
 
-        List<String> keys = PathResolver.getKeys(object);
+        List<String> keys = PathResolver.getKeys(object, false);
 
         for (String key : keys) {
             try {
-                Object value = PathResolver.resolve(object, key);
+                Object value = PathResolver.resolve(object, key, false);
 
                 this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
             } catch (SQLException e) {
