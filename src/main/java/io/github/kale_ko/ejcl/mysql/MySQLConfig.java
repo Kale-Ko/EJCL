@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,7 +13,6 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.Config;
@@ -273,21 +273,23 @@ public class MySQLConfig<T> extends Config<T> {
 
             result.getStatement().close();
             result.close();
-        } catch (CommunicationsException e) {
-            try {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-
-                return this.get(path);
-            } catch (IOException e2) {
-                throw new RuntimeException(e2);
-            }
         } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
+            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                try {
+                    reconnectAttempts++;
+                    if (reconnectAttempts > 5) {
+                        throw new RuntimeException("Maximum reconnects reached");
+                    }
+
+                    this.connect();
+
+                    return this.get(path);
+                } catch (IOException e2) {
+                    throw new RuntimeException(e2);
+                }
+            } else {
+                throw new RuntimeException(new IOException(e));
+            }
         }
 
         super.set(path, value);
@@ -329,21 +331,23 @@ public class MySQLConfig<T> extends Config<T> {
             super.set(path, value);
 
             this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
-        } catch (CommunicationsException e) {
-            try {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-
-                this.set(path, value);
-            } catch (IOException e2) {
-                throw new RuntimeException(e2);
-            }
         } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
+            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                try {
+                    reconnectAttempts++;
+                    if (reconnectAttempts > 5) {
+                        throw new RuntimeException("Maximum reconnects reached");
+                    }
+
+                    this.connect();
+
+                    this.set(path, value);
+                } catch (IOException e2) {
+                    throw new RuntimeException(e2);
+                }
+            } else {
+                throw new RuntimeException(new IOException(e));
+            }
         }
     }
 
@@ -394,6 +398,7 @@ public class MySQLConfig<T> extends Config<T> {
                     properties.put("password", this.password);
                 }
             }
+            properties.put("autoReconnect", true);
             properties.put("createDatabaseIfNotExist", true);
             properties.put("allowNanAndInf", true);
 
@@ -409,7 +414,7 @@ public class MySQLConfig<T> extends Config<T> {
 
             reconnectAttempts = 0;
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) NOT NULL CHARACTER SET utf8, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -454,17 +459,19 @@ public class MySQLConfig<T> extends Config<T> {
 
             result.getStatement().close();
             result.close();
-        } catch (CommunicationsException e) {
-            reconnectAttempts++;
-            if (reconnectAttempts > 5) {
-                throw new RuntimeException("Maximum reconnects reached");
-            }
-
-            this.connect();
-
-            this.load(save);
         } catch (SQLException e) {
-            throw new IOException(e);
+            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+
+                this.load(save);
+            } else {
+                throw new RuntimeException(new IOException(e));
+            }
         }
 
         this.config = this.processor.toObject(object, this.clazz);
@@ -510,17 +517,19 @@ public class MySQLConfig<T> extends Config<T> {
                 Object value = PathResolver.resolve(object, key, false);
 
                 this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
-            } catch (CommunicationsException e) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-
-                this.save();
             } catch (SQLException e) {
-                throw new IOException(e);
+                if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                    reconnectAttempts++;
+                    if (reconnectAttempts > 5) {
+                        throw new RuntimeException("Maximum reconnects reached");
+                    }
+
+                    this.connect();
+
+                    this.save();
+                } else {
+                    throw new RuntimeException(new IOException(e));
+                }
             }
         }
     }
