@@ -414,7 +414,7 @@ public class MySQLConfig<T> extends Config<T> {
 
             reconnectAttempts = 0;
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) NOT NULL CHARACTER SET utf8, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
         }
