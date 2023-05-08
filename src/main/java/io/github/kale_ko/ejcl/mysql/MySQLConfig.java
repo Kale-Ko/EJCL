@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.Config;
@@ -81,6 +82,13 @@ public class MySQLConfig<T> extends Config<T> {
      * @since 1.1.0
      */
     protected long configExpires = -1l;
+
+    /**
+     * How many times we have tried to reconnect
+     *
+     * @since 2.3.0
+     */
+    protected int reconnectAttempts = 0;
 
     /**
      * If this config is closed
@@ -235,6 +243,25 @@ public class MySQLConfig<T> extends Config<T> {
      */
     @Override
     public Object get(String path) {
+        if (this.closed) {
+            throw new RuntimeException("Config is already closed");
+        }
+
+        try {
+            if (this.connection == null || this.connection.isClosed()) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(new IOException(e));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         Object value = null;
 
         try {
@@ -246,6 +273,19 @@ public class MySQLConfig<T> extends Config<T> {
 
             result.getStatement().close();
             result.close();
+        } catch (CommunicationsException e) {
+            try {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+
+                return this.get(path);
+            } catch (IOException e2) {
+                throw new RuntimeException(e2);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(new IOException(e));
         }
@@ -266,10 +306,42 @@ public class MySQLConfig<T> extends Config<T> {
      */
     @Override
     public void set(String path, Object value) {
+        if (this.closed) {
+            throw new RuntimeException("Config is already closed");
+        }
+
+        try {
+            if (this.connection == null || this.connection.isClosed()) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(new IOException(e));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         try {
             super.set(path, value);
 
             this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
+        } catch (CommunicationsException e) {
+            try {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+
+                this.set(path, value);
+            } catch (IOException e2) {
+                throw new RuntimeException(e2);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(new IOException(e));
         }
@@ -292,7 +364,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection.isClosed()) {
+            if (this.connection == null || this.connection.isClosed()) {
                 return false;
             }
         } catch (SQLException e) {
@@ -335,6 +407,8 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
+            reconnectAttempts = 0;
+
             this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
         } catch (SQLException e) {
             throw new IOException(e);
@@ -358,6 +432,11 @@ public class MySQLConfig<T> extends Config<T> {
 
         try {
             if (this.connection == null || this.connection.isClosed()) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
                 this.connect();
             }
         } catch (SQLException e) {
@@ -375,6 +454,15 @@ public class MySQLConfig<T> extends Config<T> {
 
             result.getStatement().close();
             result.close();
+        } catch (CommunicationsException e) {
+            reconnectAttempts++;
+            if (reconnectAttempts > 5) {
+                throw new RuntimeException("Maximum reconnects reached");
+            }
+
+            this.connect();
+
+            this.load(save);
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -399,8 +487,18 @@ public class MySQLConfig<T> extends Config<T> {
         if (this.closed) {
             throw new RuntimeException("Config is already closed");
         }
-        if (this.connection == null) {
-            throw new RuntimeException("Config is not connected");
+
+        try {
+            if (this.connection == null || this.connection.isClosed()) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
         }
 
         ParsedObject object = this.processor.toElement(this.config).asObject();
@@ -412,6 +510,15 @@ public class MySQLConfig<T> extends Config<T> {
                 Object value = PathResolver.resolve(object, key, false);
 
                 this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
+            } catch (CommunicationsException e) {
+                reconnectAttempts++;
+                if (reconnectAttempts > 5) {
+                    throw new RuntimeException("Maximum reconnects reached");
+                }
+
+                this.connect();
+
+                this.save();
             } catch (SQLException e) {
                 throw new IOException(e);
             }
