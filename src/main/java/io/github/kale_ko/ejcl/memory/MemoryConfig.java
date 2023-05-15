@@ -27,18 +27,18 @@ public class MemoryConfig<T> extends Config<T> {
     protected MemoryConfig(Class<T> clazz) {
         super(clazz, new ObjectProcessor.Builder().build());
 
-        try {
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
-                    this.config = (T) constructor.newInstance();
+        if (clazz.getConstructors().length > 0) {
+            try {
+                for (Constructor<?> constructor : clazz.getConstructors()) {
+                    if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
+                        this.config = (T) constructor.newInstance();
 
-                    break;
+                        break;
+                    }
                 }
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
             }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-        }
-
-        if (this.config == null) {
+        } else {
             try {
                 Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
                 unsafeField.setAccessible(true);
