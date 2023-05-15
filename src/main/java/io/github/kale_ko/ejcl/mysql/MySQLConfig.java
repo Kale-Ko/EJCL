@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -144,18 +143,18 @@ public class MySQLConfig<T> extends Config<T> {
         this.username = username;
         this.password = password;
 
-        try {
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
-                    this.config = (T) constructor.newInstance();
+        if (clazz.getConstructors().length > 0) {
+            try {
+                for (Constructor<?> constructor : clazz.getConstructors()) {
+                    if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
+                        this.config = (T) constructor.newInstance();
 
-                    break;
+                        break;
+                    }
                 }
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
             }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-        }
-
-        if (this.config == null) {
+        } else {
             try {
                 Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
                 unsafeField.setAccessible(true);
@@ -274,7 +273,7 @@ public class MySQLConfig<T> extends Config<T> {
             result.getStatement().close();
             result.close();
         } catch (SQLException e) {
-            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
                 try {
                     reconnectAttempts++;
                     if (reconnectAttempts > 5) {
@@ -332,7 +331,7 @@ public class MySQLConfig<T> extends Config<T> {
 
             this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
         } catch (SQLException e) {
-            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
                 try {
                     reconnectAttempts++;
                     if (reconnectAttempts > 5) {
@@ -460,7 +459,7 @@ public class MySQLConfig<T> extends Config<T> {
             result.getStatement().close();
             result.close();
         } catch (SQLException e) {
-            if (e.getCause() != null && e.getCause() instanceof SocketException) {
+            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -518,7 +517,7 @@ public class MySQLConfig<T> extends Config<T> {
 
                 this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
             } catch (SQLException e) {
-                if (e.getCause() != null && e.getCause() instanceof SocketException) {
+                if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
                     reconnectAttempts++;
                     if (reconnectAttempts > 5) {
                         throw new RuntimeException("Maximum reconnects reached");
