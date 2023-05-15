@@ -51,18 +51,18 @@ public abstract class FileConfig<T> extends Config<T> {
 
         this.file = file;
 
-        try {
-            for (Constructor<?> constructor : clazz.getConstructors()) {
-                if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
-                    this.config = (T) constructor.newInstance();
+        if (clazz.getConstructors().length > 0) {
+            try {
+                for (Constructor<?> constructor : clazz.getConstructors()) {
+                    if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
+                        this.config = (T) constructor.newInstance();
 
-                    break;
+                        break;
+                    }
                 }
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
             }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-        }
-
-        if (this.config == null) {
+        } else {
             try {
                 Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
                 unsafeField.setAccessible(true);
