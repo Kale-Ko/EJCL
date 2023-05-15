@@ -247,7 +247,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection == null || this.connection.isClosed()) {
+            if (this.connection == null || !this.connection.isValid(5)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -273,22 +273,7 @@ public class MySQLConfig<T> extends Config<T> {
             result.getStatement().close();
             result.close();
         } catch (SQLException e) {
-            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
-                try {
-                    reconnectAttempts++;
-                    if (reconnectAttempts > 5) {
-                        throw new RuntimeException("Maximum reconnects reached");
-                    }
-
-                    this.connect();
-
-                    return this.get(path);
-                } catch (IOException e2) {
-                    throw new RuntimeException(e2);
-                }
-            } else {
-                throw new RuntimeException(new IOException(e));
-            }
+            throw new RuntimeException(new IOException(e));
         }
 
         super.set(path, value);
@@ -312,7 +297,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection == null || this.connection.isClosed()) {
+            if (this.connection == null || !this.connection.isValid(5)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -331,22 +316,7 @@ public class MySQLConfig<T> extends Config<T> {
 
             this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
         } catch (SQLException e) {
-            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
-                try {
-                    reconnectAttempts++;
-                    if (reconnectAttempts > 5) {
-                        throw new RuntimeException("Maximum reconnects reached");
-                    }
-
-                    this.connect();
-
-                    this.set(path, value);
-                } catch (IOException e2) {
-                    throw new RuntimeException(e2);
-                }
-            } else {
-                throw new RuntimeException(new IOException(e));
-            }
+            throw new RuntimeException(new IOException(e));
         }
     }
 
@@ -367,7 +337,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection == null || this.connection.isClosed()) {
+            if (this.connection == null || !this.connection.isValid(5)) {
                 return false;
             }
         } catch (SQLException e) {
@@ -435,7 +405,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection == null || this.connection.isClosed()) {
+            if (this.connection == null || !this.connection.isValid(5)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -459,18 +429,7 @@ public class MySQLConfig<T> extends Config<T> {
             result.getStatement().close();
             result.close();
         } catch (SQLException e) {
-            if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-
-                this.load(save);
-            } else {
-                throw new RuntimeException(new IOException(e));
-            }
+            throw new RuntimeException(e);
         }
 
         this.config = this.processor.toObject(object, this.clazz);
@@ -495,7 +454,7 @@ public class MySQLConfig<T> extends Config<T> {
         }
 
         try {
-            if (this.connection == null || this.connection.isClosed()) {
+            if (this.connection == null || !this.connection.isValid(5)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -517,18 +476,7 @@ public class MySQLConfig<T> extends Config<T> {
 
                 this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
             } catch (SQLException e) {
-                if (e.getMessage().toLowerCase().startsWith("The last packet successfully received".toLowerCase())) {
-                    reconnectAttempts++;
-                    if (reconnectAttempts > 5) {
-                        throw new RuntimeException("Maximum reconnects reached");
-                    }
-
-                    this.connect();
-
-                    this.save();
-                } else {
-                    throw new RuntimeException(new IOException(e));
-                }
+                throw new RuntimeException(new IOException(e));
             }
         }
     }
