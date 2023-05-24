@@ -13,8 +13,6 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
     /**
      * Create a new MemoryConfig
      *
-     * @param clazz
-     *        The class of the data being stored
      * @since 3.0.0
      */
     public UnstructuredMemoryConfig() {}
