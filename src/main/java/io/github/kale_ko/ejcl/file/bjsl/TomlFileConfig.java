@@ -44,4 +44,17 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
     public TomlFileConfig(Class<T> clazz, File file, TomlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
+
+    /**
+     * Create a new TomlFileConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @since 1.0.0
+     */
+    public TomlFileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new TomlParser.Builder().build());
+    }
 }

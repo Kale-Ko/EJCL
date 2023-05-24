@@ -7,7 +7,8 @@ import java.util.Map;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
-import io.github.kale_ko.ejcl.file.FileConfig;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
 
 /**
  * A Simple File Config for storing ParsedObjects in a File
@@ -15,7 +16,20 @@ import io.github.kale_ko.ejcl.file.FileConfig;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class SimpleFileConfig extends FileConfig<ParsedObject> {
+public class SimpleFileConfig extends UnstructuredFileConfig {
+    /**
+     * Create a new SimpleFileConfig
+     *
+     * @param file
+     *        The file where data is being stored
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @since 2.0.0
+     */
+    public SimpleFileConfig(File file, ObjectProcessor processor) {
+        super(file, processor);
+    }
+
     /**
      * Create a new SimpleFileConfig
      *
@@ -24,7 +38,7 @@ public class SimpleFileConfig extends FileConfig<ParsedObject> {
      * @since 2.0.0
      */
     public SimpleFileConfig(File file) {
-        super(ParsedObject.class, file);
+        this(file, new ObjectProcessor.Builder().build());
     }
 
     /**

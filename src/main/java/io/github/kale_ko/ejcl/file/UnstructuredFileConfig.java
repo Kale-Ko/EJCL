@@ -2,86 +2,66 @@ package io.github.kale_ko.ejcl.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.Config;
+import io.github.kale_ko.ejcl.UnstructuredConfig;
 
 /**
  * A File Config for storing data in a file
  *
- * @param <T>
- *        The type of the data being stored
- * @version 2.0.0
- * @since 1.0.0
+ * @version 3.0.0
+ * @since 3.0.0
  */
-public abstract class FileConfig<T> extends Config<T> {
+public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * The file where data is being stored
      *
-     * @since 1.0.0
+     * @since 3.0.0
      */
     protected File file;
 
     /**
      * If this config is closed
      *
-     * @since 1.0.0
+     * @since 3.0.0
      */
     protected boolean closed = false;
 
     /**
      * Create a new FileConfig
      *
-     * @param clazz
-     *        The class of the data being stored
      * @param file
      *        The file where data is being stored
-     * @since 1.0.0
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @since 3.0.0
      */
-    @SuppressWarnings("unchecked")
-    protected FileConfig(Class<T> clazz, File file) {
-        super(clazz, new ObjectProcessor.Builder().build());
+    protected UnstructuredFileConfig(File file, ObjectProcessor processor) {
+        super(processor);
 
         if (file == null) {
             throw new NullPointerException("File can not be null");
         }
 
         this.file = file;
+    }
 
-        if (clazz.getConstructors().length > 0) {
-            try {
-                for (Constructor<?> constructor : clazz.getConstructors()) {
-                    if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
-                        this.config = (T) constructor.newInstance();
-
-                        break;
-                    }
-                }
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-            }
-        } else {
-            try {
-                Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-                unsafeField.setAccessible(true);
-                sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
-                this.config = (T) unsafe.allocateInstance(clazz);
-            } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
-            }
-        }
-
-        if (this.config == null) {
-            throw new RuntimeException("Could not instantiate new config");
-        }
+    /**
+     * Create a new FileConfig
+     *
+     * @param file
+     *        The file where data is being stored
+     * @since 3.0.0
+     */
+    protected UnstructuredFileConfig(File file) {
+        this(file, new ObjectProcessor.Builder().build());
     }
 
     /**
      * Get the file where data is being stored
      *
      * @return The file where data is being stored
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public File getFile() {
         return this.file;
@@ -91,7 +71,7 @@ public abstract class FileConfig<T> extends Config<T> {
      * Get if the config is loaded
      *
      * @return If the config is loaded
-     * @since 1.0.0
+     * @since 3.0.0
      */
     @Override
     public boolean getLoaded() {
@@ -104,7 +84,7 @@ public abstract class FileConfig<T> extends Config<T> {
      * @throws IOException
      *         On create error
      * @return The config bytes
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public abstract byte[] create() throws IOException;
 
@@ -126,7 +106,7 @@ public abstract class FileConfig<T> extends Config<T> {
      * @throws IOException
      *         On load error
      * @return The file bytes
-     * @since 1.0.0
+     * @since 3.0.0
      */
     protected byte[] loadRaw() throws IOException {
         if (!Files.exists(this.file.toPath())) {
@@ -143,7 +123,7 @@ public abstract class FileConfig<T> extends Config<T> {
      *
      * @throws IOException
      *         On save error
-     * @since 1.0.0
+     * @since 3.0.0
      */
     @Override
     public void save() throws IOException {
@@ -164,7 +144,7 @@ public abstract class FileConfig<T> extends Config<T> {
      * @throws IOException
      *         On save error
      * @return The config bytes
-     * @since 1.0.0
+     * @since 3.0.0
      */
     protected abstract byte[] saveRaw() throws IOException;
 
@@ -173,7 +153,7 @@ public abstract class FileConfig<T> extends Config<T> {
      *
      * @throws IOException
      *         On close error
-     * @since 1.0.0
+     * @since 3.0.0
      */
     @Override
     public void close() throws IOException {
@@ -188,7 +168,7 @@ public abstract class FileConfig<T> extends Config<T> {
      * Get if the config is closed
      *
      * @return If the config is closed
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public boolean isClosed() {
         return this.closed;
