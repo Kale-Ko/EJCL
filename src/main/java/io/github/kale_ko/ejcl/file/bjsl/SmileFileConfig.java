@@ -44,4 +44,17 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
     public SmileFileConfig(Class<T> clazz, File file, SmileParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
+
+    /**
+     * Create a new SmileFileConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @since 2.0.0
+     */
+    public SmileFileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new SmileParser.Builder().build());
+    }
 }

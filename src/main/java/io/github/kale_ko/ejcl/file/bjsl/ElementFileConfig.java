@@ -2,9 +2,9 @@ package io.github.kale_ko.ejcl.file.bjsl;
 
 import java.io.File;
 import java.io.IOException;
-import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.parsers.Parser;
-import io.github.kale_ko.ejcl.file.FileConfig;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
 
 /**
  * A Element File Config for storing ParsedObjects in a File
@@ -12,7 +12,7 @@ import io.github.kale_ko.ejcl.file.FileConfig;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class ElementFileConfig extends FileConfig<ParsedObject> {
+public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * The parser/processor to use for parsing and serialization
      *
@@ -27,16 +27,31 @@ public class ElementFileConfig extends FileConfig<ParsedObject> {
      *        The file where data is being stored
      * @param parser
      *        The parser/processor to use for parsing and serialization
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
      * @since 2.0.0
      */
-    public ElementFileConfig(File file, Parser<?, ?> parser) {
-        super(ParsedObject.class, file);
+    public ElementFileConfig(File file, Parser<?, ?> parser, ObjectProcessor processor) {
+        super(file, processor);
 
         if (parser == null) {
             throw new NullPointerException("Parser can not be null");
         }
 
         this.parser = parser;
+    }
+
+    /**
+     * Create a new ElementFileConfig
+     *
+     * @param file
+     *        The file where data is being stored
+     * @param parser
+     *        The parser/processor to use for parsing and serialization
+     * @since 2.0.0
+     */
+    public ElementFileConfig(File file, Parser<?, ?> parser) {
+        this(file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**

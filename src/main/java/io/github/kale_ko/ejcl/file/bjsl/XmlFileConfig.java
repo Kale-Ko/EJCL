@@ -44,4 +44,17 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
     public XmlFileConfig(Class<T> clazz, File file, XmlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
+
+    /**
+     * Create a new XmlFileConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @since 2.0.0
+     */
+    public XmlFileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new XmlParser.Builder().setPrettyPrint(true).build());
+    }
 }

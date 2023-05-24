@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.Config;
+import io.github.kale_ko.ejcl.StructuredConfig;
 
 /**
  * A Memory Config for storing data in memory
@@ -15,7 +14,7 @@ import io.github.kale_ko.ejcl.Config;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class MemoryConfig<T> extends Config<T> {
+public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
     /**
      * Create a new MemoryConfig
      *
@@ -24,8 +23,8 @@ public class MemoryConfig<T> extends Config<T> {
      * @since 2.0.0
      */
     @SuppressWarnings("unchecked")
-    protected MemoryConfig(Class<T> clazz) {
-        super(clazz, new ObjectProcessor.Builder().build());
+    protected StructuredMemoryConfig(Class<T> clazz) {
+        super(clazz);
 
         if (clazz.getConstructors().length > 0) {
             try {
@@ -94,7 +93,9 @@ public class MemoryConfig<T> extends Config<T> {
      * @since 1.0.0
      */
     @Override
-    public void close() throws IOException {}
+    public void close() throws IOException {
+        this.config = null;
+    }
 
     /**
      * Get if the config is closed

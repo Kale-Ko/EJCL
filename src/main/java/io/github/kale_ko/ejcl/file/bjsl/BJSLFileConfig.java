@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import io.github.kale_ko.bjsl.parsers.Parser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.file.FileConfig;
+import io.github.kale_ko.ejcl.file.StructuredFileConfig;
 
 /**
  * A BJSL File Config for storing BJSL data in a File
@@ -14,13 +14,20 @@ import io.github.kale_ko.ejcl.file.FileConfig;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class BJSLFileConfig<T> extends FileConfig<T> {
+public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
     /**
      * The parser/processor to use for parsing and serialization
      *
      * @since 2.0.0
      */
     protected Parser<?, ?> parser;
+
+    /**
+     * The ObjectProcessor to use for serialization/deserialization
+     *
+     * @since 3.0.0
+     */
+    protected ObjectProcessor processor;
 
     /**
      * Create a new BJSLConfig
@@ -60,9 +67,9 @@ public class BJSLFileConfig<T> extends FileConfig<T> {
      *        The parser/processor to use for parsing and serialization
      * @since 2.0.0
      */
-    // public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {d u
-    //     this(clazz, file, parser, new ObjectProcessor.Builder().build());
-    // }
+    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {
+        this(clazz, file, parser, new ObjectProcessor.Builder().build());
+    }
 
     /**
      * Create a blank config file

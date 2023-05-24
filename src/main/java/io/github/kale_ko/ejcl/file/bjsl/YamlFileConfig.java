@@ -44,4 +44,17 @@ public class YamlFileConfig<T> extends BJSLFileConfig<T> {
     public YamlFileConfig(Class<T> clazz, File file, YamlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
+
+    /**
+     * Create a new YamlFileConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @since 1.0.0
+     */
+    public YamlFileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new YamlParser.Builder().build());
+    }
 }

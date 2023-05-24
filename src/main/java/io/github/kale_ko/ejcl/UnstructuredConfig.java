@@ -1,90 +1,52 @@
 package io.github.kale_ko.ejcl;
 
 import java.io.IOException;
+import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 
 /**
- * An abstract class that all configs extend from
+ * An abstract class that all unstructured configs extend from
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @param <T>
- *        The type of the data being stored
- * @version 2.0.0
- * @since 1.0.0
+ * @version 3.0.0
+ * @since 3.0.0
  */
-public abstract class Config<T> {
-    /**
-     * The class of the data being stored
-     *
-     * @since 1.0.0
-     */
-    protected Class<T> clazz;
-
+public abstract class UnstructuredConfig {
     /**
      * The ObjectProcessor to use for serialization/deserialization
      *
-     * @since 2.0.0
+     * @since 3.0.0
      */
     protected ObjectProcessor processor;
 
     /**
      * The data being stored
      *
-     * @since 1.0.0
+     * @since 3.0.0
      */
-    protected T config = null;
+    protected ParsedObject config = null;
 
     /**
      * Create a new Config
      *
-     * @param clazz
-     *        The class of the data being stored
      * @param processor
      *        The ObjectProcessor to use for serialization/deserialization
-     * @since 2.0.0
+     * @since 3.0.0
      */
-    protected Config(Class<T> clazz, ObjectProcessor processor) {
-        if (clazz == null) {
-            throw new NullPointerException("Clazz can not be null");
-        }
-
-        if (clazz.isArray() || clazz.isInterface() || clazz.isEnum()) {
-            throw new RuntimeException("clazz must be an object");
-        }
-
-        this.clazz = clazz;
-
+    protected UnstructuredConfig(ObjectProcessor processor) {
         this.processor = processor;
+
+        this.config = ParsedObject.create();
     }
 
     /**
      * Create a new Config
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @since 1.0.0
+     * @since 3.0.0
      */
-    protected Config(Class<T> clazz) {
-        this(clazz, new ObjectProcessor.Builder().build());
-    }
-
-    /**
-     * Get the data being stored
-     *
-     * @return The data being stored
-     * @since 1.0.0
-     */
-    public T get() {
-        if (!this.getLoaded()) {
-            try {
-                this.load();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return this.config;
+    protected UnstructuredConfig() {
+        this(new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -93,7 +55,7 @@ public abstract class Config<T> {
      * @param path
      *        The path to get
      * @return The value being stored
-     * @since 2.0.0
+     * @since 3.0.0
      */
     public Object get(String path) {
         if (path == null) {
@@ -108,22 +70,7 @@ public abstract class Config<T> {
             }
         }
 
-        return PathResolver.resolve(this.processor.toElement(this.config), path);
-    }
-
-    /**
-     * Set the data being stored
-     *
-     * @param value
-     *        The data to be stored
-     * @since 1.0.0
-     */
-    public void set(T value) {
-        if (value == null) {
-            throw new NullPointerException("Value can not be null");
-        }
-
-        this.config = value;
+        return PathResolver.resolve(this.config, path);
     }
 
     /**
@@ -133,7 +80,7 @@ public abstract class Config<T> {
      *        The path to set
      * @param value
      *        The value to set
-     * @since 2.0.0
+     * @since 3.0.0
      */
     public void set(String path, Object value) {
         if (path == null) {
@@ -143,14 +90,14 @@ public abstract class Config<T> {
             throw new NullPointerException("Value can not be null");
         }
 
-        this.set(this.processor.toObject(PathResolver.update(this.processor.toElement(this.config), path, value), this.clazz));
+        PathResolver.update(this.config, path, value);
     }
 
     /**
      * Get if the config is loaded
      *
      * @return If the config is loaded
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public abstract boolean getLoaded();
 
@@ -159,10 +106,10 @@ public abstract class Config<T> {
      *
      * @throws IOException
      *         On load error
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public void load() throws IOException {
-        load(true);
+        load(false);
     }
 
     /**
@@ -181,7 +128,7 @@ public abstract class Config<T> {
      *
      * @throws IOException
      *         On save error
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public abstract void save() throws IOException;
 
@@ -190,7 +137,7 @@ public abstract class Config<T> {
      *
      * @throws IOException
      *         On close error
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public abstract void close() throws IOException;
 
@@ -198,7 +145,7 @@ public abstract class Config<T> {
      * Get if the config is closed
      *
      * @return If the config is closed
-     * @since 1.0.0
+     * @since 3.0.0
      */
     public abstract boolean isClosed();
 }
