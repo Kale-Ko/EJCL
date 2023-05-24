@@ -44,4 +44,17 @@ public class PropertiesFileConfig<T> extends BJSLFileConfig<T> {
     public PropertiesFileConfig(Class<T> clazz, File file, PropertiesParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
+
+    /**
+     * Create a new PropertiesFileConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param file
+     *        The file where data is being stored
+     * @since 2.0.0
+     */
+    public PropertiesFileConfig(Class<T> clazz, File file) {
+        this(clazz, file, new PropertiesParser.Builder().build());
+    }
 }

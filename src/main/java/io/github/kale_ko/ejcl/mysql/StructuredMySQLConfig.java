@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.Config;
 import io.github.kale_ko.ejcl.PathResolver;
+import io.github.kale_ko.ejcl.StructuredConfig;
 
 /**
  * A MySQL Config for storing data on a MySQL server
@@ -25,7 +25,14 @@ import io.github.kale_ko.ejcl.PathResolver;
  * @version 2.0.0
  * @since 1.0.0
  */
-public class MySQLConfig<T> extends Config<T> {
+public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
+    /**
+     * The ObjectProcessor to use for serialization/deserialization
+     *
+     * @since 3.0.0
+     */
+    protected ObjectProcessor processor;
+
     /**
      * The host of the server
      *
@@ -76,18 +83,18 @@ public class MySQLConfig<T> extends Config<T> {
     protected Connection connection;
 
     /**
-     * When the config expires next
-     *
-     * @since 1.1.0
-     */
-    protected long configExpires = -1l;
-
-    /**
      * How many times we have tried to reconnect
      *
      * @since 2.3.0
      */
     protected int reconnectAttempts = 0;
+
+    /**
+     * When the config expires next
+     *
+     * @since 1.1.0
+     */
+    protected long configExpires = -1l;
 
     /**
      * If this config is closed
@@ -118,8 +125,8 @@ public class MySQLConfig<T> extends Config<T> {
      * @since 2.0.0
      */
     @SuppressWarnings("unchecked")
-    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
-        super(clazz, processor);
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+        super(clazz);
 
         if (processor == null) {
             throw new NullPointerException("Processor can not be null");
@@ -133,6 +140,8 @@ public class MySQLConfig<T> extends Config<T> {
         if (table == null) {
             throw new NullPointerException("Table can not be null");
         }
+
+        this.processor = processor;
 
         this.host = host;
         this.port = port;
@@ -188,7 +197,7 @@ public class MySQLConfig<T> extends Config<T> {
      *        The password to the server
      * @since 2.0.0
      */
-    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
         this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build());
     }
 
@@ -209,7 +218,7 @@ public class MySQLConfig<T> extends Config<T> {
      *        The ObjectProcessor to use for serialization/deserialization
      * @since 2.0.0
      */
-    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table, ObjectProcessor processor) {
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, ObjectProcessor processor) {
         this(clazz, host, port, database, table, null, null, processor);
     }
 
@@ -228,96 +237,8 @@ public class MySQLConfig<T> extends Config<T> {
      *        The table of the database
      * @since 2.0.0
      */
-    public MySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
         this(clazz, host, port, database, table, null, null, new ObjectProcessor.Builder().build());
-    }
-
-    /**
-     * Get a path being stored
-     *
-     * @param path
-     *        The path to get
-     * @return The value being stored
-     * @since 2.0.0
-     */
-    @Override
-    public Object get(String path) {
-        if (this.closed) {
-            throw new RuntimeException("Config is already closed");
-        }
-
-        try {
-            if (this.connection == null || !this.connection.isValid(5)) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Object value = null;
-
-        try {
-            ResultSet result = this.query("SELECT path,value FROM " + this.table + " WHERE path=\"" + path + "\"");
-
-            while (result.next()) {
-                value = result.getString("value");
-            }
-
-            result.getStatement().close();
-            result.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        }
-
-        super.set(path, value);
-
-        return value;
-    }
-
-    /**
-     * Set a path being stored
-     *
-     * @param path
-     *        The path to set
-     * @param value
-     *        The value to set
-     * @since 2.0.0
-     */
-    @Override
-    public void set(String path, Object value) {
-        if (this.closed) {
-            throw new RuntimeException("Config is already closed");
-        }
-
-        try {
-            if (this.connection == null || !this.connection.isValid(5)) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
-                }
-
-                this.connect();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            super.set(path, value);
-
-            this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        }
     }
 
     /**
@@ -381,9 +302,9 @@ public class MySQLConfig<T> extends Config<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            reconnectAttempts = 0;
-
             this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+
+            reconnectAttempts = 0;
         } catch (SQLException e) {
             throw new IOException(e);
         }
