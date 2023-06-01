@@ -194,9 +194,9 @@ public class PathResolver {
                         resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
                     }
                 } else {
-                    if (value instanceof String string && string.startsWith("{obj},")) {
+                    if (value instanceof String && ((String) value).startsWith("{obj},")) {
                         resolved.asObject().set(valueKey, ParsedObject.create());
-                    } else if (value instanceof String string && string.startsWith("{arr},")) {
+                    } else if (value instanceof String && ((String) value).startsWith("{arr},")) {
                         resolved.asObject().set(valueKey, ParsedArray.create());
                     } else {
                         resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
@@ -211,9 +211,9 @@ public class PathResolver {
                             resolved.asArray().set(resolvedValueKey, ParsedPrimitive.from(value));
                         }
                     } else {
-                        if (value instanceof String string && string.startsWith("{obj},")) {
+                        if (value instanceof String && ((String) value).startsWith("{obj},")) {
                             resolved.asArray().add(ParsedObject.create());
-                        } else if (value instanceof String string && string.startsWith("{arr},")) {
+                        } else if (value instanceof String && ((String) value).startsWith("{arr},")) {
                             resolved.asArray().add(ParsedArray.create());
                         } else {
                             resolved.asArray().add(ParsedPrimitive.from(value));
