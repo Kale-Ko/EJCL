@@ -201,7 +201,7 @@ public class PathResolver {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
-                            while (resolved.asArray().getSize() < index) {
+                            while (resolved.asArray().getSize() <= index) {
                                 if (keys[i + 1].equals(keys[i + 1].replaceAll("\\[([0-9])\\]", "$1"))) {
                                     resolved.asArray().add(ParsedObject.create());
                                 } else {
@@ -326,7 +326,7 @@ public class PathResolver {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
-                            while (resolved.asArray().getSize() < index) {
+                            while (resolved.asArray().getSize() <= index) {
                                 if (keys[i + 1].equals(keys[i + 1].replaceAll("\\[([0-9])\\]", "$1"))) {
                                     resolved.asArray().add(ParsedObject.create());
                                 } else {
