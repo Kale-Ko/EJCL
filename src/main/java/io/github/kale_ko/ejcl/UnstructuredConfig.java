@@ -90,7 +90,7 @@ public abstract class UnstructuredConfig {
             throw new NullPointerException("Value can not be null");
         }
 
-        PathResolver.update(this.config, path, value);
+        PathResolver.update(this.config, path, value, true);
     }
 
     /**
