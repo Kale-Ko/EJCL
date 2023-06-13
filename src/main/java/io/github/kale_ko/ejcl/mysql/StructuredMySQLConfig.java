@@ -344,7 +344,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             ResultSet result = this.query("SELECT path,value FROM " + this.table);
 
             while (result.next()) {
-                PathResolver.update(object, result.getString("path"), result.getString("value"));
+                PathResolver.update(object, result.getString("path"), result.getString("value"), true);
             }
 
             result.getStatement().close();
