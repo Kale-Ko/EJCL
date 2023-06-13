@@ -189,6 +189,8 @@ public class PathResolver {
                             resolved.asObject().set(key, ParsedArray.create());
                         }
 
+                        System.out.println("obj " + path + ": " + key + ": " + key.equals(key.replaceAll("\\[([0-9])\\]", "$1")));
+
                         resolved = resolved.asObject().get(key);
                     } else {
                         resolved = null;
@@ -210,6 +212,8 @@ public class PathResolver {
                                     resolved.asArray().add(ParsedArray.create());
                                 }
                             }
+
+                            System.out.println("arr " + path + ": " + key + ": " + key.equals(key.replaceAll("\\[([0-9])\\]", "$1")));
 
                             resolved = resolved.asArray().get(index);
                         } else {
