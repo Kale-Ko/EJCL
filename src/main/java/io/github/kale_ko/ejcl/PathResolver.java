@@ -53,8 +53,8 @@ public class PathResolver {
 
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
-        for (int i = 1; i < path.length(); i++) {
-            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
+        for (int i = 1; i <= path.length(); i++) {
+            if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
@@ -118,8 +118,8 @@ public class PathResolver {
 
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
-        for (int i = 1; i < path.length(); i++) {
-            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
+        for (int i = 1; i <= path.length(); i++) {
+            if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
@@ -193,8 +193,8 @@ public class PathResolver {
 
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
-        for (int i = 1; i < path.length(); i++) {
-            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
+        for (int i = 1; i <= path.length(); i++) {
+            if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
@@ -328,8 +328,8 @@ public class PathResolver {
 
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
-        for (int i = 1; i < path.length(); i++) {
-            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
+        for (int i = 1; i <= path.length(); i++) {
+            if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
