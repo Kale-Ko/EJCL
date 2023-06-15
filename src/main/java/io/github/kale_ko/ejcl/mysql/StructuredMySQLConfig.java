@@ -83,6 +83,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected Connection connection;
 
     /**
+     * How long to cache the config in memory
+     *
+     * @since 3.2.0
+     */
+    protected long cacheLength = 5l;
+
+    /**
      * How many times we have tried to reconnect
      *
      * @since 2.3.0
@@ -122,10 +129,12 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *        The password to the server
      * @param processor
      *        The ObjectProcessor to use for serialization/deserialization
+     * @param cacheLength
+     *        How long to cache the config in memory
      * @since 2.0.0
      */
     @SuppressWarnings("unchecked")
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor, long cacheLength) {
         super(clazz);
 
         if (processor == null) {
@@ -195,10 +204,60 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *        The username to the server
      * @param password
      *        The password to the server
+     * @param processor
+     *        The ObjectProcessor to use for serialization/deserialization
+     * @since 2.0.0
+     */
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+        this(clazz, host, port, database, table, username, password, processor, 5l);
+    }
+
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @param username
+     *        The username to the server
+     * @param password
+     *        The password to the server
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
         this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build());
+    }
+
+    /**
+     * Create a new MySQLConfig
+     *
+     * @param clazz
+     *        The class of the data being stored
+     * @param host
+     *        The host of the server
+     * @param port
+     *        The port of the server
+     * @param database
+     *        The database on the server
+     * @param table
+     *        The table of the database
+     * @param username
+     *        The username to the server
+     * @param password
+     *        The password to the server
+     * @param cacheLength
+     *        How long to cache the config in memory
+     * @since 2.0.0
+     */
+    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, long cacheLength) {
+        this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build(), cacheLength);
     }
 
     /**
@@ -344,7 +403,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         this.config = this.processor.toObject(object, this.clazz);
-        this.configExpires = Instant.now().getEpochSecond() + 5;
+        this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
 
         if (save) {
             this.save();
