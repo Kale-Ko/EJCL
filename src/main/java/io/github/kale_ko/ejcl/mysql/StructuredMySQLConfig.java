@@ -162,6 +162,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         this.username = username;
         this.password = password;
 
+        this.cacheLength = cacheLength;
+
         if (clazz.getConstructors().length > 0) {
             try {
                 for (Constructor<?> constructor : clazz.getConstructors()) {
