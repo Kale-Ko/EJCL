@@ -2,6 +2,7 @@ package io.github.kale_ko.ejcl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import io.github.kale_ko.bjsl.elements.ParsedArray;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
@@ -48,7 +49,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
 
         ParsedElement resolved = element;
 
@@ -104,7 +105,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement resolveElement(ParsedElement element, String path) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
 
         ParsedElement resolved = element;
 
@@ -170,7 +171,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
@@ -295,7 +296,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
@@ -413,13 +414,13 @@ public class PathResolver {
         if (element.isObject()) {
             ParsedObject object = element.asObject();
 
-            for (String key : object.getKeys()) {
-                if (object.get(key).isObject()) {
-                    keys.addAll(getKeys(object.get(key), path + key + ".", returnObjArrKeys));
-                } else if (object.get(key).isArray()) {
-                    keys.addAll(getKeys(object.get(key), path + key, returnObjArrKeys));
-                } else if (returnObjArrKeys || object.get(key).isPrimitive()) {
-                    keys.add(path + key);
+            for (Map.Entry<String, ParsedElement> entry : object.getEntries()) {
+                if (entry.getValue().isObject()) {
+                    keys.addAll(getKeys(entry.getValue(), path + entry.getKey().replace(".", "\\.") + ".", returnObjArrKeys));
+                } else if (entry.getValue().isArray()) {
+                    keys.addAll(getKeys(entry.getValue(), path + entry.getKey().replace(".", "\\."), returnObjArrKeys));
+                } else if (returnObjArrKeys || entry.getValue().isPrimitive()) {
+                    keys.add(path + entry.getKey().replace(".", "\\."));
                 }
             }
         } else if (element.isArray()) {
