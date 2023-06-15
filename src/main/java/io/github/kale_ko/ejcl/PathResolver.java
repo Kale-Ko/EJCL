@@ -49,7 +49,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
 
         ParsedElement resolved = element;
 
@@ -105,7 +105,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement resolveElement(ParsedElement element, String path) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
 
         ParsedElement resolved = element;
 
@@ -171,7 +171,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
@@ -296,7 +296,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\]\\.");
+        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
