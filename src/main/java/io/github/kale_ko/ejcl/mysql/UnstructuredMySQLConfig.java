@@ -271,16 +271,6 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      */
     @Override
     public boolean getLoaded() {
-        try {
-            if (this.connection == null || !this.connection.isValid(5)) {
-                return false;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            return false;
-        }
-
         return true;
     }
 
