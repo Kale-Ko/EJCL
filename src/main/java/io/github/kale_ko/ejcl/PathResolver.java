@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import io.github.kale_ko.bjsl.elements.ParsedArray;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
@@ -49,8 +50,8 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
-
+        String[] keys = Pattern.compile("[^\\\\]\\.").split(path.replaceAll("\\[([0-9])\\]", ".[$1]"));
+        
         ParsedElement resolved = element;
 
         for (int i = 0; i < keys.length; i++) {
@@ -105,8 +106,8 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement resolveElement(ParsedElement element, String path) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
-
+        String[] keys = Pattern.compile("[^\\\\]\\.").split(path.replaceAll("\\[([0-9])\\]", ".[$1]"));
+        
         ParsedElement resolved = element;
 
         for (int i = 0; i < keys.length; i++) {
@@ -171,7 +172,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
+        String[] keys = Pattern.compile("[^\\\\]\\.").split(path.replaceAll("\\[([0-9])\\]", ".[$1]"));
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
@@ -296,7 +297,7 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
-        String[] keys = path.replaceAll("\\[([0-9])\\]", ".[$1]").split("[^\\\\]\\.");
+        String[] keys = Pattern.compile("[^\\\\]\\.").split(path.replaceAll("\\[([0-9])\\]", ".[$1]"));
         String valueKey = keys[keys.length - 1];
 
         ParsedElement resolved = element;
