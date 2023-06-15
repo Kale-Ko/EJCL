@@ -6,13 +6,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
+import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.PathResolver;
 import io.github.kale_ko.ejcl.StructuredConfig;
@@ -436,17 +437,32 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new IOException(e);
         }
 
-        ParsedObject object = this.processor.toElement(this.config).asObject();
+        ParsedObject currentObject = ParsedObject.create();
+        try {
+            ResultSet result = this.query("SELECT path,value FROM " + this.table);
 
+            while (result.next()) {
+                currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
+            }
+
+            result.getStatement().close();
+            result.close();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
+
+        ParsedObject object = this.processor.toElement(this.config).asObject();
         List<String> keys = PathResolver.getKeys(object, false);
 
         for (String key : keys) {
-            try {
-                Object value = PathResolver.resolve(object, key, false);
+            Object value = PathResolver.resolve(object, key, false);
 
-                this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + key + "\", \"" + (value != null ? value.toString() : "null") + "\");");
-            } catch (SQLException e) {
-                throw new RuntimeException(new IOException(e));
+            if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
+                try {
+                    this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", key, (value != null ? value.toString() : "null"));
+                } catch (SQLException e) {
+                    throw new IOException(e);
+                }
             }
         }
     }
@@ -456,15 +472,20 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @param query
      *        The base query
+     * @param args
+     *        Extra args
      * @return If the statement was successful
      * @throws SQLException
      *         On sql error
      * @since 1.0.0
      */
-    protected boolean execute(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected boolean execute(String query, String... args) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+        for (int i = 0; i < args.length; i++) {
+            statement.setString(i + 1, args[i]);
+        }
 
-        boolean result = statement.execute(query);
+        boolean result = statement.execute();
         statement.close();
 
         return result;
@@ -475,15 +496,20 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @param query
      *        The base query
+     * @param args
+     *        Extra args
      * @return The result of the query
      * @throws SQLException
      *         On sql error
      * @since 1.0.0
      */
-    protected ResultSet query(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected ResultSet query(String query, String... args) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+        for (int i = 0; i < args.length; i++) {
+            statement.setString(i + 1, args[i]);
+        }
 
-        ResultSet results = statement.executeQuery(query);
+        ResultSet results = statement.executeQuery();
 
         return results;
     }
