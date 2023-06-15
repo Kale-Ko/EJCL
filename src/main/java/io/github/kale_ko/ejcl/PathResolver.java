@@ -54,7 +54,7 @@ public class PathResolver {
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
         for (int i = 1; i < path.length(); i++) {
-            if (path.charAt(i - 1) != '\\' && path.charAt(i) == '.') {
+            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
@@ -119,7 +119,7 @@ public class PathResolver {
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
         for (int i = 1; i < path.length(); i++) {
-            if (path.charAt(i - 1) != '\\' && path.charAt(i) == '.') {
+            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
@@ -194,17 +194,15 @@ public class PathResolver {
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
         for (int i = 1; i < path.length(); i++) {
-            if (path.charAt(i - 1) != '\\' && path.charAt(i) == '.') {
+            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
         }
 
-        String valueKey = keys.get(keys.size() - 1);
-
         ParsedElement resolved = element;
 
-        for (int i = 0; i < keys.size(); i++) {
+        for (int i = 0; i < keys.size() - 1; i++) {
             if (resolved.isObject()) {
                 if (resolved.asObject().has(keys.get(i))) {
                     resolved = resolved.asObject().get(keys.get(i));
@@ -253,6 +251,8 @@ public class PathResolver {
                 break;
             }
         }
+
+        String valueKey = keys.get(keys.size() - 1);
 
         if (resolved != null) {
             if (resolved.isObject()) {
@@ -329,17 +329,15 @@ public class PathResolver {
         List<String> keys = new ArrayList<String>();
         int i2 = 0;
         for (int i = 1; i < path.length(); i++) {
-            if (path.charAt(i - 1) != '\\' && path.charAt(i) == '.') {
+            if ((path.charAt(i - 1) != '\\' && path.charAt(i) == '.') || i == path.length() - 1) {
                 keys.add(path.substring(i2, i).replace("\\.", "."));
                 i2 = i + 1;
             }
         }
 
-        String valueKey = keys.get(keys.size() - 1);
-
         ParsedElement resolved = element;
 
-        for (int i = 0; i < keys.size(); i++) {
+        for (int i = 0; i < keys.size() - 1; i++) {
             if (resolved.isObject()) {
                 if (resolved.asObject().has(keys.get(i))) {
                     resolved = resolved.asObject().get(keys.get(i));
@@ -388,6 +386,8 @@ public class PathResolver {
                 break;
             }
         }
+
+        String valueKey = keys.get(keys.size() - 1);
 
         if (resolved != null) {
             if (resolved.isObject()) {
