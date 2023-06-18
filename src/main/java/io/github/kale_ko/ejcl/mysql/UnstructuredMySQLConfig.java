@@ -3,9 +3,9 @@ package io.github.kale_ko.ejcl.mysql;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
@@ -211,7 +211,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         Object value = null;
 
         try {
-            ResultSet result = this.query("SELECT path,value FROM " + this.table + " WHERE path=\"" + path + "\"");
+            ResultSet result = this.query("SELECT path,value FROM " + this.table + " WHERE path=?", path);
 
             while (result.next()) {
                 value = result.getString("value");
@@ -257,7 +257,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (\"" + path + "\", \"" + (value != null ? value.toString() : "null") + "\");");
+            this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
         } catch (SQLException e) {
             throw new RuntimeException(new IOException(e));
         }
@@ -341,15 +341,20 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @param query
      *        The base query
+     * @param args
+     *        Extra args
      * @return If the statement was successful
      * @throws SQLException
      *         On sql error
-     * @since 3.0.0
+     * @since 1.0.0
      */
-    protected boolean execute(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected boolean execute(String query, String... args) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+        for (int i = 0; i < args.length; i++) {
+            statement.setString(i + 1, args[i]);
+        }
 
-        boolean result = statement.execute(query);
+        boolean result = statement.execute();
         statement.close();
 
         return result;
@@ -360,15 +365,20 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @param query
      *        The base query
+     * @param args
+     *        Extra args
      * @return The result of the query
      * @throws SQLException
      *         On sql error
-     * @since 3.0.0
+     * @since 1.0.0
      */
-    protected ResultSet query(String query) throws SQLException {
-        Statement statement = this.connection.createStatement();
+    protected ResultSet query(String query, String... args) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+        for (int i = 0; i < args.length; i++) {
+            statement.setString(i + 1, args[i]);
+        }
 
-        ResultSet results = statement.executeQuery(query);
+        ResultSet results = statement.executeQuery();
 
         return results;
     }
