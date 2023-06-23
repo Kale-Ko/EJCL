@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
@@ -456,26 +457,33 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         ParsedObject object = this.processor.toElement(this.config).asObject();
         List<String> keys = PathResolver.getKeys(object, false);
 
+        List<String> queryArgs = new ArrayList<String>();
         for (String key : keys) {
             Object value = PathResolver.resolve(object, key, false);
 
             if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
-                try {
-                    this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", key, (value != null ? value.toString() : "null"));
-                } catch (SQLException e) {
-                    throw new IOException(e);
-                }
+                queryArgs.add(key);
+                queryArgs.add(value != null ? value.toString() : "null");
             }
         }
 
+        List<String> queryArgs2 = new ArrayList<String>();
         for (String key : currentObject.getKeys()) {
             if (!keys.contains(key)) {
-                try {
-                    this.execute("DELETE FROM " + this.table + " where path=?", key);
-                } catch (SQLException e) {
-                    throw new IOException(e);
-                }
+                queryArgs2.add(key);
             }
+        }
+
+        try {
+            if (queryArgs.size() > 0) {
+                this.executeBatch("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+            }
+
+            if (queryArgs2.size() > 0) {
+                this.executeBatch("DELETE FROM " + this.table + " WHERE path=?;", 1, queryArgs2);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
         }
     }
 
@@ -501,6 +509,36 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         statement.close();
 
         return result;
+    }
+
+    /**
+     * Execute a mysql statement
+     *
+     * @param query
+     *        The base query
+     * @param argsSize
+     *        The number of arguments per statement
+     * @param args
+     *        Extra args
+     * @return If the statement was successful
+     * @throws SQLException
+     *         On sql error
+     * @since 1.0.0
+     */
+    protected boolean executeBatch(String query, int argsSize, List<String> args) throws SQLException {
+        PreparedStatement statement = this.connection.prepareStatement(query);
+        for (int i = 0; i < args.size(); i++) {
+            statement.setString(i % argsSize, args.get(i));
+
+            if ((i + 1) % argsSize == 0) {
+                statement.addBatch();
+            }
+        }
+
+        statement.executeBatch();
+        statement.close();
+
+        return true;
     }
 
     /**
