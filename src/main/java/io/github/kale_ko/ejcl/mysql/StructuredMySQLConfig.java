@@ -464,13 +464,10 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
                 queryArgs.add(key);
                 queryArgs.add(value != null ? value.toString() : "null");
-            }
-        }
 
-        List<String> queryArgs2 = new ArrayList<String>();
-        for (String key : currentObject.getKeys()) {
-            if (!keys.contains(key)) {
-                queryArgs2.add(key);
+                currentObject.remove(key);
+            } else if (currentObject.has(key)) {
+                currentObject.remove(key);
             }
         }
 
@@ -479,8 +476,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 this.executeBatch("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
             }
 
-            if (queryArgs2.size() > 0) {
-                this.executeBatch("DELETE FROM " + this.table + " WHERE path=?;", 1, queryArgs2);
+            if (currentObject.getKeys().size() > 0) {
+                this.executeBatch("DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
             }
         } catch (SQLException e) {
             throw new IOException(e);
