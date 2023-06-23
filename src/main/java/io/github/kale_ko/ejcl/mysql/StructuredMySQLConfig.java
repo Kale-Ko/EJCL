@@ -525,7 +525,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected boolean executeBatch(String query, int argsSize, List<String> args) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query);
         for (int i = 0; i < args.size(); i++) {
-            statement.setString(i % argsSize, args.get(i));
+            statement.setString((i % argsSize) + 1, args.get(i));
 
             if ((i + 1) % argsSize == 0) {
                 statement.addBatch();
