@@ -378,7 +378,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(5)) {
+            if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -427,7 +427,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(5)) {
+            if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -462,6 +462,16 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
                 try {
                     this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", key, (value != null ? value.toString() : "null"));
+                } catch (SQLException e) {
+                    throw new IOException(e);
+                }
+            }
+        }
+
+        for (String key : currentObject.getKeys()) {
+            if (!keys.contains(key)) {
+                try {
+                    this.execute("DELETE FROM " + this.table + " where path=?", key);
                 } catch (SQLException e) {
                     throw new IOException(e);
                 }
