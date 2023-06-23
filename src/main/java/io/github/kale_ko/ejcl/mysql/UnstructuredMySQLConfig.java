@@ -194,7 +194,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(5)) {
+            if (this.connection == null || !this.connection.isValid(3)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
@@ -242,7 +242,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(5)) {
+            if (this.connection == null || !this.connection.isValid(3)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new RuntimeException("Maximum reconnects reached");
