@@ -464,9 +464,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
                 queryArgs.add(key);
                 queryArgs.add(value != null ? value.toString() : "null");
+            }
 
-                currentObject.remove(key);
-            } else if (currentObject.has(key)) {
+            if (currentObject.has(key)) {
                 currentObject.remove(key);
             }
         }
