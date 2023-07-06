@@ -1,10 +1,11 @@
 package io.github.kale_ko.ejcl.file;
 
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.UnstructuredConfig;
+import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.UnstructuredConfig;
 
 /**
  * A File Config for storing data in a file
@@ -30,10 +31,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Create a new FileConfig
      *
-     * @param file
-     *        The file where data is being stored
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param file      The file where data is being stored
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 3.0.0
      */
     protected UnstructuredFileConfig(File file, ObjectProcessor processor) {
@@ -49,8 +49,8 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Create a new FileConfig
      *
-     * @param file
-     *        The file where data is being stored
+     * @param file The file where data is being stored
+     *
      * @since 3.0.0
      */
     protected UnstructuredFileConfig(File file) {
@@ -61,6 +61,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * Get the file where data is being stored
      *
      * @return The file where data is being stored
+     *
      * @since 3.0.0
      */
     public File getFile() {
@@ -71,6 +72,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 3.0.0
      */
     @Override
@@ -81,9 +83,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Create a blank config file
      *
-     * @throws IOException
-     *         On create error
      * @return The config bytes
+     *
+     * @throws IOException On create error
      * @since 3.0.0
      */
     public abstract byte[] create() throws IOException;
@@ -91,10 +93,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     @Override
@@ -103,9 +104,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Load the config from file
      *
-     * @throws IOException
-     *         On load error
      * @return The file bytes
+     *
+     * @throws IOException On load error
      * @since 3.0.0
      */
     protected byte[] loadRaw() throws IOException {
@@ -121,14 +122,13 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Save the config to file
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 3.0.0
      */
     @Override
     public void save() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         if (!Files.exists(this.file.toPath())) {
@@ -141,9 +141,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Save the config to bytes
      *
-     * @throws IOException
-     *         On save error
      * @return The config bytes
+     *
+     * @throws IOException On save error
      * @since 3.0.0
      */
     protected abstract byte[] saveRaw() throws IOException;
@@ -151,14 +151,13 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 3.0.0
      */
     @Override
     public void close() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         this.closed = true;
@@ -168,6 +167,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 3.0.0
      */
     public boolean isClosed() {
