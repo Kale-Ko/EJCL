@@ -1,12 +1,12 @@
 package io.github.kale_ko.ejcl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import io.github.kale_ko.bjsl.elements.ParsedArray;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains methods useful for getting/setting nested values
@@ -20,16 +20,17 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    private PathResolver() {}
+    private PathResolver() {
+    }
 
     /**
      * Resolve a value on an element
      *
-     * @param element
-     *        The element to resolve on
-     * @param path
-     *        The path to resolve to
+     * @param element The element to resolve on
+     * @param path    The path to resolve to
+     *
      * @return The value resolved
+     *
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path) {
@@ -39,19 +40,18 @@ public class PathResolver {
     /**
      * Resolve a value on an element
      *
-     * @param element
-     *        The element to resolve on
-     * @param path
-     *        The path to resolve to
-     * @param returnObjArrValues
-     *        Weather or not to return the keys of objects and arrays when queried
+     * @param element            The element to resolve on
+     * @param path               The path to resolve to
+     * @param returnObjArrValues Weather or not to return the keys of objects and arrays when queried
+     *
      * @return The value resolved
+     *
      * @since 1.0.0
      */
     public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
         path = path.replaceAll("\\[([0-9]*)\\]", ".[$1]");
 
-        List<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<>();
         int i2 = 0;
         for (int i = 1; i <= path.length(); i++) {
             if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
@@ -106,17 +106,17 @@ public class PathResolver {
     /**
      * Resolve an element on an element
      *
-     * @param element
-     *        The element to resolve on
-     * @param path
-     *        The path to resolve to
+     * @param element The element to resolve on
+     * @param path    The path to resolve to
+     *
      * @return The value resolved
+     *
      * @since 1.0.0
      */
     public static ParsedElement resolveElement(ParsedElement element, String path) {
         path = path.replaceAll("\\[([0-9]*)\\]", ".[$1]");
 
-        List<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<>();
         int i2 = 0;
         for (int i = 1; i <= path.length(); i++) {
             if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
@@ -161,13 +161,12 @@ public class PathResolver {
     /**
      * Update a value on an element
      *
-     * @param element
-     *        The element to update on
-     * @param path
-     *        The path to update
-     * @param value
-     *        The value to update to
+     * @param element The element to update on
+     * @param path    The path to update
+     * @param value   The value to update to
+     *
      * @return element for chaining
+     *
      * @since 1.0.0
      */
     public static ParsedElement update(ParsedElement element, String path, Object value) {
@@ -177,21 +176,19 @@ public class PathResolver {
     /**
      * Update a value on an element
      *
-     * @param element
-     *        The element to update on
-     * @param path
-     *        The path to update
-     * @param value
-     *        The value to update to
-     * @param force
-     *        If the value should be force set (Create objects/arrays that dont exist)
+     * @param element The element to update on
+     * @param path    The path to update
+     * @param value   The value to update to
+     * @param force   If the value should be force set (Create objects/arrays that don't exist)
+     *
      * @return element for chaining
+     *
      * @since 1.0.0
      */
     public static ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)\\]", ".[$1]");
 
-        List<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<>();
         int i2 = 0;
         for (int i = 1; i <= path.length(); i++) {
             if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
@@ -271,7 +268,7 @@ public class PathResolver {
                 }
             } else if (resolved.isArray()) {
                 if (valueKey.startsWith("[") && valueKey.endsWith("]")) {
-                    Integer resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9]*)\\]", "$1"));
+                    int resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9]*)\\]", "$1"));
 
                     if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
                         if (resolved.asArray().get(resolvedValueKey).isPrimitive()) {
@@ -296,13 +293,12 @@ public class PathResolver {
     /**
      * Update an element on an element
      *
-     * @param element
-     *        The element to update on
-     * @param path
-     *        The path to update
-     * @param value
-     *        The value to update to
+     * @param element The element to update on
+     * @param path    The path to update
+     * @param value   The value to update to
+     *
      * @return element for chaining
+     *
      * @since 1.0.0
      */
     public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value) {
@@ -312,21 +308,19 @@ public class PathResolver {
     /**
      * Update an element on an element
      *
-     * @param element
-     *        The element to update on
-     * @param path
-     *        The path to update
-     * @param value
-     *        The value to update to
-     * @param force
-     *        If the value should be force set (Create objects/arrays that dont exist)
+     * @param element The element to update on
+     * @param path    The path to update
+     * @param value   The value to update to
+     * @param force   If the value should be force set (Create objects/arrays that don't exist)
+     *
      * @return element for chaining
+     *
      * @since 1.0.0
      */
     public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)\\]", ".[$1]");
 
-        List<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<>();
         int i2 = 0;
         for (int i = 1; i <= path.length(); i++) {
             if (i == path.length() || (path.charAt(i - 1) != '\\' && path.charAt(i) == '.')) {
@@ -394,7 +388,7 @@ public class PathResolver {
                 resolved.asObject().set(valueKey, value);
             } else if (resolved.isArray()) {
                 if (valueKey.startsWith("[") && valueKey.endsWith("]")) {
-                    Integer resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9]*)\\]", "$1"));
+                    int resolvedValueKey = Integer.parseInt(valueKey.replaceAll("\\[([0-9]*)\\]", "$1"));
 
                     if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
                         resolved.asArray().set(resolvedValueKey, value);
@@ -411,9 +405,10 @@ public class PathResolver {
     /**
      * Get all the keys in an element
      *
-     * @param element
-     *        The element to get the keys of
+     * @param element The element to get the keys of
+     *
      * @return A list of all the keys
+     *
      * @since 1.0.0
      */
     public static List<String> getKeys(ParsedElement element) {
@@ -423,11 +418,11 @@ public class PathResolver {
     /**
      * Get all the keys in an element
      *
-     * @param element
-     *        The element to get the keys of
-     * @param returnObjArrKeys
-     *        Weather or not to return the keys for objects and arrays
+     * @param element          The element to get the keys of
+     * @param returnObjArrKeys Weather or not to return the keys for objects and arrays
+     *
      * @return A list of all the keys
+     *
      * @since 1.0.0
      */
     public static List<String> getKeys(ParsedElement element, boolean returnObjArrKeys) {
@@ -437,17 +432,16 @@ public class PathResolver {
     /**
      * Get all the keys in an element
      *
-     * @param element
-     *        The element to get the keys of
-     * @param path
-     *        The current path
-     * @param returnObjArrKeys
-     *        Weather or not to return the keys for objects and arrays
+     * @param element          The element to get the keys of
+     * @param path             The current path
+     * @param returnObjArrKeys Weather or not to return the keys for objects and arrays
+     *
      * @return A list of all the keys
+     *
      * @since 1.0.0
      */
     protected static List<String> getKeys(ParsedElement element, String path, boolean returnObjArrKeys) {
-        List<String> keys = new ArrayList<String>();
+        List<String> keys = new ArrayList<>();
 
         if (element.isObject()) {
             ParsedObject object = element.asObject();

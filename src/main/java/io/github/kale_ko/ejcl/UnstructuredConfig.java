@@ -1,8 +1,9 @@
 package io.github.kale_ko.ejcl;
 
-import java.io.IOException;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.exception.ConfigLoadException;
+import java.io.IOException;
 
 /**
  * An abstract class that all unstructured configs extend from
@@ -25,13 +26,13 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected ParsedObject config = null;
+    protected ParsedObject config;
 
     /**
      * Create a new Config
      *
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 3.0.0
      */
     protected UnstructuredConfig(ObjectProcessor processor) {
@@ -52,9 +53,10 @@ public abstract class UnstructuredConfig {
     /**
      * Get a path being stored
      *
-     * @param path
-     *        The path to get
+     * @param path The path to get
+     *
      * @return The value being stored
+     *
      * @since 3.0.0
      */
     public Object get(String path) {
@@ -66,7 +68,7 @@ public abstract class UnstructuredConfig {
             try {
                 this.load();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ConfigLoadException(e);
             }
         }
 
@@ -76,10 +78,9 @@ public abstract class UnstructuredConfig {
     /**
      * Set a path being stored
      *
-     * @param path
-     *        The path to set
-     * @param value
-     *        The value to set
+     * @param path  The path to set
+     * @param value The value to set
+     *
      * @since 3.0.0
      */
     public void set(String path, Object value) {
@@ -97,6 +98,7 @@ public abstract class UnstructuredConfig {
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 3.0.0
      */
     public abstract boolean getLoaded();
@@ -104,8 +106,7 @@ public abstract class UnstructuredConfig {
     /**
      * Load the config
      *
-     * @throws IOException
-     *         On load error
+     * @throws IOException On load error
      * @since 3.0.0
      */
     public void load() throws IOException {
@@ -115,10 +116,9 @@ public abstract class UnstructuredConfig {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     public abstract void load(boolean save) throws IOException;
@@ -126,8 +126,7 @@ public abstract class UnstructuredConfig {
     /**
      * Save the config
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 3.0.0
      */
     public abstract void save() throws IOException;
@@ -135,8 +134,7 @@ public abstract class UnstructuredConfig {
     /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 3.0.0
      */
     public abstract void close() throws IOException;
@@ -145,6 +143,7 @@ public abstract class UnstructuredConfig {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 3.0.0
      */
     public abstract boolean isClosed();

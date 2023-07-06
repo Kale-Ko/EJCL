@@ -1,29 +1,30 @@
 package io.github.kale_ko.ejcl.mysql;
 
+import io.github.kale_ko.bjsl.elements.ParsedObject;
+import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.bjsl.processor.reflection.InitializationUtil;
+import io.github.kale_ko.ejcl.PathResolver;
+import io.github.kale_ko.ejcl.StructuredConfig;
+import io.github.kale_ko.ejcl.exception.ConfigClosedException;
+import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
+import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
+import io.github.kale_ko.ejcl.mysql.driver.MySQL;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import io.github.kale_ko.bjsl.elements.ParsedObject;
-import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
-import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.PathResolver;
-import io.github.kale_ko.ejcl.StructuredConfig;
 
 /**
  * A MySQL Config for storing data on a MySQL server
  *
- * @param <T>
- *        The type of the data being stored
+ * @param <T> The type of the data being stored
+ *
  * @version 2.0.0
  * @since 1.0.0
  */
@@ -89,7 +90,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.2.0
      */
-    protected long cacheLength = 5l;
+    protected long cacheLength;
 
     /**
      * How many times we have tried to reconnect
@@ -103,7 +104,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.1.0
      */
-    protected long configExpires = -1l;
+    protected long configExpires = -1L;
 
     /**
      * If this config is closed
@@ -115,27 +116,18 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
-     * @param cacheLength
-     *        How long to cache the config in memory
+     * @param clazz       The class of the data being stored
+     * @param host        The host of the server
+     * @param port        The port of the server
+     * @param database    The database on the server
+     * @param table       The table of the database
+     * @param username    The username to the server
+     * @param password    The password to the server
+     * @param processor   The ObjectProcessor to use for serialization/deserialization
+     * @param cacheLength How long to cache the config in memory
+     *
      * @since 2.0.0
      */
-    @SuppressWarnings("unchecked")
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor, long cacheLength) {
         super(clazz);
 
@@ -165,74 +157,41 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
         this.cacheLength = cacheLength;
 
-        if (clazz.getConstructors().length > 0) {
-            try {
-                for (Constructor<?> constructor : clazz.getConstructors()) {
-                    if ((constructor.canAccess(null) || constructor.trySetAccessible()) && constructor.getParameterTypes().length == 0) {
-                        this.config = (T) constructor.newInstance();
-
-                        break;
-                    }
-                }
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-            }
-        } else {
-            try {
-                Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-                unsafeField.setAccessible(true);
-                sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
-                this.config = (T) unsafe.allocateInstance(clazz);
-            } catch (InstantiationException | IllegalAccessException | NoSuchFieldException e) {
-            }
-        }
-
+        this.config = InitializationUtil.initializeUnsafe(clazz);
         if (this.config == null) {
-            throw new RuntimeException("Could not instantiate new config");
+            throw new ConfigInitializationException(clazz);
         }
     }
 
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param clazz     The class of the data being stored
+     * @param host      The host of the server
+     * @param port      The port of the server
+     * @param database  The database on the server
+     * @param table     The table of the database
+     * @param username  The username to the server
+     * @param password  The password to the server
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
-        this(clazz, host, port, database, table, username, password, processor, 5l);
+        this(clazz, host, port, database, table, username, password, processor, 5L);
     }
 
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
+     * @param clazz    The class of the data being stored
+     * @param host     The host of the server
+     * @param port     The port of the server
+     * @param database The database on the server
+     * @param table    The table of the database
+     * @param username The username to the server
+     * @param password The password to the server
+     *
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
@@ -242,22 +201,15 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
-     * @param cacheLength
-     *        How long to cache the config in memory
+     * @param clazz       The class of the data being stored
+     * @param host        The host of the server
+     * @param port        The port of the server
+     * @param database    The database on the server
+     * @param table       The table of the database
+     * @param username    The username to the server
+     * @param password    The password to the server
+     * @param cacheLength How long to cache the config in memory
+     *
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, long cacheLength) {
@@ -267,18 +219,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param clazz     The class of the data being stored
+     * @param host      The host of the server
+     * @param port      The port of the server
+     * @param database  The database on the server
+     * @param table     The table of the database
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, ObjectProcessor processor) {
@@ -288,16 +235,12 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Create a new MySQLConfig
      *
-     * @param clazz
-     *        The class of the data being stored
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
+     * @param clazz    The class of the data being stored
+     * @param host     The host of the server
+     * @param port     The port of the server
+     * @param database The database on the server
+     * @param table    The table of the database
+     *
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
@@ -308,6 +251,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 1.0.0
      */
     @Override
@@ -316,18 +260,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             return false;
         }
 
-        if (Instant.now().getEpochSecond() >= configExpires) {
-            return false;
-        }
-
-        return true;
+        return Instant.now().getEpochSecond() < configExpires;
     }
 
     /**
      * Connect to the server
      *
-     * @throws IOException
-     *         On connect error
+     * @throws IOException On connect error
      * @since 1.0.0
      */
     public void connect() throws IOException {
@@ -355,7 +294,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+            MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
 
             reconnectAttempts = 0;
         } catch (SQLException e) {
@@ -366,23 +305,22 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     @Override
     public void load(boolean save) throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         try {
             if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
+                    throw new MaximumReconnectsException();
                 }
 
                 this.connect();
@@ -394,7 +332,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         ParsedObject object = this.processor.toElement(this.config).asObject();
 
         try {
-            ResultSet result = this.query("SELECT path,value FROM " + this.table);
+            ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table);
 
             while (result.next()) {
                 PathResolver.update(object, result.getString("path"), result.getString("value"), true);
@@ -403,7 +341,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             result.getStatement().close();
             result.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
 
         this.config = this.processor.toObject(object, this.clazz);
@@ -417,21 +355,20 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * Save the config to the server
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 1.0.0
      */
     @Override
     public void save() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         try {
             if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
+                    throw new MaximumReconnectsException();
                 }
 
                 this.connect();
@@ -442,7 +379,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
         ParsedObject currentObject = ParsedObject.create();
         try {
-            ResultSet result = this.query("SELECT path,value FROM " + this.table);
+            ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table);
 
             while (result.next()) {
                 currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
@@ -457,7 +394,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         ParsedObject object = this.processor.toElement(this.config).asObject();
         List<String> keys = PathResolver.getKeys(object, false);
 
-        List<String> queryArgs = new ArrayList<String>();
+        List<String> queryArgs = new ArrayList<>();
         for (String key : keys) {
             Object value = PathResolver.resolve(object, key, false);
 
@@ -473,11 +410,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
         try {
             if (queryArgs.size() > 0) {
-                this.executeBatch("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+                MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
             }
 
             if (currentObject.getKeys().size() > 0) {
-                this.executeBatch("DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
+                MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
             }
         } catch (SQLException e) {
             throw new IOException(e);
@@ -485,93 +422,15 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * Execute a mysql statement
-     *
-     * @param query
-     *        The base query
-     * @param args
-     *        Extra args
-     * @return If the statement was successful
-     * @throws SQLException
-     *         On sql error
-     * @since 1.0.0
-     */
-    protected boolean execute(String query, String... args) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-        for (int i = 0; i < args.length; i++) {
-            statement.setString(i + 1, args[i]);
-        }
-
-        boolean result = statement.execute();
-        statement.close();
-
-        return result;
-    }
-
-    /**
-     * Execute a mysql statement
-     *
-     * @param query
-     *        The base query
-     * @param argsSize
-     *        The number of arguments per statement
-     * @param args
-     *        Extra args
-     * @return If the statement was successful
-     * @throws SQLException
-     *         On sql error
-     * @since 1.0.0
-     */
-    protected boolean executeBatch(String query, int argsSize, List<String> args) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-        for (int i = 0; i < args.size(); i++) {
-            statement.setString((i % argsSize) + 1, args.get(i));
-
-            if ((i + 1) % argsSize == 0) {
-                statement.addBatch();
-            }
-        }
-
-        statement.executeBatch();
-        statement.close();
-
-        return true;
-    }
-
-    /**
-     * Execute a mysql query
-     *
-     * @param query
-     *        The base query
-     * @param args
-     *        Extra args
-     * @return The result of the query
-     * @throws SQLException
-     *         On sql error
-     * @since 1.0.0
-     */
-    protected ResultSet query(String query, String... args) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-        for (int i = 0; i < args.length; i++) {
-            statement.setString(i + 1, args[i]);
-        }
-
-        ResultSet results = statement.executeQuery();
-
-        return results;
-    }
-
-    /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 1.0.0
      */
     @Override
     public void close() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         this.closed = true;
@@ -587,6 +446,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 1.0.0
      */
     public boolean isClosed() {

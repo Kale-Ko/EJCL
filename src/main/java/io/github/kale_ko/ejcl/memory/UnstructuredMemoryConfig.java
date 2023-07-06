@@ -1,7 +1,7 @@
 package io.github.kale_ko.ejcl.memory;
 
-import java.io.IOException;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
+import java.io.IOException;
 
 /**
  * A Memory Config for storing data in memory
@@ -15,12 +15,14 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMemoryConfig() {}
+    public UnstructuredMemoryConfig() {
+    }
 
     /**
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 1.0.0
      */
     @Override
@@ -31,30 +33,29 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     @Override
-    public void load(boolean save) throws IOException {}
+    public void load(boolean save) throws IOException {
+    }
 
     /**
      * Save the config to memory
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 1.0.0
      */
     @Override
-    public void save() throws IOException {}
+    public void save() throws IOException {
+    }
 
     /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 1.0.0
      */
     @Override
@@ -66,6 +67,7 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 1.0.0
      */
     public boolean isClosed() {

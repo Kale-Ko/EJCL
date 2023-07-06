@@ -1,13 +1,14 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import java.io.File;
-import java.io.IOException;
 import io.github.kale_ko.bjsl.parsers.Parser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * A Element File Config for storing ParsedObjects in a File
+ * An Element File Config for storing ParsedObjects in a File
  *
  * @version 2.0.0
  * @since 2.0.0
@@ -23,12 +24,10 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * Create a new ElementFileConfig
      *
-     * @param file
-     *        The file where data is being stored
-     * @param parser
-     *        The parser/processor to use for parsing and serialization
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param file      The file where data is being stored
+     * @param parser    The parser/processor to use for parsing and serialization
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 2.0.0
      */
     public ElementFileConfig(File file, Parser<?, ?> parser, ObjectProcessor processor) {
@@ -44,10 +43,9 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * Create a new ElementFileConfig
      *
-     * @param file
-     *        The file where data is being stored
-     * @param parser
-     *        The parser/processor to use for parsing and serialization
+     * @param file   The file where data is being stored
+     * @param parser The parser/processor to use for parsing and serialization
+     *
      * @since 2.0.0
      */
     public ElementFileConfig(File file, Parser<?, ?> parser) {
@@ -57,15 +55,15 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * Create a blank config file
      *
-     * @throws IOException
-     *         On create error
      * @return The config bytes
+     *
+     * @throws IOException On create error
      * @since 1.0.0
      */
     @Override
     public byte[] create() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         return this.parser.emptyBytes();
@@ -74,16 +72,15 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     @Override
     public void load(boolean save) throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         this.config = this.parser.toElement(this.loadRaw()).asObject();
@@ -96,9 +93,9 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     /**
      * Save the config to bytes
      *
-     * @throws IOException
-     *         On save error
      * @return The config bytes
+     *
+     * @throws IOException On save error
      * @since 1.0.0
      */
     @Override
