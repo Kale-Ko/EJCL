@@ -1,5 +1,7 @@
 package io.github.kale_ko.ejcl;
 
+import io.github.kale_ko.bjsl.parsers.exception.InvalidTypeException;
+import io.github.kale_ko.ejcl.exception.ConfigLoadException;
 import java.io.IOException;
 
 /**
@@ -7,8 +9,8 @@ import java.io.IOException;
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @param <T>
- *        The type of the data being stored
+ * @param <T> The type of the data being stored
+ *
  * @version 3.0.0
  * @since 1.0.0
  */
@@ -30,8 +32,8 @@ public abstract class StructuredConfig<T> {
     /**
      * Create a new Config
      *
-     * @param clazz
-     *        The class of the data being stored
+     * @param clazz The class of the data being stored
+     *
      * @since 2.0.0
      */
     protected StructuredConfig(Class<T> clazz) {
@@ -40,7 +42,7 @@ public abstract class StructuredConfig<T> {
         }
 
         if (clazz.isArray() || clazz.isInterface() || clazz.isEnum()) {
-            throw new RuntimeException("clazz must be an object");
+            throw new InvalidTypeException(clazz);
         }
 
         this.clazz = clazz;
@@ -50,6 +52,7 @@ public abstract class StructuredConfig<T> {
      * Get the data being stored
      *
      * @return The data being stored
+     *
      * @since 1.0.0
      */
     public T get() {
@@ -57,7 +60,7 @@ public abstract class StructuredConfig<T> {
             try {
                 this.load();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new ConfigLoadException(e);
             }
         }
 
@@ -67,8 +70,8 @@ public abstract class StructuredConfig<T> {
     /**
      * Set the data being stored
      *
-     * @param value
-     *        The data to be stored
+     * @param value The data to be stored
+     *
      * @since 1.0.0
      */
     public void set(T value) {
@@ -83,6 +86,7 @@ public abstract class StructuredConfig<T> {
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 1.0.0
      */
     public abstract boolean getLoaded();
@@ -90,8 +94,7 @@ public abstract class StructuredConfig<T> {
     /**
      * Load the config
      *
-     * @throws IOException
-     *         On load error
+     * @throws IOException On load error
      * @since 1.0.0
      */
     public void load() throws IOException {
@@ -101,10 +104,9 @@ public abstract class StructuredConfig<T> {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     public abstract void load(boolean save) throws IOException;
@@ -112,8 +114,7 @@ public abstract class StructuredConfig<T> {
     /**
      * Save the config
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 1.0.0
      */
     public abstract void save() throws IOException;
@@ -121,8 +122,7 @@ public abstract class StructuredConfig<T> {
     /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 1.0.0
      */
     public abstract void close() throws IOException;
@@ -131,6 +131,7 @@ public abstract class StructuredConfig<T> {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 1.0.0
      */
     public abstract boolean isClosed();
