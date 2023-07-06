@@ -1,14 +1,17 @@
 package io.github.kale_ko.ejcl.mysql;
 
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
+import io.github.kale_ko.ejcl.UnstructuredConfig;
+import io.github.kale_ko.ejcl.exception.ConfigClosedException;
+import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
+import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
+import io.github.kale_ko.ejcl.mysql.driver.MySQL;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.ejcl.UnstructuredConfig;
 
 /**
  * A MySQL Config for storing data on a MySQL server
@@ -83,20 +86,14 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Create a new MySQLConfig
      *
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param host      The host of the server
+     * @param port      The port of the server
+     * @param database  The database on the server
+     * @param table     The table of the database
+     * @param username  The username to the server
+     * @param password  The password to the server
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 3.0.0
      */
     public UnstructuredMySQLConfig(String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
@@ -125,18 +122,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Create a new MySQLConfig
      *
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param username
-     *        The username to the server
-     * @param password
-     *        The password to the server
+     * @param host     The host of the server
+     * @param port     The port of the server
+     * @param database The database on the server
+     * @param table    The table of the database
+     * @param username The username to the server
+     * @param password The password to the server
+     *
      * @since 3.0.0
      */
     public UnstructuredMySQLConfig(String host, int port, String database, String table, String username, String password) {
@@ -146,16 +138,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Create a new MySQLConfig
      *
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
-     * @param processor
-     *        The ObjectProcessor to use for serialization/deserialization
+     * @param host      The host of the server
+     * @param port      The port of the server
+     * @param database  The database on the server
+     * @param table     The table of the database
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
      * @since 3.0.0
      */
     public UnstructuredMySQLConfig(String host, int port, String database, String table, ObjectProcessor processor) {
@@ -165,14 +153,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Create a new MySQLConfig
      *
-     * @param host
-     *        The host of the server
-     * @param port
-     *        The port of the server
-     * @param database
-     *        The database on the server
-     * @param table
-     *        The table of the database
+     * @param host     The host of the server
+     * @param port     The port of the server
+     * @param database The database on the server
+     * @param table    The table of the database
+     *
      * @since 3.0.0
      */
     public UnstructuredMySQLConfig(String host, int port, String database, String table) {
@@ -182,36 +167,30 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Get a path being stored
      *
-     * @param path
-     *        The path to get
+     * @param path The path to get
+     *
      * @return The value being stored
+     *
      * @since 3.0.0
      */
     @Override
     public Object get(String path) {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         try {
             if (this.connection == null || !this.connection.isValid(3)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
+                    throw new MaximumReconnectsException();
                 }
 
                 this.connect();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
-        Object value = null;
-
-        try {
-            ResultSet result = this.query("SELECT path,value FROM " + this.table + " WHERE path=?", path);
+            Object value = null;
+            ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table + " WHERE path=?", path);
 
             while (result.next()) {
                 value = result.getString("value");
@@ -219,47 +198,40 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
 
             result.getStatement().close();
             result.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        }
 
-        return value;
+            return value;
+        } catch (IOException | SQLException e) {
+            throw new MySQLException(e);
+        }
     }
 
     /**
      * Set a path being stored
      *
-     * @param path
-     *        The path to set
-     * @param value
-     *        The value to set
+     * @param path  The path to set
+     * @param value The value to set
+     *
      * @since 3.0.0
      */
     @Override
     public void set(String path, Object value) {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         try {
             if (this.connection == null || !this.connection.isValid(3)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
-                    throw new RuntimeException("Maximum reconnects reached");
+                    throw new MaximumReconnectsException();
                 }
 
                 this.connect();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
-        try {
-            this.execute("REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
-        } catch (SQLException e) {
-            throw new RuntimeException(new IOException(e));
+            MySQL.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+        } catch (IOException | SQLException e) {
+            throw new MySQLException(e);
         }
     }
 
@@ -267,6 +239,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * Get if the config is loaded
      *
      * @return If the config is loaded
+     *
      * @since 3.0.0
      */
     @Override
@@ -277,8 +250,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Connect to the server
      *
-     * @throws IOException
-     *         On connect error
+     * @throws IOException On connect error
      * @since 3.0.0
      */
     public void connect() throws IOException {
@@ -306,7 +278,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
             }
 
-            this.execute("CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+            MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
 
             reconnectAttempts = 0;
         } catch (SQLException e) {
@@ -317,83 +289,35 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Load the config
      *
-     * @param save
-     *        Weather to save the config after loaded (To update the template)
-     * @throws IOException
-     *         On load error
+     * @param save Weather to save the config after loaded (To update the template)
+     *
+     * @throws IOException On load error
      * @since 1.3.0
      */
     @Override
-    public void load(boolean save) throws IOException {}
+    public void load(boolean save) throws IOException {
+    }
 
     /**
      * Save the config to the server
      *
-     * @throws IOException
-     *         On save error
+     * @throws IOException On save error
      * @since 3.0.0
      */
     @Override
-    public void save() throws IOException {}
-
-    /**
-     * Execute a mysql statement
-     *
-     * @param query
-     *        The base query
-     * @param args
-     *        Extra args
-     * @return If the statement was successful
-     * @throws SQLException
-     *         On sql error
-     * @since 1.0.0
-     */
-    protected boolean execute(String query, String... args) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-        for (int i = 0; i < args.length; i++) {
-            statement.setString(i + 1, args[i]);
-        }
-
-        boolean result = statement.execute();
-        statement.close();
-
-        return result;
-    }
-
-    /**
-     * Execute a mysql query
-     *
-     * @param query
-     *        The base query
-     * @param args
-     *        Extra args
-     * @return The result of the query
-     * @throws SQLException
-     *         On sql error
-     * @since 1.0.0
-     */
-    protected ResultSet query(String query, String... args) throws SQLException {
-        PreparedStatement statement = this.connection.prepareStatement(query);
-        for (int i = 0; i < args.length; i++) {
-            statement.setString(i + 1, args[i]);
-        }
-
-        ResultSet results = statement.executeQuery();
-
-        return results;
+    public void save() throws IOException {
     }
 
     /**
      * Close the config
      *
-     * @throws IOException
-     *         On close error
+     * @throws IOException On close error
      * @since 3.0.0
      */
     @Override
     public void close() throws IOException {
         if (this.closed) {
-            throw new RuntimeException("Config is already closed");
+            throw new ConfigClosedException();
         }
 
         this.closed = true;
@@ -409,6 +333,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * Get if the config is closed
      *
      * @return If the config is closed
+     *
      * @since 3.0.0
      */
     public boolean isClosed() {
