@@ -19,7 +19,7 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected ObjectProcessor processor;
+    protected final ObjectProcessor processor;
 
     /**
      * The data being stored

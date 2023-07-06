@@ -1,7 +1,18 @@
 package io.github.kale_ko.ejcl.exception;
 
+/**
+ * Thrown when an exception occurs during initializing a config
+ *
+ * @version 3.4.0
+ * @since 3.4.0
+ */
 public class ConfigInitializationException extends RuntimeException {
-    public ConfigInitializationException(Class<?> clazz) {
-        super("Could not instantiate new config of type \"" + clazz.getSimpleName() + "\"");
+    /**
+     * Create a new ConfigInitializationException
+     *
+     * @param type The type that was unable to be initialized
+     */
+    public ConfigInitializationException(Class<?> type) {
+        super("Could not instantiate new config of type \"" + type.getSimpleName() + "\"");
     }
 }
