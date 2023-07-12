@@ -3,12 +3,8 @@ plugins {
     id "maven-publish"
 }
 
-sourceCompatibility = JavaVersion.toVersion(project.java_version)
-targetCompatibility = JavaVersion.toVersion(project.java_version)
-
-archivesBaseName = "ejcl"
-group = "io.github.kale_ko"
-version = project.project_version
+project.group = "io.github.kale_ko.ejcl"
+project.version = project.project_version
 
 repositories {
     mavenCentral()
@@ -24,21 +20,19 @@ dependencies {
 }
 
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version)
+    }
+
     withSourcesJar()
     withJavadocJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = JavaVersion.toVersion(project.java_version)
-    targetCompatibility = JavaVersion.toVersion(project.java_version)
-
     options.encoding = "UTF-8"
 }
 
 jar {
-    sourceCompatibility = JavaVersion.toVersion(project.java_version)
-    targetCompatibility = JavaVersion.toVersion(project.java_version)
-
     manifest {
         attributes "Name": "io/github/kale_ko/ejcl/",
                 "Specification-Title": "EJCL",
@@ -52,9 +46,6 @@ jar {
 }
 
 tasks.register("fatJar", Jar) {
-    sourceCompatibility = JavaVersion.toVersion(project.java_version)
-    targetCompatibility = JavaVersion.toVersion(project.java_version)
-
     archiveClassifier = "fat"
     manifest {
         attributes "Name": "io/github/kale_ko/ejcl/",
@@ -108,7 +99,6 @@ publishing {
     publications {
         ghp(MavenPublication) {
             groupId = project.group
-            artifactId = project.archivesBaseName
             version = project.version
 
             artifact tasks.jar
