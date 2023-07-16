@@ -20,7 +20,7 @@ public abstract class StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected Class<T> clazz;
+    protected final Class<T> clazz;
 
     /**
      * The data being stored
@@ -49,7 +49,7 @@ public abstract class StructuredConfig<T> {
     }
 
     /**
-     * Get the data being stored
+     * Get the data being store and loads it if necessary
      *
      * @return The data being stored
      *
@@ -64,6 +64,17 @@ public abstract class StructuredConfig<T> {
             }
         }
 
+        return this.config;
+    }
+
+    /**
+     * Get the data being stored
+     *
+     * @return The data being stored or null
+     *
+     * @since 3.5.0
+     */
+    public T getCached() {
         return this.config;
     }
 

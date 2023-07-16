@@ -21,14 +21,14 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    protected Parser<?, ?> parser;
+    protected final Parser<?, ?> parser;
 
     /**
      * The ObjectProcessor to use for serialization/deserialization
      *
      * @since 3.0.0
      */
-    protected ObjectProcessor processor;
+    protected final ObjectProcessor processor;
 
     /**
      * Create a new BJSLConfig

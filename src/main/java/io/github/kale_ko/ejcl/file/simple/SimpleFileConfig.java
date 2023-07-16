@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * A Simple File Config for storing ParsedObjects in a File
+ * A Simple File Config for storing key/value pairs in a File
  *
  * @version 2.0.0
  * @since 2.0.0
@@ -98,7 +98,9 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
         StringBuilder data = new StringBuilder();
 
         for (Map.Entry<String, ParsedElement> entry : this.config.getEntries()) {
-            data.append(entry.getKey()).append("=").append(entry.getValue().asPrimitive().toString());
+            if (entry.getValue().isPrimitive()) {
+                data.append(entry.getKey()).append("=").append(entry.getValue().asPrimitive().get().toString());
+            }
         }
 
         return data.toString().getBytes(StandardCharsets.UTF_8);
