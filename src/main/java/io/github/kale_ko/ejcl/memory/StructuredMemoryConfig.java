@@ -83,6 +83,6 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
      * @since 1.0.0
      */
     public boolean isClosed() {
-        return false;
+        return this.config == null;
     }
 }
