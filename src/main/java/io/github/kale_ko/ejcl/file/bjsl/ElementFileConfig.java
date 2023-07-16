@@ -19,7 +19,7 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    protected Parser<?, ?> parser;
+    protected final Parser<?, ?> parser;
 
     /**
      * Create a new ElementFileConfig

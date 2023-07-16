@@ -71,6 +71,6 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      * @since 1.0.0
      */
     public boolean isClosed() {
-        return false;
+        return this.config == null;
     }
 }

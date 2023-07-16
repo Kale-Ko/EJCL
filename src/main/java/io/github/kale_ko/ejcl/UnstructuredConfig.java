@@ -51,7 +51,7 @@ public abstract class UnstructuredConfig {
     }
 
     /**
-     * Get a path being stored
+     * Get a path being stored and load it if necessary
      *
      * @param path The path to get
      *
@@ -73,6 +73,27 @@ public abstract class UnstructuredConfig {
         }
 
         return PathResolver.resolve(this.config, path);
+    }
+
+    /**
+     * Get a path being stored
+     *
+     * @param path The path to get
+     *
+     * @return The value being stored or null
+     *
+     * @since 3.5.0
+     */
+    public Object getCached(String path) {
+        if (path == null) {
+            throw new NullPointerException("Path can not be null");
+        }
+
+        if (this.config != null) {
+            return PathResolver.resolve(this.config, path);
+        } else {
+            return null;
+        }
     }
 
     /**
