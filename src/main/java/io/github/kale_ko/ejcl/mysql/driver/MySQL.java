@@ -23,18 +23,36 @@ public class MySQL {
      * @param query      The base query to send
      * @param args       Extra args to replace into the query
      *
-     * @return If the statement was successful
-     *
      * @throws java.sql.SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static boolean execute(Connection connection, String query, String... args) throws SQLException {
+    public static void execute(Connection connection, String query, String... args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.length; i++) {
                 statement.setString(i + 1, args[i]);
             }
 
-            return statement.execute();
+            statement.execute();
+        }
+    }
+
+    /**
+     * Execute a mysql statement
+     *
+     * @param connection The connection to execute on
+     * @param query      The base query to send
+     * @param args       Extra args to replace into the query
+     *
+     * @throws java.sql.SQLException When an SQLException is throw by the driver
+     * @since 3.4.0
+     */
+    public static void execute(Connection connection, String query, List<String> args) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (int i = 0; i < args.size(); i++) {
+                statement.setString(i + 1, args.get(i));
+            }
+
+            statement.execute();
         }
     }
 
@@ -44,14 +62,37 @@ public class MySQL {
      * @param connection The connection to execute on
      * @param query      The base query to send
      * @param argsSize   The number of argument to replace into the queries per statement
-     * @param args       Extra args
-     *
-     * @return If the statement was successful
+     * @param args       Extra args to replace into the query
      *
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static boolean executeBatch(Connection connection, String query, int argsSize, List<String> args) throws SQLException {
+    public static void executeBatch(Connection connection, String query, int argsSize, String... args) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (int i = 0; i < args.length; i++) {
+                statement.setString((i % argsSize) + 1, args[i]);
+
+                if ((i + 1) % argsSize == 0) {
+                    statement.addBatch();
+                }
+            }
+
+            statement.executeBatch();
+        }
+    }
+
+    /**
+     * Execute a mysql statement
+     *
+     * @param connection The connection to execute on
+     * @param query      The base query to send
+     * @param argsSize   The number of argument to replace into the queries per statement
+     * @param args       Extra args to replace into the query
+     *
+     * @throws SQLException When an SQLException is throw by the driver
+     * @since 3.4.0
+     */
+    public static void executeBatch(Connection connection, String query, int argsSize, List<String> args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.size(); i++) {
                 statement.setString((i % argsSize) + 1, args.get(i));
@@ -62,7 +103,6 @@ public class MySQL {
             }
 
             statement.executeBatch();
-            return true;
         }
     }
 
