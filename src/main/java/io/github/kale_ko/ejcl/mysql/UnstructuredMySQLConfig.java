@@ -180,7 +180,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(3)) {
+            if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
@@ -190,7 +190,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             }
 
             Object value = null;
-            ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table + " WHERE path=?", path);
+            ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
             while (result.next()) {
                 value = result.getString("value");
@@ -201,6 +201,39 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
 
             return value;
         } catch (IOException | SQLException e) {
+            throw new MySQLException(e);
+        }
+    }
+
+    /**
+     * Get a path being stored
+     * <p>
+     * This method <b>will not</b> check if the connection is open before attempting to query the database
+     *
+     * @param path The path to get
+     *
+     * @return The value being stored
+     *
+     * @since 3.5.0
+     */
+    public Object fastGet(String path) {
+        if (this.closed) {
+            throw new ConfigClosedException();
+        }
+
+        try {
+            Object value = null;
+            ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
+
+            while (result.next()) {
+                value = result.getString("value");
+            }
+
+            result.getStatement().close();
+            result.close();
+
+            return value;
+        } catch (SQLException e) {
             throw new MySQLException(e);
         }
     }
@@ -220,7 +253,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(3)) {
+            if (this.connection == null || !this.connection.isValid(2)) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
@@ -236,6 +269,28 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     }
 
     /**
+     * Set a path being stored
+     * <p>
+     * This method <b>will not</b> check if the connection is open before attempting to query the database
+     *
+     * @param path  The path to set
+     * @param value The value to set
+     *
+     * @since 3.5.0
+     */
+    public void fastSet(String path, Object value) {
+        if (this.closed) {
+            throw new ConfigClosedException();
+        }
+
+        try {
+            MySQL.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+        } catch (SQLException e) {
+            throw new MySQLException(e);
+        }
+    }
+
+    /**
      * Get if the config is loaded
      *
      * @return If the config is loaded
@@ -245,6 +300,21 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     @Override
     public boolean getLoaded() {
         return true;
+    }
+
+    /**
+     * Get if the driver is connected
+     *
+     * @return If the driver is connected
+     *
+     * @since 3.5.0
+     */
+    public boolean getConnected() {
+        try {
+            return this.connection != null && this.connection.isValid(2);
+        } catch (SQLException e) {
+            throw new MySQLException(e);
+        }
     }
 
     /**
