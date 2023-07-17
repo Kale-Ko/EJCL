@@ -9,6 +9,7 @@ import io.github.kale_ko.ejcl.StructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
 import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
+import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
 import io.github.kale_ko.ejcl.mysql.driver.MySQL;
 import java.io.IOException;
 import java.sql.Connection;
@@ -178,7 +179,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @since 2.0.0
      */
     public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
-        this(clazz, host, port, database, table, username, password, processor, 5L);
+        this(clazz, host, port, database, table, username, password, processor, 1L);
     }
 
     /**
@@ -261,6 +262,21 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         return Instant.now().getEpochSecond() < configExpires;
+    }
+
+    /**
+     * Get if the driver is connected
+     *
+     * @return If the driver is connected
+     *
+     * @since 3.5.0
+     */
+    public boolean getConnected() {
+        try {
+            return this.connection != null && this.connection.isValid(2);
+        } catch (SQLException e) {
+            throw new MySQLException(e);
+        }
     }
 
     /**
@@ -409,11 +425,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         try {
-            if (queryArgs.size() > 0) {
+            if (!queryArgs.isEmpty()) {
                 MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
             }
 
-            if (currentObject.getKeys().size() > 0) {
+            if (!currentObject.getKeys().isEmpty()) {
                 MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
             }
         } catch (SQLException e) {
