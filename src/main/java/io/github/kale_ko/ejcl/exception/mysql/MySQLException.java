@@ -1,5 +1,7 @@
 package io.github.kale_ko.ejcl.exception.mysql;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Thrown when an exception occurs in a MySQL connection
  *
@@ -12,7 +14,7 @@ public class MySQLException extends RuntimeException {
      *
      * @param cause The cause of the exception
      */
-    public MySQLException(Exception cause) {
+    public MySQLException(@NotNull Exception cause) {
         super("Error executing a MySQL statement:", cause);
     }
 }

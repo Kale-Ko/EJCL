@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.CsvParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A CSV File Config for storing CSV data in a File
@@ -23,7 +24,7 @@ public class CsvFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public CsvFileConfig(Class<T> clazz, File file, CsvParser parser, ObjectProcessor processor) {
+    public CsvFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull CsvParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class CsvFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public CsvFileConfig(Class<T> clazz, File file, CsvParser parser) {
+    public CsvFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull CsvParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class CsvFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 1.0.0
      */
-    public CsvFileConfig(Class<T> clazz, File file) {
+    public CsvFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new CsvParser.Builder().build());
     }
 }

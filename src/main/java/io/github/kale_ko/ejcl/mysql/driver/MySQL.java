@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A utility class for executing MySQL statements and queries
@@ -26,7 +27,7 @@ public class MySQL {
      * @throws java.sql.SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static void execute(Connection connection, String query, String... args) throws SQLException {
+    public static void execute(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.length; i++) {
                 statement.setString(i + 1, args[i]);
@@ -46,7 +47,7 @@ public class MySQL {
      * @throws java.sql.SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static void execute(Connection connection, String query, List<String> args) throws SQLException {
+    public static void execute(@NotNull Connection connection, @NotNull String query, @NotNull List<String> args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.size(); i++) {
                 statement.setString(i + 1, args.get(i));
@@ -67,7 +68,7 @@ public class MySQL {
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static void executeBatch(Connection connection, String query, int argsSize, String... args) throws SQLException {
+    public static void executeBatch(@NotNull Connection connection, @NotNull String query, int argsSize, String @NotNull ... args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.length; i++) {
                 statement.setString((i % argsSize) + 1, args[i]);
@@ -92,7 +93,7 @@ public class MySQL {
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static void executeBatch(Connection connection, String query, int argsSize, List<String> args) throws SQLException {
+    public static void executeBatch(@NotNull Connection connection, @NotNull String query, int argsSize, @NotNull List<String> args) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (int i = 0; i < args.size(); i++) {
                 statement.setString((i % argsSize) + 1, args.get(i));
@@ -120,7 +121,7 @@ public class MySQL {
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static ResultSet query(Connection connection, String query, String... args) throws SQLException {
+    public static ResultSet query(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query);
         for (int i = 0; i < args.length; i++) {
             statement.setString(i + 1, args[i]);
@@ -143,7 +144,7 @@ public class MySQL {
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static ResultSet queryStream(Connection connection, String query, String... args) throws SQLException {
+    public static ResultSet queryStream(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
         statement.setFetchSize(Integer.MIN_VALUE);
         for (int i = 0; i < args.length; i++) {

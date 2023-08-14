@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.YamlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A YAML File Config for storing YAML data in a File
@@ -23,7 +24,7 @@ public class YamlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public YamlFileConfig(Class<T> clazz, File file, YamlParser parser, ObjectProcessor processor) {
+    public YamlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull YamlParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class YamlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public YamlFileConfig(Class<T> clazz, File file, YamlParser parser) {
+    public YamlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull YamlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class YamlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 1.0.0
      */
-    public YamlFileConfig(Class<T> clazz, File file) {
+    public YamlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new YamlParser.Builder().build());
     }
 }
