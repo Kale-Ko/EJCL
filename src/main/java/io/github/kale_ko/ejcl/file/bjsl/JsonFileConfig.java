@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.JsonParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A JSON File Config for storing JSON data in a File
@@ -23,7 +24,7 @@ public class JsonFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public JsonFileConfig(Class<T> clazz, File file, JsonParser parser, ObjectProcessor processor) {
+    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class JsonFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public JsonFileConfig(Class<T> clazz, File file, JsonParser parser) {
+    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class JsonFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 1.0.0
      */
-    public JsonFileConfig(Class<T> clazz, File file) {
+    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new JsonParser.Builder().setPrettyPrint(true).build());
     }
 }

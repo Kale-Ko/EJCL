@@ -1,5 +1,7 @@
 package io.github.kale_ko.ejcl.exception;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Thrown when an exception occurs during loading a config
  *
@@ -12,7 +14,7 @@ public class ConfigLoadException extends RuntimeException {
      *
      * @param cause The cause of the exception
      */
-    public ConfigLoadException(Exception cause) {
+    public ConfigLoadException(@NotNull Exception cause) {
         super("Failed to load config:", cause);
     }
 }

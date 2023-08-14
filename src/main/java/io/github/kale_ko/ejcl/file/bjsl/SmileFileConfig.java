@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.SmileParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Smile File Config for storing Smile data in a File
@@ -23,7 +24,7 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(Class<T> clazz, File file, SmileParser parser, ObjectProcessor processor) {
+    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull SmileParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(Class<T> clazz, File file, SmileParser parser) {
+    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull SmileParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(Class<T> clazz, File file) {
+    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new SmileParser.Builder().build());
     }
 }

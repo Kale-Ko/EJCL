@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Simple File Config for storing key/value pairs in a File
@@ -26,7 +27,7 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public SimpleFileConfig(File file, ObjectProcessor processor) {
+    public SimpleFileConfig(@NotNull File file, @NotNull ObjectProcessor processor) {
         super(file, processor);
     }
 
@@ -37,7 +38,7 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public SimpleFileConfig(File file) {
+    public SimpleFileConfig(@NotNull File file) {
         this(file, new ObjectProcessor.Builder().build());
     }
 
@@ -50,7 +51,7 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte[] create() throws IOException {
+    public byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -94,7 +95,11 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte[] saveRaw() throws IOException {
+    public byte @NotNull [] saveRaw() throws IOException {
+        if (this.config == null) {
+            return this.create();
+        }
+
         StringBuilder data = new StringBuilder();
 
         for (Map.Entry<String, ParsedElement> entry : this.config.getEntries()) {

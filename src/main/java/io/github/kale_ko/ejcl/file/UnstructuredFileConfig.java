@@ -6,6 +6,7 @@ import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A File Config for storing data in a file
@@ -19,7 +20,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected File file;
+    protected final @NotNull File file;
 
     /**
      * If this config is closed
@@ -36,12 +37,8 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected UnstructuredFileConfig(File file, ObjectProcessor processor) {
+    protected UnstructuredFileConfig(@NotNull File file, @NotNull ObjectProcessor processor) {
         super(processor);
-
-        if (file == null) {
-            throw new NullPointerException("File can not be null");
-        }
 
         this.file = file;
     }
@@ -53,7 +50,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected UnstructuredFileConfig(File file) {
+    protected UnstructuredFileConfig(@NotNull File file) {
         this(file, new ObjectProcessor.Builder().build());
     }
 
@@ -64,7 +61,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public File getFile() {
+    public @NotNull File getFile() {
         return this.file;
     }
 
@@ -88,7 +85,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * @throws IOException On create error
      * @since 3.0.0
      */
-    public abstract byte[] create() throws IOException;
+    public abstract byte @NotNull [] create() throws IOException;
 
     /**
      * Load the config
@@ -109,7 +106,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * @throws IOException On load error
      * @since 3.0.0
      */
-    protected byte[] loadRaw() throws IOException {
+    protected byte @NotNull [] loadRaw() throws IOException {
         if (!Files.exists(this.file.toPath())) {
             Files.createFile(this.file.toPath());
 
@@ -146,7 +143,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      * @throws IOException On save error
      * @since 3.0.0
      */
-    protected abstract byte[] saveRaw() throws IOException;
+    protected abstract byte @NotNull [] saveRaw() throws IOException;
 
     /**
      * Close the config

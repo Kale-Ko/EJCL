@@ -7,6 +7,7 @@ import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A File Config for storing data in a file
@@ -22,7 +23,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected File file;
+    protected final @NotNull File file;
 
     /**
      * If this config is closed
@@ -39,12 +40,9 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected StructuredFileConfig(Class<T> clazz, File file) {
+    protected StructuredFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         super(clazz);
 
-        if (file == null) {
-            throw new NullPointerException("File can not be null");
-        }
         this.file = file;
 
         this.config = InitializationUtil.initializeUnsafe(clazz);
@@ -60,7 +58,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    public File getFile() {
+    public @NotNull File getFile() {
         return this.file;
     }
 
@@ -84,7 +82,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @throws IOException On create error
      * @since 1.0.0
      */
-    public abstract byte[] create() throws IOException;
+    public abstract byte @NotNull [] create() throws IOException;
 
     /**
      * Load the config
@@ -105,7 +103,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @throws IOException On load error
      * @since 1.0.0
      */
-    protected byte[] loadRaw() throws IOException {
+    protected byte @NotNull [] loadRaw() throws IOException {
         if (!Files.exists(this.file.toPath())) {
             Files.createFile(this.file.toPath());
 
@@ -142,7 +140,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @throws IOException On save error
      * @since 1.0.0
      */
-    protected abstract byte[] saveRaw() throws IOException;
+    protected abstract byte @NotNull [] saveRaw() throws IOException;
 
     /**
      * Close the config

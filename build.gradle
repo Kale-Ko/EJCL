@@ -16,6 +16,8 @@ repositories {
 dependencies {
     implementation "com.github.Kale-Ko:BJSL:${project.bjsl_version}"
 
+    compileOnly "org.jetbrains:annotations:24.0.0"
+
     runtimeOnly "com.mysql:mysql-connector-j:${project.mysql_connector_version}"
 }
 

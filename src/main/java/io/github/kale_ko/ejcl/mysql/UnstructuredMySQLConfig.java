@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A MySQL Config for storing data on a MySQL server
@@ -25,49 +27,49 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected String host;
+    protected final @NotNull String host;
 
     /**
      * The port of the server
      *
      * @since 3.0.0
      */
-    protected int port;
+    protected final int port;
 
     /**
      * The database on the server
      *
      * @since 3.0.0
      */
-    protected String database;
+    protected final @NotNull String database;
 
     /**
      * The table of the database
      *
      * @since 3.0.0
      */
-    protected String table;
+    protected final @NotNull String table;
 
     /**
      * The username to the server
      *
      * @since 3.0.0
      */
-    protected String username;
+    protected final @Nullable String username;
 
     /**
      * The password to the server
      *
      * @since 3.0.0
      */
-    protected String password;
+    protected final @Nullable String password;
 
     /**
      * The connection to the server
      *
      * @since 3.0.0
      */
-    protected Connection connection;
+    protected @Nullable Connection connection;
 
     /**
      * How many times we have tried to reconnect
@@ -96,18 +98,8 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMySQLConfig(String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+    public UnstructuredMySQLConfig(@NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor) {
         super(processor);
-
-        if (host == null) {
-            throw new NullPointerException("Host can not be null");
-        }
-        if (database == null) {
-            throw new NullPointerException("Database can not be null");
-        }
-        if (table == null) {
-            throw new NullPointerException("Table can not be null");
-        }
 
         this.host = host;
         this.port = port;
@@ -131,7 +123,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMySQLConfig(String host, int port, String database, String table, String username, String password) {
+    public UnstructuredMySQLConfig(@NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password) {
         this(host, port, database, table, username, password, new ObjectProcessor.Builder().build());
     }
 
@@ -146,7 +138,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMySQLConfig(String host, int port, String database, String table, ObjectProcessor processor) {
+    public UnstructuredMySQLConfig(@NotNull String host, int port, @NotNull String database, @NotNull String table, @NotNull ObjectProcessor processor) {
         this(host, port, database, table, null, null, processor);
     }
 
@@ -160,7 +152,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMySQLConfig(String host, int port, String database, String table) {
+    public UnstructuredMySQLConfig(@NotNull String host, int port, @NotNull String database, @NotNull String table) {
         this(host, port, database, table, null, null, new ObjectProcessor.Builder().build());
     }
 
@@ -174,7 +166,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @since 3.0.0
      */
     @Override
-    public Object get(String path) {
+    public @Nullable Object get(@NotNull String path) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -216,12 +208,16 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.5.0
      */
-    public Object fastGet(String path) {
+    public @Nullable Object fastGet(@NotNull String path) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
 
         try {
+            if (this.connection == null) {
+                return null;
+            }
+
             Object value = null;
             ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
@@ -247,7 +243,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @since 3.0.0
      */
     @Override
-    public void set(String path, Object value) {
+    public void set(@NotNull String path, @Nullable Object value) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -278,9 +274,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.5.0
      */
-    public void fastSet(String path, Object value) {
+    public void fastSet(@NotNull String path, @Nullable Object value) {
         if (this.closed) {
             throw new ConfigClosedException();
+        }
+
+        if (this.connection == null) {
+            return;
         }
 
         try {
@@ -393,7 +393,9 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         this.closed = true;
 
         try {
-            this.connection.close();
+            if (this.connection != null) {
+                this.connection.close();
+            }
         } catch (SQLException e) {
             throw new IOException(e);
         }

@@ -6,6 +6,7 @@ import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.StructuredFileConfig;
 import java.io.File;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A BJSL File Config for storing BJSL data in a File
@@ -21,14 +22,14 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    protected final Parser<?, ?> parser;
+    protected final @NotNull Parser<?, ?> parser;
 
     /**
      * The ObjectProcessor to use for serialization/deserialization
      *
      * @since 3.0.0
      */
-    protected final ObjectProcessor processor;
+    protected final @NotNull ObjectProcessor processor;
 
     /**
      * Create a new BJSLConfig
@@ -40,15 +41,8 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser, ObjectProcessor processor) {
+    public BJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
-
-        if (parser == null) {
-            throw new NullPointerException("Parser can not be null");
-        }
-        if (processor == null) {
-            throw new NullPointerException("Processor can not be null");
-        }
 
         this.parser = parser;
         this.processor = processor;
@@ -63,7 +57,7 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public BJSLFileConfig(Class<T> clazz, File file, Parser<?, ?> parser) {
+    public BJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
         this(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -76,7 +70,7 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      * @since 1.0.0
      */
     @Override
-    public byte[] create() throws IOException {
+    public byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -114,7 +108,11 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      * @since 1.0.0
      */
     @Override
-    public byte[] saveRaw() throws IOException {
+    public byte @NotNull [] saveRaw() throws IOException {
+        if (this.config == null) {
+            return this.create();
+        }
+
         return this.parser.toBytes(this.processor.toElement(this.config));
     }
 }

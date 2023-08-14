@@ -3,6 +3,8 @@ package io.github.kale_ko.ejcl;
 import io.github.kale_ko.bjsl.parsers.exception.InvalidTypeException;
 import io.github.kale_ko.ejcl.exception.ConfigLoadException;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An abstract class that all structured configs extend from
@@ -20,14 +22,14 @@ public abstract class StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected final Class<T> clazz;
+    protected final @NotNull Class<T> clazz;
 
     /**
      * The data being stored
      *
      * @since 1.0.0
      */
-    protected T config = null;
+    protected @Nullable T config = null;
 
     /**
      * Create a new Config
@@ -36,11 +38,7 @@ public abstract class StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    protected StructuredConfig(Class<T> clazz) {
-        if (clazz == null) {
-            throw new NullPointerException("Clazz can not be null");
-        }
-
+    protected StructuredConfig(@NotNull Class<T> clazz) {
         if (clazz.isArray() || clazz.isInterface() || clazz.isEnum()) {
             throw new InvalidTypeException(clazz);
         }
@@ -55,7 +53,7 @@ public abstract class StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    public T get() {
+    public @NotNull T get() {
         if (!this.getLoaded()) {
             try {
                 this.load();
@@ -64,6 +62,7 @@ public abstract class StructuredConfig<T> {
             }
         }
 
+        //noinspection DataFlowIssue
         return this.config;
     }
 
@@ -74,7 +73,7 @@ public abstract class StructuredConfig<T> {
      *
      * @since 3.5.0
      */
-    public T getCached() {
+    public @Nullable T getCached() {
         return this.config;
     }
 
@@ -85,11 +84,7 @@ public abstract class StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    public void set(T value) {
-        if (value == null) {
-            throw new NullPointerException("Value can not be null");
-        }
-
+    public void set(@NotNull T value) {
         this.config = value;
     }
 

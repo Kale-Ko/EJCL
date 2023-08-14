@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A MySQL Config for storing data on a MySQL server
@@ -35,63 +37,63 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.0.0
      */
-    protected ObjectProcessor processor;
+    protected final @NotNull ObjectProcessor processor;
 
     /**
      * The host of the server
      *
      * @since 1.0.0
      */
-    protected String host;
+    protected final @NotNull String host;
 
     /**
      * The port of the server
      *
      * @since 1.0.0
      */
-    protected int port;
+    protected final int port;
 
     /**
      * The database on the server
      *
      * @since 1.0.0
      */
-    protected String database;
+    protected final @NotNull String database;
 
     /**
      * The table of the database
      *
      * @since 1.0.0
      */
-    protected String table;
+    protected final @NotNull String table;
 
     /**
      * The username to the server
      *
      * @since 1.0.0
      */
-    protected String username;
+    protected final @Nullable String username;
 
     /**
      * The password to the server
      *
      * @since 1.0.0
      */
-    protected String password;
+    protected final @Nullable String password;
 
     /**
      * The connection to the server
      *
      * @since 1.0.0
      */
-    protected Connection connection;
+    protected @Nullable Connection connection;
 
     /**
      * How long to cache the config in memory
      *
      * @since 3.2.0
      */
-    protected long cacheLength;
+    protected final long cacheLength;
 
     /**
      * How many times we have tried to reconnect
@@ -129,21 +131,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor, long cacheLength) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor, long cacheLength) {
         super(clazz);
-
-        if (processor == null) {
-            throw new NullPointerException("Processor can not be null");
-        }
-        if (host == null) {
-            throw new NullPointerException("Host can not be null");
-        }
-        if (database == null) {
-            throw new NullPointerException("Database can not be null");
-        }
-        if (table == null) {
-            throw new NullPointerException("Table can not be null");
-        }
 
         this.processor = processor;
 
@@ -178,7 +167,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, ObjectProcessor processor) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor) {
         this(clazz, host, port, database, table, username, password, processor, 1L);
     }
 
@@ -195,7 +184,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password) {
         this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build());
     }
 
@@ -213,7 +202,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, String username, String password, long cacheLength) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, long cacheLength) {
         this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build(), cacheLength);
     }
 
@@ -229,7 +218,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table, ObjectProcessor processor) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @NotNull ObjectProcessor processor) {
         this(clazz, host, port, database, table, null, null, processor);
     }
 
@@ -244,7 +233,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredMySQLConfig(Class<T> clazz, String host, int port, String database, String table) {
+    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table) {
         this(clazz, host, port, database, table, null, null, new ObjectProcessor.Builder().build());
     }
 
@@ -452,7 +441,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         this.closed = true;
 
         try {
-            this.connection.close();
+            if (this.connection != null) {
+                this.connection.close();
+            }
         } catch (SQLException e) {
             throw new IOException(e);
         }
