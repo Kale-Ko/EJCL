@@ -6,6 +6,7 @@ import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
 import java.io.File;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An Element File Config for storing ParsedObjects in a File
@@ -19,7 +20,7 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    protected final Parser<?, ?> parser;
+    protected final @NotNull Parser<?, ?> parser;
 
     /**
      * Create a new ElementFileConfig
@@ -30,12 +31,8 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public ElementFileConfig(File file, Parser<?, ?> parser, ObjectProcessor processor) {
+    public ElementFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(file, processor);
-
-        if (parser == null) {
-            throw new NullPointerException("Parser can not be null");
-        }
 
         this.parser = parser;
     }
@@ -48,7 +45,7 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public ElementFileConfig(File file, Parser<?, ?> parser) {
+    public ElementFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser) {
         this(file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -61,7 +58,7 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte[] create() throws IOException {
+    public byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -99,7 +96,11 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte[] saveRaw() throws IOException {
+    public byte @NotNull [] saveRaw() throws IOException {
+        if (this.config == null) {
+            return this.create();
+        }
+
         return this.parser.toBytes(this.config);
     }
 }

@@ -7,6 +7,8 @@ import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Contains methods useful for getting/setting nested values
@@ -28,7 +30,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static Object resolve(ParsedElement element, String path) {
+    public static @Nullable Object resolve(ParsedElement element, String path) {
         return resolve(element, path, true);
     }
 
@@ -43,7 +45,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
+    public static @Nullable Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -108,7 +110,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static ParsedElement resolveElement(ParsedElement element, String path) {
+    public static @Nullable ParsedElement resolveElement(ParsedElement element, String path) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -180,7 +182,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
+    public static @Nullable ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -311,7 +313,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
+    public static @Nullable ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -404,7 +406,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static List<String> getKeys(ParsedElement element) {
+    public static @NotNull List<String> getKeys(@NotNull ParsedElement element) {
         return getKeys(element, true);
     }
 
@@ -418,7 +420,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static List<String> getKeys(ParsedElement element, boolean returnObjArrKeys) {
+    public static @NotNull List<String> getKeys(@NotNull ParsedElement element, boolean returnObjArrKeys) {
         return getKeys(element, "", returnObjArrKeys);
     }
 
@@ -433,7 +435,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    protected static List<String> getKeys(ParsedElement element, String path, boolean returnObjArrKeys) {
+    protected static @NotNull List<String> getKeys(@NotNull ParsedElement element, String path, boolean returnObjArrKeys) {
         List<String> keys = new ArrayList<>();
 
         if (element.isObject()) {

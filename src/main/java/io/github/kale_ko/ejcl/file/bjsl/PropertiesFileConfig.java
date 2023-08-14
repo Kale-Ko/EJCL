@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.PropertiesParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Properties File Config for storing Properties data in a File
@@ -23,7 +24,7 @@ public class PropertiesFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public PropertiesFileConfig(Class<T> clazz, File file, PropertiesParser parser, ObjectProcessor processor) {
+    public PropertiesFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull PropertiesParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class PropertiesFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public PropertiesFileConfig(Class<T> clazz, File file, PropertiesParser parser) {
+    public PropertiesFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull PropertiesParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class PropertiesFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public PropertiesFileConfig(Class<T> clazz, File file) {
+    public PropertiesFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new PropertiesParser.Builder().build());
     }
 }
