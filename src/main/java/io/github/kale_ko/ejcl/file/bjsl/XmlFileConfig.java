@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.XmlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A XML File Config for storing XML data in a File
@@ -23,7 +24,7 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public XmlFileConfig(Class<T> clazz, File file, XmlParser parser, ObjectProcessor processor) {
+    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public XmlFileConfig(Class<T> clazz, File file, XmlParser parser) {
+    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public XmlFileConfig(Class<T> clazz, File file) {
+    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new XmlParser.Builder().setPrettyPrint(true).build());
     }
 }

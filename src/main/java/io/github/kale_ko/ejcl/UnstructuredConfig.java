@@ -4,6 +4,8 @@ import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigLoadException;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An abstract class that all unstructured configs extend from
@@ -19,14 +21,14 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected final ObjectProcessor processor;
+    protected final @NotNull ObjectProcessor processor;
 
     /**
      * The data being stored
      *
      * @since 3.0.0
      */
-    protected ParsedObject config;
+    protected @Nullable ParsedObject config;
 
     /**
      * Create a new Config
@@ -35,7 +37,7 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected UnstructuredConfig(ObjectProcessor processor) {
+    protected UnstructuredConfig(@NotNull ObjectProcessor processor) {
         this.processor = processor;
 
         this.config = ParsedObject.create();
@@ -59,11 +61,7 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public Object get(String path) {
-        if (path == null) {
-            throw new NullPointerException("Path can not be null");
-        }
-
+    public @Nullable Object get(@NotNull String path) {
         if (!this.getLoaded()) {
             try {
                 this.load();
@@ -84,11 +82,7 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.5.0
      */
-    public Object getCached(String path) {
-        if (path == null) {
-            throw new NullPointerException("Path can not be null");
-        }
-
+    public @Nullable Object getCached(@NotNull String path) {
         if (this.config != null) {
             return PathResolver.resolve(this.config, path);
         } else {
@@ -104,15 +98,10 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public void set(String path, Object value) {
-        if (path == null) {
-            throw new NullPointerException("Path can not be null");
+    public void set(@NotNull String path, @NotNull Object value) {
+        if (this.config != null) {
+            PathResolver.update(this.config, path, value, true);
         }
-        if (value == null) {
-            throw new NullPointerException("Value can not be null");
-        }
-
-        PathResolver.update(this.config, path, value, true);
     }
 
     /**

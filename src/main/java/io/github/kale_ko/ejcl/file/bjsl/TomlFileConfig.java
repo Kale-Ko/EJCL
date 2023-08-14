@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file.bjsl;
 import io.github.kale_ko.bjsl.parsers.TomlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A TOML File Config for storing TOML data in a File
@@ -23,7 +24,7 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public TomlFileConfig(Class<T> clazz, File file, TomlParser parser, ObjectProcessor processor) {
+    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull TomlParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
@@ -36,7 +37,7 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public TomlFileConfig(Class<T> clazz, File file, TomlParser parser) {
+    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull TomlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
@@ -48,7 +49,7 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 1.0.0
      */
-    public TomlFileConfig(Class<T> clazz, File file) {
+    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new TomlParser.Builder().build());
     }
 }

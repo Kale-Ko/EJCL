@@ -4,6 +4,7 @@ import io.github.kale_ko.bjsl.processor.reflection.InitializationUtil;
 import io.github.kale_ko.ejcl.StructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Memory Config for storing data in memory
@@ -21,7 +22,7 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
      *
      * @since 2.0.0
      */
-    protected StructuredMemoryConfig(Class<T> clazz) {
+    protected StructuredMemoryConfig(@NotNull Class<T> clazz) {
         super(clazz);
 
         this.config = InitializationUtil.initializeUnsafe(clazz);
