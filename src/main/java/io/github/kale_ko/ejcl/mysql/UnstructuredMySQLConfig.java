@@ -234,6 +234,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
     }
 
+    @Override
+    public @Nullable Object getCached(@NotNull String path) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Set a path being stored
      *
