@@ -30,7 +30,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @Nullable Object resolve(ParsedElement element, String path) {
+    public static @Nullable Object resolve(@NotNull ParsedElement element, @NotNull String path) {
         return resolve(element, path, true);
     }
 
@@ -45,7 +45,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @Nullable Object resolve(ParsedElement element, String path, boolean returnObjArrValues) {
+    public static @Nullable Object resolve(@NotNull ParsedElement element, @NotNull String path, boolean returnObjArrValues) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -110,7 +110,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @Nullable ParsedElement resolveElement(ParsedElement element, String path) {
+    public static @Nullable ParsedElement resolveElement(@NotNull ParsedElement element, @NotNull String path) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -166,7 +166,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static ParsedElement update(ParsedElement element, String path, Object value) {
+    public static @NotNull ParsedElement update(@NotNull ParsedElement element, @NotNull String path, @Nullable Object value) {
         return PathResolver.update(element, path, value, true);
     }
 
@@ -182,7 +182,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @Nullable ParsedElement update(ParsedElement element, String path, Object value, boolean force) {
+    public static @NotNull ParsedElement update(@NotNull ParsedElement element, @NotNull String path, @Nullable Object value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -297,7 +297,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static ParsedElement updateElement(ParsedElement element, String path, ParsedElement value) {
+    public static @NotNull ParsedElement updateElement(@NotNull ParsedElement element, @NotNull String path, @NotNull ParsedElement value) {
         return PathResolver.updateElement(element, path, value, true);
     }
 
@@ -313,7 +313,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @Nullable ParsedElement updateElement(ParsedElement element, String path, ParsedElement value, boolean force) {
+    public static @NotNull ParsedElement updateElement(@NotNull ParsedElement element, @NotNull String path, @NotNull ParsedElement value, boolean force) {
         path = path.replaceAll("\\[([0-9]*)]", ".[$1]");
 
         List<String> keys = new ArrayList<>();
@@ -435,7 +435,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    protected static @NotNull List<String> getKeys(@NotNull ParsedElement element, String path, boolean returnObjArrKeys) {
+    protected static @NotNull List<String> getKeys(@NotNull ParsedElement element, @NotNull String path, boolean returnObjArrKeys) {
         List<String> keys = new ArrayList<>();
 
         if (element.isObject()) {
