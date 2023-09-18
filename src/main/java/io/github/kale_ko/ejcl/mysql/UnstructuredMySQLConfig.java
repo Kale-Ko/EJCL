@@ -339,9 +339,6 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                     properties.put("password", this.password);
                 }
             }
-            properties.put("autoReconnect", true);
-            properties.put("createDatabaseIfNotExist", true);
-            properties.put("allowNanAndInf", true);
 
             this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
 
