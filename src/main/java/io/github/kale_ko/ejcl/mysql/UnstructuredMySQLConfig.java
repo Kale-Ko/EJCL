@@ -79,6 +79,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     protected int reconnectAttempts = 0;
 
     /**
+     * The lock used when saving and loading the config
+     *
+     * @since 3.8.0
+     */
+    protected final Object SAVELOAD_LOCK = new Object();
+
+    /**
      * If this config is closed
      *
      * @since 3.0.0
@@ -167,12 +174,9 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      */
     @Override
     public @Nullable Object get(@NotNull String path) {
-        if (this.closed) {
-            throw new ConfigClosedException();
-        }
 
         try {
-            if (this.connection == null || !this.connection.isValid(2)) {
+            if (!this.getConnected()) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
@@ -181,6 +185,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 this.connect();
             }
 
+            assert this.connection != null;
+        } catch (IOException e) {
+            throw new MySQLException(e);
+        }
+
+        try {
             Object value = null;
             ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
@@ -192,7 +202,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             result.close();
 
             return value;
-        } catch (IOException | SQLException e) {
+        } catch (SQLException e) {
             throw new MySQLException(e);
         }
     }
@@ -213,11 +223,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new ConfigClosedException();
         }
 
-        try {
-            if (this.connection == null) {
-                return null;
-            }
+        if (this.connection == null) {
+            return null;
+        }
 
+        try {
             Object value = null;
             ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
@@ -254,7 +264,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (this.connection == null || !this.connection.isValid(2)) {
+            if (!this.getConnected()) {
                 reconnectAttempts++;
                 if (reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
@@ -263,8 +273,14 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 this.connect();
             }
 
+            assert this.connection != null;
+        } catch (IOException e) {
+            throw new MySQLException(e);
+        }
+
+        try {
             MySQL.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
-        } catch (IOException | SQLException e) {
+        } catch (SQLException e) {
             throw new MySQLException(e);
         }
     }
@@ -329,24 +345,26 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @since 3.0.0
      */
     public void connect() throws IOException {
-        try {
-            Properties properties = new Properties();
-            properties.put("characterEncoding", "utf8");
-            if (this.username != null) {
-                properties.put("user", this.username);
+        synchronized (SAVELOAD_LOCK) {
+            try {
+                Properties properties = new Properties();
+                properties.put("characterEncoding", "utf8");
+                if (this.username != null) {
+                    properties.put("user", this.username);
 
-                if (this.password != null) {
-                    properties.put("password", this.password);
+                    if (this.password != null) {
+                        properties.put("password", this.password);
+                    }
                 }
+
+                this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
+
+                MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+
+                reconnectAttempts = 0;
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
-
-            this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
-
-            MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
-
-            reconnectAttempts = 0;
-        } catch (SQLException e) {
-            throw new IOException(e);
         }
     }
 

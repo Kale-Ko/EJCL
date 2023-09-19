@@ -62,7 +62,7 @@ public abstract class StructuredConfig<T> {
             }
         }
 
-        //noinspection DataFlowIssue
+        assert this.config != null;
         return this.config;
     }
 
