@@ -110,6 +110,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected long configExpires = -1L;
 
     /**
+     * The lock used when saving and loading the config
+     *
+     * @since 3.8.0
+     */
+    protected final Object SAVELOAD_LOCK = new Object();
+
+    /**
      * If this config is closed
      *
      * @since 1.0.0
@@ -275,24 +282,26 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @since 1.0.0
      */
     public void connect() throws IOException {
-        try {
-            Properties properties = new Properties();
-            properties.put("characterEncoding", "utf8");
-            if (this.username != null) {
-                properties.put("user", this.username);
+        synchronized (SAVELOAD_LOCK) {
+            try {
+                Properties properties = new Properties();
+                properties.put("characterEncoding", "utf8");
+                if (this.username != null) {
+                    properties.put("user", this.username);
 
-                if (this.password != null) {
-                    properties.put("password", this.password);
+                    if (this.password != null) {
+                        properties.put("password", this.password);
+                    }
                 }
+
+                this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
+
+                MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+
+                reconnectAttempts = 0;
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
-
-            this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
-
-            MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
-
-            reconnectAttempts = 0;
-        } catch (SQLException e) {
-            throw new IOException(e);
         }
     }
 
@@ -310,39 +319,39 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigClosedException();
         }
 
-        try {
-            if (this.connection == null || !this.connection.isValid(2)) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException();
+        if (!this.getConnected()) {
+            reconnectAttempts++;
+            if (reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
+
+            this.connect();
+        }
+
+        assert this.connection != null;
+
+        synchronized (SAVELOAD_LOCK) {
+            ParsedObject object = this.processor.toElement(this.config).asObject();
+
+            try {
+                ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table);
+
+                while (result.next()) {
+                    PathResolver.update(object, result.getString("path"), result.getString("value"), true);
                 }
 
-                this.connect();
-            }
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
-
-        ParsedObject object = this.processor.toElement(this.config).asObject();
-
-        try {
-            ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table);
-
-            while (result.next()) {
-                PathResolver.update(object, result.getString("path"), result.getString("value"), true);
+                result.getStatement().close();
+                result.close();
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
 
-            result.getStatement().close();
-            result.close();
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
+            this.config = this.processor.toObject(object, this.clazz);
+            this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
 
-        this.config = this.processor.toObject(object, this.clazz);
-        this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
-
-        if (save) {
-            this.save();
+            if (save) {
+                this.save();
+            }
         }
     }
 
@@ -358,60 +367,60 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigClosedException();
         }
 
-        try {
-            if (this.connection == null || !this.connection.isValid(2)) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException();
+        if (!this.getConnected()) {
+            reconnectAttempts++;
+            if (reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
+
+            this.connect();
+        }
+
+        assert this.connection != null;
+
+        synchronized (SAVELOAD_LOCK) {
+            ParsedObject currentObject = ParsedObject.create();
+            try {
+                ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table);
+
+                while (result.next()) {
+                    currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
                 }
 
-                this.connect();
-            }
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
-
-        ParsedObject currentObject = ParsedObject.create();
-        try {
-            ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table);
-
-            while (result.next()) {
-                currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
+                result.getStatement().close();
+                result.close();
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
 
-            result.getStatement().close();
-            result.close();
-        } catch (SQLException e) {
-            throw new IOException(e);
-        }
+            ParsedObject object = this.processor.toElement(this.config).asObject();
+            List<String> keys = PathResolver.getKeys(object, false);
 
-        ParsedObject object = this.processor.toElement(this.config).asObject();
-        List<String> keys = PathResolver.getKeys(object, false);
+            List<String> queryArgs = new ArrayList<>();
+            for (String key : keys) {
+                Object value = PathResolver.resolve(object, key, false);
 
-        List<String> queryArgs = new ArrayList<>();
-        for (String key : keys) {
-            Object value = PathResolver.resolve(object, key, false);
+                if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
+                    queryArgs.add(key);
+                    queryArgs.add(value != null ? value.toString() : "null");
+                }
 
-            if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
-                queryArgs.add(key);
-                queryArgs.add(value != null ? value.toString() : "null");
+                if (currentObject.has(key)) {
+                    currentObject.remove(key);
+                }
             }
 
-            if (currentObject.has(key)) {
-                currentObject.remove(key);
-            }
-        }
+            try {
+                if (!queryArgs.isEmpty()) {
+                    MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+                }
 
-        try {
-            if (!queryArgs.isEmpty()) {
-                MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+                if (!currentObject.getKeys().isEmpty()) {
+                    MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
+                }
+            } catch (SQLException e) {
+                throw new IOException(e);
             }
-
-            if (!currentObject.getKeys().isEmpty()) {
-                MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
-            }
-        } catch (SQLException e) {
-            throw new IOException(e);
         }
     }
 

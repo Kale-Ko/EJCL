@@ -92,10 +92,12 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
             throw new ConfigClosedException();
         }
 
-        this.config = this.processor.toObject(this.parser.toElement(this.loadRaw()), this.clazz);
+        synchronized (SAVELOAD_LOCK) {
+            this.config = this.processor.toObject(this.parser.toElement(this.loadRaw()), this.clazz);
 
-        if (save) {
-            this.save();
+            if (save) {
+                this.save();
+            }
         }
     }
 
