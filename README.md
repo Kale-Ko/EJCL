@@ -1,8 +1,8 @@
 # EJCL
 
-EJCL is an advanced configuration library for Java with support for local files, mysql databases, and more.
+EJCL is an advanced configuration library for Java with support for local files, MySQL databases, and more.
 
-Bellow you can find information about how to use the library.
+Below you can find information about how to use the library.
 
 EJCL is also fully documented at [ejcl.kaleko.dev/docs](https://ejcl.kaleko.dev/docs/).
 
@@ -22,7 +22,7 @@ To get or set data on an unstructured config you can call `config#get(path)` or 
 
 ## Storage types
 
-EJCL also offers a variety of storage options listed bellow.
+EJCL also offers a variety of storage options listed below.
 
 ### Local filesystem
 
@@ -30,7 +30,7 @@ Configs can be stored locally on the filesystem using classes from the `io.githu
 
 This includes a `SimpleFileConfig` which is an unstructured config that stores key/value pairs in a very simple format `{key}={value}` and may lead to errors if special characters are used.
 
-There is also `BJSLFileConfig` which is a structured config that stores data in different common formats (JSON, Yaml, Toml, XML, CSV, Java Properties, and Json Smile)\
+There is also `BJSLFileConfig` which is a structured config that stores data in different common formats (JSON, YAML, TOML, XML, CSV, Java Properties, and Json Smile)\
 Each of these different formats can be used with their respective classes `{format}FileConfig`
 
 ### MySQL Server
@@ -43,7 +43,7 @@ The unstructured version also has the advantage of drastically lowering the chan
 
 ### In memory
 
-If you want you can also use EJCL to store a config in memory but there is not much point to this unless you are using an api that only accepts Config objects.
+If you want you can also use EJCL to store a config in memory but there is not much point to this unless you are using an API that only accepts Config objects.
 
 ## Contributing
 
