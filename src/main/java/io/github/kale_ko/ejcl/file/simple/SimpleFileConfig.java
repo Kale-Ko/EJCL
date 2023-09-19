@@ -73,16 +73,18 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
             throw new ConfigClosedException();
         }
 
-        this.config = ParsedObject.create();
+        synchronized (SAVELOAD_LOCK) {
+            this.config = ParsedObject.create();
 
-        for (String line : new String(this.loadRaw(), StandardCharsets.UTF_8).split("\n")) {
-            line = line.trim();
+            for (String line : new String(this.loadRaw(), StandardCharsets.UTF_8).split("\n")) {
+                line = line.trim();
 
-            this.config.set(line.split("=")[0].trim(), ParsedPrimitive.fromString(line.split("=")[1].trim()));
-        }
+                this.config.set(line.split("=")[0].trim(), ParsedPrimitive.fromString(line.split("=")[1].trim()));
+            }
 
-        if (save) {
-            this.save();
+            if (save) {
+                this.save();
+            }
         }
     }
 

@@ -80,10 +80,12 @@ public class ElementFileConfig extends UnstructuredFileConfig {
             throw new ConfigClosedException();
         }
 
-        this.config = this.parser.toElement(this.loadRaw()).asObject();
+        synchronized (SAVELOAD_LOCK) {
+            this.config = this.parser.toElement(this.loadRaw()).asObject();
 
-        if (save) {
-            this.save();
+            if (save) {
+                this.save();
+            }
         }
     }
 

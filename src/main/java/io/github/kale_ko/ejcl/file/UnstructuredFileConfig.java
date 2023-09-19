@@ -23,6 +23,13 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     protected final @NotNull File file;
 
     /**
+     * The lock used when saving and loading the config
+     *
+     * @since 3.8.0
+     */
+    protected final Object SAVELOAD_LOCK = new Object();
+
+    /**
      * If this config is closed
      *
      * @since 3.0.0
@@ -128,11 +135,13 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
             throw new ConfigClosedException();
         }
 
-        if (!Files.exists(this.file.toPath())) {
-            Files.createFile(this.file.toPath());
-        }
+        synchronized (SAVELOAD_LOCK) {
+            if (!Files.exists(this.file.toPath())) {
+                Files.createFile(this.file.toPath());
+            }
 
-        Files.write(this.file.toPath(), this.saveRaw());
+            Files.write(this.file.toPath(), this.saveRaw());
+        }
     }
 
     /**

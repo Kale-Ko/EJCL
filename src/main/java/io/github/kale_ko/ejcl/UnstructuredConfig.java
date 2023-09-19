@@ -70,7 +70,7 @@ public abstract class UnstructuredConfig {
             }
         }
 
-        //noinspection DataFlowIssue
+        assert this.config != null;
         return PathResolver.resolve(this.config, path);
     }
 
