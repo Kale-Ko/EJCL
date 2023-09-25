@@ -190,16 +190,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new MySQLException(e);
         }
 
-        try {
+        try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
             Object value = null;
-            ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
             while (result.next()) {
                 value = result.getString("value");
             }
-
-            result.getStatement().close();
-            result.close();
 
             return value;
         } catch (SQLException e) {
@@ -227,16 +223,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             return null;
         }
 
-        try {
+        try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
             Object value = null;
-            ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path);
 
             while (result.next()) {
                 value = result.getString("value");
             }
-
-            result.getStatement().close();
-            result.close();
 
             return value;
         } catch (SQLException e) {
