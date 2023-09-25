@@ -333,7 +333,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         synchronized (SAVELOAD_LOCK) {
             ParsedObject object = this.processor.toElement(this.config).asObject();
 
-            try (ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table)) {
+            try (ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table)) {
                 while (result.next()) {
                     PathResolver.update(object, result.getString("path"), result.getString("value"), true);
                 }
@@ -376,7 +376,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         synchronized (SAVELOAD_LOCK) {
             ParsedObject currentObject = ParsedObject.create();
 
-            try (ResultSet result = MySQL.queryStream(this.connection, "SELECT path,value FROM " + this.table)) {
+            try (ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table)) {
                 while (result.next()) {
                     currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
                 }
