@@ -145,7 +145,7 @@ public class MySQL {
      * @since 3.4.0
      */
     public static ResultSet queryStream(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(query, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+        PreparedStatement statement = connection.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchSize(Integer.MIN_VALUE);
         for (int i = 0; i < args.length; i++) {
             statement.setString(i + 1, args[i]);
