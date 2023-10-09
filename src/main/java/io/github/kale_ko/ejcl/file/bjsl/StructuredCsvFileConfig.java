@@ -1,21 +1,21 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.XmlParser;
+import io.github.kale_ko.bjsl.parsers.CsvParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A XML File Config for storing XML data in a File
+ * A CSV File Config for storing CSV data in a File
  *
  * @param <T> The type of the data being stored
  *
  * @version 2.0.0
  * @since 1.0.0
  */
-public class XmlFileConfig<T> extends BJSLFileConfig<T> {
+public class StructuredCsvFileConfig<T> extends StructuredBJSLFileConfig<T> {
     /**
-     * Create a new XmlFileConfig
+     * Create a new StructuredCsvFileConfig
      *
      * @param clazz     The class of the data being stored
      * @param file      The file where data is being stored
@@ -24,12 +24,12 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser, @NotNull ObjectProcessor processor) {
+    public StructuredCsvFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull CsvParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
     /**
-     * Create a new XmlFileConfig
+     * Create a new StructuredCsvFileConfig
      *
      * @param clazz  The class of the data being stored
      * @param file   The file where data is being stored
@@ -37,19 +37,19 @@ public class XmlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser) {
+    public StructuredCsvFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull CsvParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
-     * Create a new XmlFileConfig
+     * Create a new StructuredCsvFileConfig
      *
      * @param clazz The class of the data being stored
      * @param file  The file where data is being stored
      *
-     * @since 2.0.0
+     * @since 1.0.0
      */
-    public XmlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
-        this(clazz, file, new XmlParser.Builder().setPrettyPrint(true).build());
+    public StructuredCsvFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+        this(clazz, file, new CsvParser.Builder().build());
     }
 }

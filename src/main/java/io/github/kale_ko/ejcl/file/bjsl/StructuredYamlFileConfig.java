@@ -1,21 +1,21 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.TomlParser;
+import io.github.kale_ko.bjsl.parsers.YamlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A TOML File Config for storing TOML data in a File
+ * A YAML File Config for storing YAML data in a File
  *
  * @param <T> The type of the data being stored
  *
  * @version 2.0.0
  * @since 1.0.0
  */
-public class TomlFileConfig<T> extends BJSLFileConfig<T> {
+public class StructuredYamlFileConfig<T> extends StructuredBJSLFileConfig<T> {
     /**
-     * Create a new TomlFileConfig
+     * Create a new StructuredYamlFileConfig
      *
      * @param clazz     The class of the data being stored
      * @param file      The file where data is being stored
@@ -24,12 +24,12 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull TomlParser parser, @NotNull ObjectProcessor processor) {
+    public StructuredYamlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull YamlParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
     /**
-     * Create a new TomlFileConfig
+     * Create a new StructuredYamlFileConfig
      *
      * @param clazz  The class of the data being stored
      * @param file   The file where data is being stored
@@ -37,19 +37,19 @@ public class TomlFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull TomlParser parser) {
+    public StructuredYamlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull YamlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
-     * Create a new TomlFileConfig
+     * Create a new StructuredYamlFileConfig
      *
      * @param clazz The class of the data being stored
      * @param file  The file where data is being stored
      *
      * @since 1.0.0
      */
-    public TomlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
-        this(clazz, file, new TomlParser.Builder().build());
+    public StructuredYamlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+        this(clazz, file, new YamlParser.Builder().build());
     }
 }

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class ElementFileConfig extends UnstructuredFileConfig {
+public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
     /**
      * The parser/processor to use for parsing and serialization
      *
@@ -23,7 +23,7 @@ public class ElementFileConfig extends UnstructuredFileConfig {
     protected final @NotNull Parser<?, ?> parser;
 
     /**
-     * Create a new ElementFileConfig
+     * Create a new UnstructuredBJSLFileConfig
      *
      * @param file      The file where data is being stored
      * @param parser    The parser/processor to use for parsing and serialization
@@ -31,21 +31,21 @@ public class ElementFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public ElementFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    public UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(file, processor);
 
         this.parser = parser;
     }
 
     /**
-     * Create a new ElementFileConfig
+     * Create a new UnstructuredBJSLFileConfig
      *
      * @param file   The file where data is being stored
      * @param parser The parser/processor to use for parsing and serialization
      *
      * @since 2.0.0
      */
-    public ElementFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser) {
+    public UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser) {
         this(file, parser, new ObjectProcessor.Builder().build());
     }
 

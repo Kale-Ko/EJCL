@@ -13,9 +13,9 @@ import org.jetbrains.annotations.NotNull;
  * @version 2.0.0
  * @since 1.0.0
  */
-public class JsonFileConfig<T> extends BJSLFileConfig<T> {
+public class StructuredJsonFileConfig<T> extends StructuredBJSLFileConfig<T> {
     /**
-     * Create a new JsonFileConfig
+     * Create a new StructuredJsonFileConfig
      *
      * @param clazz     The class of the data being stored
      * @param file      The file where data is being stored
@@ -24,12 +24,12 @@ public class JsonFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser, @NotNull ObjectProcessor processor) {
+    public StructuredJsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
     /**
-     * Create a new JsonFileConfig
+     * Create a new StructuredJsonFileConfig
      *
      * @param clazz  The class of the data being stored
      * @param file   The file where data is being stored
@@ -37,19 +37,19 @@ public class JsonFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser) {
+    public StructuredJsonFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull JsonParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
-     * Create a new JsonFileConfig
+     * Create a new StructuredJsonFileConfig
      *
      * @param clazz The class of the data being stored
      * @param file  The file where data is being stored
      *
      * @since 1.0.0
      */
-    public JsonFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+    public StructuredJsonFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
         this(clazz, file, new JsonParser.Builder().setPrettyPrint(true).build());
     }
 }
