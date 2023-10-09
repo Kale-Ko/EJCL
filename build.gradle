@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation "com.github.Kale-Ko:BJSL:${project.bjsl_version}"
 
-    compileOnly "org.jetbrains:annotations:24.0.0"
+    compileOnly "org.jetbrains:annotations:24.0.1"
 
     runtimeOnly "com.mysql:mysql-connector-j:${project.mysql_connector_version}"
 }
@@ -101,6 +101,7 @@ publishing {
     publications {
         ghp(MavenPublication) {
             groupId = project.group
+            artifactId = "ejcl"
             version = project.version
 
             artifact tasks.jar
