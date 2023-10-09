@@ -6,11 +6,11 @@ import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Smile File Config for storing Smile data in a File
+ * A Structured Smile File Config for storing Smile data in a File
  *
  * @param <T> The type of the data being stored
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class StructuredSmileFileConfig<T> extends StructuredBJSLFileConfig<T> {

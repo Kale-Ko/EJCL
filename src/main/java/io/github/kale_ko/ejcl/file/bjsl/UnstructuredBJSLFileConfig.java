@@ -9,9 +9,9 @@ import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An Element File Config for storing ParsedObjects in a File
+ * An Unstructured BJSL File Config for storing BJSL data in a File
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {

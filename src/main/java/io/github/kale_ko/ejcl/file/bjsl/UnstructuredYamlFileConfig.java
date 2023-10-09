@@ -6,14 +6,14 @@ import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A YAML File Config for storing YAML data in a File
+ * An Unstructured YAML File Config for storing YAML data in a File
  *
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
 public class UnstructuredYamlFileConfig extends UnstructuredBJSLFileConfig {
     /**
-     * Create a new StructuredYamlFileConfig
+     * Create a new UnstructuredYamlFileConfig
      *
      * @param file      The file where data is being stored
      * @param parser    The parser/processor to use for parsing and serialization
@@ -26,7 +26,7 @@ public class UnstructuredYamlFileConfig extends UnstructuredBJSLFileConfig {
     }
 
     /**
-     * Create a new StructuredYamlFileConfig
+     * Create a new UnstructuredYamlFileConfig
      *
      * @param file   The file where data is being stored
      * @param parser The parser/processor to use for parsing and serialization
@@ -38,7 +38,7 @@ public class UnstructuredYamlFileConfig extends UnstructuredBJSLFileConfig {
     }
 
     /**
-     * Create a new StructuredYamlFileConfig
+     * Create a new UnstructuredYamlFileConfig
      *
      * @param file The file where data is being stored
      *

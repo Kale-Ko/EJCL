@@ -9,11 +9,11 @@ import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A BJSL File Config for storing BJSL data in a File
+ * A Structured BJSL File Config for storing BJSL data in a File
  *
  * @param <T> The type of the data being stored
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
@@ -32,7 +32,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
     protected final @NotNull ObjectProcessor processor;
 
     /**
-     * Create a new BJSLConfig
+     * Create a new StructuredBJSLFileConfig
      *
      * @param clazz     The class of the data being stored
      * @param file      The file where data is being stored
@@ -49,7 +49,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
     }
 
     /**
-     * Create a new BJSLConfig
+     * Create a new StructuredBJSLFileConfig
      *
      * @param clazz  The class of the data being stored
      * @param file   The file where data is being stored
