@@ -1,21 +1,21 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.SmileParser;
+import io.github.kale_ko.bjsl.parsers.XmlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Smile File Config for storing Smile data in a File
+ * A XML File Config for storing XML data in a File
  *
  * @param <T> The type of the data being stored
  *
  * @version 2.0.0
  * @since 1.0.0
  */
-public class SmileFileConfig<T> extends BJSLFileConfig<T> {
+public class StructuredXmlFileConfig<T> extends StructuredBJSLFileConfig<T> {
     /**
-     * Create a new SmileFileConfig
+     * Create a new StructuredXmlFileConfig
      *
      * @param clazz     The class of the data being stored
      * @param file      The file where data is being stored
@@ -24,12 +24,12 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull SmileParser parser, @NotNull ObjectProcessor processor) {
+    public StructuredXmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file, parser, processor);
     }
 
     /**
-     * Create a new SmileFileConfig
+     * Create a new StructuredXmlFileConfig
      *
      * @param clazz  The class of the data being stored
      * @param file   The file where data is being stored
@@ -37,19 +37,19 @@ public class SmileFileConfig<T> extends BJSLFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull SmileParser parser) {
+    public StructuredXmlFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull XmlParser parser) {
         super(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
-     * Create a new SmileFileConfig
+     * Create a new StructuredXmlFileConfig
      *
      * @param clazz The class of the data being stored
      * @param file  The file where data is being stored
      *
      * @since 2.0.0
      */
-    public SmileFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
-        this(clazz, file, new SmileParser.Builder().build());
+    public StructuredXmlFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+        this(clazz, file, new XmlParser.Builder().setPrettyPrint(true).build());
     }
 }

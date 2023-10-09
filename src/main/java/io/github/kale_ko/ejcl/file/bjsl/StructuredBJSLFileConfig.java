@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * @version 2.0.0
  * @since 2.0.0
  */
-public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
+public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
     /**
      * The parser/processor to use for parsing and serialization
      *
@@ -41,7 +41,7 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public BJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.parser = parser;
@@ -57,7 +57,7 @@ public class BJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public BJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
+    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
         this(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
