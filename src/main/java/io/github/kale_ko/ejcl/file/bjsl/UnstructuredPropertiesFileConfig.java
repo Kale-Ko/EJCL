@@ -6,14 +6,14 @@ import java.io.File;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Properties File Config for storing Properties data in a File
+ * An Unstructured Properties File Config for storing Properties data in a File
  *
  * @version 4.0.0
- * @since 1.0.0
+ * @since 4.0.0
  */
 public class UnstructuredPropertiesFileConfig extends UnstructuredBJSLFileConfig {
     /**
-     * Create a new StructuredPropertiesFileConfig
+     * Create a new UnstructuredPropertiesFileConfig
      *
      * @param file      The file where data is being stored
      * @param parser    The parser/processor to use for parsing and serialization
@@ -26,7 +26,7 @@ public class UnstructuredPropertiesFileConfig extends UnstructuredBJSLFileConfig
     }
 
     /**
-     * Create a new StructuredPropertiesFileConfig
+     * Create a new UnstructuredPropertiesFileConfig
      *
      * @param file   The file where data is being stored
      * @param parser The parser/processor to use for parsing and serialization
@@ -38,7 +38,7 @@ public class UnstructuredPropertiesFileConfig extends UnstructuredBJSLFileConfig
     }
 
     /**
-     * Create a new StructuredPropertiesFileConfig
+     * Create a new UnstructuredPropertiesFileConfig
      *
      * @param file The file where data is being stored
      *
