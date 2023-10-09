@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A File Config for storing data in a file
+ * An Unstructured File Config for storing data in a file
  *
  * @version 3.0.0
  * @since 3.0.0
@@ -116,7 +116,6 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     protected byte @NotNull [] loadRaw() throws IOException {
         if (!Files.exists(this.file.toPath())) {
             Files.createFile(this.file.toPath());
-
             Files.write(this.file.toPath(), this.create());
         }
 
@@ -139,7 +138,6 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
             if (!Files.exists(this.file.toPath())) {
                 Files.createFile(this.file.toPath());
             }
-
             Files.write(this.file.toPath(), this.saveRaw());
         }
     }

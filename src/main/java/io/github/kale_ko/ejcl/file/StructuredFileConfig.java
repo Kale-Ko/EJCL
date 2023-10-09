@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A File Config for storing data in a file
+ * A Structured File Config for storing data in a file
  *
  * @param <T> The type of the data being stored
  *
@@ -113,7 +113,6 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
     protected byte @NotNull [] loadRaw() throws IOException {
         if (!Files.exists(this.file.toPath())) {
             Files.createFile(this.file.toPath());
-
             Files.write(this.file.toPath(), this.create());
         }
 
@@ -136,7 +135,6 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
             if (!Files.exists(this.file.toPath())) {
                 Files.createFile(this.file.toPath());
             }
-
             Files.write(this.file.toPath(), this.saveRaw());
         }
     }
