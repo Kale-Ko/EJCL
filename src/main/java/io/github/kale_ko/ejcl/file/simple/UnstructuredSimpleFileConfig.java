@@ -13,32 +13,32 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Simple File Config for storing key/value pairs in a File
+ * A Simple Unstructured File Config for storing key/value pairs in a File
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 2.0.0
  */
-public class SimpleFileConfig extends UnstructuredFileConfig {
+public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
     /**
-     * Create a new SimpleFileConfig
+     * Create a new UnstructuredSimpleFileConfig
      *
      * @param file      The file where data is being stored
      * @param processor The ObjectProcessor to use for serialization/deserialization
      *
      * @since 2.0.0
      */
-    public SimpleFileConfig(@NotNull File file, @NotNull ObjectProcessor processor) {
+    public UnstructuredSimpleFileConfig(@NotNull File file, @NotNull ObjectProcessor processor) {
         super(file, processor);
     }
 
     /**
-     * Create a new SimpleFileConfig
+     * Create a new UnstructuredSimpleFileConfig
      *
      * @param file The file where data is being stored
      *
      * @since 2.0.0
      */
-    public SimpleFileConfig(@NotNull File file) {
+    public UnstructuredSimpleFileConfig(@NotNull File file) {
         this(file, new ObjectProcessor.Builder().build());
     }
 
@@ -79,7 +79,7 @@ public class SimpleFileConfig extends UnstructuredFileConfig {
             for (String line : new String(this.loadRaw(), StandardCharsets.UTF_8).split("\n")) {
                 line = line.trim();
 
-                this.config.set(line.split("=")[0].trim(), ParsedPrimitive.fromString(line.split("=")[1].trim()));
+                this.config.set(line.split("=", 2)[0].trim(), ParsedPrimitive.fromString(line.split("=", 2)[1].trim()));
             }
 
             if (save) {
