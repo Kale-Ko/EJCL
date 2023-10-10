@@ -4,18 +4,19 @@ import io.github.kale_ko.ejcl.UnstructuredConfig;
 import java.io.IOException;
 
 /**
- * A Memory Config for storing data in memory
+ * An Unstructured Memory Config for storing data in memory
  *
  * @version 3.0.0
  * @since 3.0.0
  */
 public class UnstructuredMemoryConfig extends UnstructuredConfig {
     /**
-     * Create a new MemoryConfig
+     * Create a new UnstructuredMemoryConfig
      *
      * @since 3.0.0
      */
     public UnstructuredMemoryConfig() {
+        super();
     }
 
     /**

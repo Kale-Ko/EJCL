@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Memory Config for storing data in memory
+ * A Structured Memory Config for storing data in memory
  *
  * @param <T> The type of the data being stored
  *
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
     /**
-     * Create a new MemoryConfig
+     * Create a new StructuredMemoryConfig
      *
      * @param clazz The class of the data being stored
      *
