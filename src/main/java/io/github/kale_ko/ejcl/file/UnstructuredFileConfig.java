@@ -95,10 +95,8 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
          *
          * @since 4.0.0
          */
-        public UnstructuredFileConfig.Builder setFile(@NotNull File file) {
+        public void setFile(@NotNull File file) {
             this.file = file;
-
-            return this;
         }
 
         /**

@@ -1,6 +1,5 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.JsonParser;
 import io.github.kale_ko.bjsl.parsers.Parser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
@@ -36,70 +35,6 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
         super(file, processor);
 
         this.parser = parser;
-    }
-
-    /**
-     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig}s
-     *
-     * @version 4.0.0
-     * @since 4.0.0
-     */
-    public static class Builder extends UnstructuredFileConfig.Builder {
-        /**
-         * The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        protected @NotNull Parser<?, ?> parser;
-
-        /**
-         * Create a new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
-         *
-         * @param file The file where data is stored
-         *
-         * @since 4.0.0
-         */
-        public Builder(@NotNull File file) {
-            super(file);
-
-            this.parser = new JsonParser.Builder().build();
-        }
-
-        /**
-         * Get the parser/processor to use for parsing and serialization
-         *
-         * @return The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull Parser<?, ?> getParser() {
-            return this.parser;
-        }
-
-        /**
-         * Get the parser/processor to use for parsing and serialization
-         *
-         * @param parser The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        public UnstructuredBJSLFileConfig.Builder setParser(@NotNull Parser<?, ?> parser) {
-            this.parser = parser;
-
-            return this;
-        }
-
-        /**
-         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig}
-         *
-         * @return A new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} instance
-         *
-         * @since 4.0.0
-         */
-        @Override
-        public @NotNull UnstructuredBJSLFileConfig build() {
-            return new UnstructuredBJSLFileConfig(this.file, this.parser, this.processor);
-        }
     }
 
     /**

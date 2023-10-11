@@ -1,6 +1,5 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.JsonParser;
 import io.github.kale_ko.bjsl.parsers.Parser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
@@ -47,102 +46,6 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
 
         this.parser = parser;
         this.processor = processor;
-    }
-
-    /**
-     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}s
-     *
-     * @version 4.0.0
-     * @since 4.0.0
-     */
-    public static class Builder<T> extends StructuredFileConfig.Builder<T> {
-        /**
-         * The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        protected @NotNull Parser<?, ?> parser;
-
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        protected @NotNull ObjectProcessor processor;
-
-        /**
-         * Create a new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
-         *
-         * @param file The file where data is stored
-         *
-         * @since 4.0.0
-         */
-        public Builder(@NotNull Class<T> clazz, @NotNull File file) {
-            super(clazz, file);
-
-            this.parser = new JsonParser.Builder().build();
-            this.processor = new ObjectProcessor.Builder().build();
-        }
-
-        /**
-         * Get the parser/processor to use for parsing and serialization
-         *
-         * @return The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull Parser<?, ?> getParser() {
-            return this.parser;
-        }
-
-        /**
-         * Get the parser/processor to use for parsing and serialization
-         *
-         * @param parser The parser/processor to use for parsing and serialization
-         *
-         * @since 4.0.0
-         */
-        public StructuredBJSLFileConfig.Builder<T> setParser(@NotNull Parser<?, ?> parser) {
-            this.parser = parser;
-
-            return this;
-        }
-
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @return The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull ObjectProcessor getProcessor() {
-            return this.processor;
-        }
-
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @param processor The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull StructuredBJSLFileConfig.Builder<T> setProcessor(@NotNull ObjectProcessor processor) {
-            this.processor = processor;
-
-            return this;
-        }
-
-        /**
-         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}
-         *
-         * @return A new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} instance
-         *
-         * @since 4.0.0
-         */
-        @Override
-        public @NotNull StructuredFileConfig<T> build() {
-            return new StructuredBJSLFileConfig<>(this.clazz, this.file, this.parser, this.processor);
-        }
     }
 
     /**
