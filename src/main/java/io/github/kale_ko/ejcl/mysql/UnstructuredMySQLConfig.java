@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A MySQL Config for storing data on a MySQL server
+ * An Unstructured MySQL Config for storing data on a MySQL server
  *
- * @version 3.0.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 public class UnstructuredMySQLConfig extends UnstructuredConfig {
@@ -173,7 +173,10 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @since 3.0.0
      */
     @Override
-    public @Nullable Object get(@NotNull String path) {
+    public @Nullable String get(@NotNull String path) {
+        if (this.closed) {
+            throw new ConfigClosedException();
+        }
 
         try {
             if (!this.getConnected()) {
@@ -191,7 +194,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
-            Object value = null;
+            String value = null;
 
             while (result.next()) {
                 value = result.getString("value");
@@ -214,7 +217,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.5.0
      */
-    public @Nullable Object fastGet(@NotNull String path) {
+    public @Nullable String fastGet(@NotNull String path) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -224,7 +227,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
-            Object value = null;
+            String value = null;
 
             while (result.next()) {
                 value = result.getString("value");
@@ -237,7 +240,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     }
 
     @Override
-    public @Nullable Object getCached(@NotNull String path) {
+    public @Nullable String getCached(@NotNull String path) {
         throw new UnsupportedOperationException();
     }
 
@@ -351,9 +354,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
 
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
 
-                MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                if (this.connection.isValid(3)) {
+                    reconnectAttempts = 0;
 
-                reconnectAttempts = 0;
+                    MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                } else {
+                    throw new IOException("Failed to connect: Connection is not valid");
+                }
             } catch (SQLException e) {
                 throw new IOException(e);
             }

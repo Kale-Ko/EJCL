@@ -24,11 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A MySQL Config for storing data on a MySQL server
+ * A Structured MySQL Config for storing data on a MySQL server
  *
  * @param <T> The type of the data being stored
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -296,9 +296,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
                 this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
 
-                MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                if (this.connection.isValid(3)) {
+                    reconnectAttempts = 0;
 
-                reconnectAttempts = 0;
+                    MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                } else {
+                    throw new IOException("Failed to connect: Connection is not valid");
+                }
             } catch (SQLException e) {
                 throw new IOException(e);
             }
@@ -327,7 +331,6 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             this.connect();
         }
-
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
@@ -343,10 +346,10 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             this.config = this.processor.toObject(object, this.clazz);
             this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
+        }
 
-            if (save) {
-                this.save();
-            }
+        if (save) {
+            this.save();
         }
     }
 
@@ -370,7 +373,6 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             this.connect();
         }
-
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
