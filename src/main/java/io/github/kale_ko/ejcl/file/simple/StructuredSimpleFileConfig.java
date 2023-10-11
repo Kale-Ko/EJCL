@@ -43,6 +43,70 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
     }
 
     /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder<T> extends StructuredFileConfig.Builder<T> {
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull ObjectProcessor processor;
+
+        /**
+         * Create a new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig} builder
+         *
+         * @param file The file where data is stored
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz, @NotNull File file) {
+            super(clazz, file);
+
+            this.processor = new ObjectProcessor.Builder().build();
+        }
+
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @return The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull ObjectProcessor getProcessor() {
+            return this.processor;
+        }
+
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @param processor The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull StructuredSimpleFileConfig.Builder<T> setProcessor(@NotNull ObjectProcessor processor) {
+            this.processor = processor;
+
+            return this;
+        }
+
+        /**
+         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig} instance
+         *
+         * @since 4.0.0
+         */
+        @Override
+        public @NotNull StructuredFileConfig<T> build() {
+            return new StructuredSimpleFileConfig<>(this.clazz, this.file, this.processor);
+        }
+    }
+
+    /**
      * Create a blank config file
      *
      * @return The config bytes

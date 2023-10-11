@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A MySQL Config for storing data on a MySQL server
+ * A Structured MySQL Config for storing data on a MySQL server
  *
  * @param <T> The type of the data being stored
  *

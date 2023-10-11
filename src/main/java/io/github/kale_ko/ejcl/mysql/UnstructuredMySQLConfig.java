@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A MySQL Config for storing data on a MySQL server
+ * An Unstructured MySQL Config for storing data on a MySQL server
  *
  * @version 3.0.0
  * @since 3.0.0
