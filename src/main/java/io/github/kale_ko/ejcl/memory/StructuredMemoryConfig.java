@@ -32,35 +32,6 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}s
-     *
-     * @version 4.0.0
-     * @since 4.0.0
-     */
-    public static class Builder<T> extends StructuredConfig.Builder<T> {
-        /**
-         * Create a new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig} builder
-         *
-         * @since 4.0.0
-         */
-        public Builder(@NotNull Class<T> clazz) {
-            super(clazz);
-        }
-
-        /**
-         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}
-         *
-         * @return A new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig} instance
-         *
-         * @since 4.0.0
-         */
-        @Override
-        public @NotNull StructuredMemoryConfig<T> build() {
-            return new StructuredMemoryConfig<>(this.clazz);
-        }
-    }
-
-    /**
      * Get if the config is loaded
      *
      * @return If the config is loaded

@@ -32,6 +32,17 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
     }
 
     /**
+     * Create a new UnstructuredSimpleFileConfig
+     *
+     * @param file The file where data is being stored
+     *
+     * @since 2.0.0
+     */
+    public UnstructuredSimpleFileConfig(@NotNull File file) {
+        this(file, new ObjectProcessor.Builder().build());
+    }
+
+    /**
      * Create a blank config file
      *
      * @return The config bytes

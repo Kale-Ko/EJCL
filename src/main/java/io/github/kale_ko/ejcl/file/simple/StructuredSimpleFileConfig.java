@@ -43,6 +43,18 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
     }
 
     /**
+     * Create a new StructuredSimpleFileConfig
+     *
+     * @param clazz The class of the data being stored
+     * @param file  The file where data is being stored
+     *
+     * @since 2.0.0
+     */
+    public StructuredSimpleFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+        this(clazz, file, new ObjectProcessor.Builder().build());
+    }
+
+    /**
      * Create a blank config file
      *
      * @return The config bytes
