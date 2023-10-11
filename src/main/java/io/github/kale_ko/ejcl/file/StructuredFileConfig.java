@@ -59,6 +59,66 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
     }
 
     /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.StructuredFileConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    protected abstract static class Builder<T> extends StructuredConfig.Builder<T> {
+        /**
+         * The file where data is being stored
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull File file;
+
+        /**
+         * Create a new {@link io.github.kale_ko.ejcl.file.StructuredFileConfig} builder
+         *
+         * @param file The file where data is stored
+         *
+         * @since 4.0.0
+         */
+        protected Builder(@NotNull Class<T> clazz, @NotNull File file) {
+            super(clazz);
+
+            this.file = file;
+        }
+
+        /**
+         * Get the file where data is being stored
+         *
+         * @return The file where data is being stored
+         *
+         * @since 4.0.0
+         */
+        public @NotNull File getFile() {
+            return this.file;
+        }
+
+        /**
+         * Set the file where data is being stored
+         *
+         * @param file The file where data is being stored
+         *
+         * @since 4.0.0
+         */
+        public void setFile(@NotNull File file) {
+            this.file = file;
+        }
+
+        /**
+         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.StructuredFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.StructuredFileConfig} instance
+         *
+         * @since 4.0.0
+         */
+        @Override
+        public abstract @NotNull StructuredFileConfig<T> build();
+    }
+
+    /**
      * Get the file where data is being stored
      *
      * @return The file where data is being stored

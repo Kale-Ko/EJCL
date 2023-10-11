@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 3.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public abstract class StructuredConfig<T> {
@@ -44,6 +44,39 @@ public abstract class StructuredConfig<T> {
         }
 
         this.clazz = clazz;
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.StructuredConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    protected abstract static class Builder<T> {
+        /**
+         * The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull Class<T> clazz;
+
+        /**
+         * Create a new {@link io.github.kale_ko.ejcl.StructuredConfig} builder
+         *
+         * @since 4.0.0
+         */
+        protected Builder(@NotNull Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        /**
+         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.StructuredConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.StructuredConfig} instance
+         *
+         * @since 4.0.0
+         */
+        public abstract @NotNull StructuredConfig<T> build();
     }
 
     /**

@@ -31,22 +31,10 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    public UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    protected UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(file, processor);
 
         this.parser = parser;
-    }
-
-    /**
-     * Create a new UnstructuredBJSLFileConfig
-     *
-     * @param file   The file where data is being stored
-     * @param parser The parser/processor to use for parsing and serialization
-     *
-     * @since 2.0.0
-     */
-    public UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser) {
-        this(file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
