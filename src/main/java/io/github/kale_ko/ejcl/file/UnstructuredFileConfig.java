@@ -51,63 +51,14 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     }
 
     /**
-     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.UnstructuredFileConfig}s
+     * Create a new FileConfig
      *
-     * @version 4.0.0
-     * @since 4.0.0
+     * @param file The file where data is being stored
+     *
+     * @since 3.0.0
      */
-    protected abstract static class Builder extends UnstructuredConfig.Builder {
-        /**
-         * The file where data is being stored
-         *
-         * @since 4.0.0
-         */
-        protected @NotNull File file;
-
-        /**
-         * Create a new {@link io.github.kale_ko.ejcl.file.UnstructuredFileConfig} builder
-         *
-         * @param file The file where data is stored
-         *
-         * @since 4.0.0
-         */
-        protected Builder(@NotNull File file) {
-            super();
-
-            this.file = file;
-        }
-
-        /**
-         * Get the file where data is being stored
-         *
-         * @return The file where data is being stored
-         *
-         * @since 4.0.0
-         */
-        public @NotNull File getFile() {
-            return this.file;
-        }
-
-        /**
-         * Set the file where data is being stored
-         *
-         * @param file The file where data is being stored
-         *
-         * @since 4.0.0
-         */
-        public void setFile(@NotNull File file) {
-            this.file = file;
-        }
-
-        /**
-         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.UnstructuredFileConfig}
-         *
-         * @return A new {@link io.github.kale_ko.ejcl.file.UnstructuredFileConfig} instance
-         *
-         * @since 4.0.0
-         */
-        @Override
-        public abstract @NotNull UnstructuredFileConfig build();
+    protected UnstructuredFileConfig(@NotNull File file) {
+        this(file, new ObjectProcessor.Builder().build());
     }
 
     /**

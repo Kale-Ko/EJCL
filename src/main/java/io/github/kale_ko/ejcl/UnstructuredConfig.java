@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @version 4.0.0
+ * @version 3.0.0
  * @since 3.0.0
  */
 public abstract class UnstructuredConfig {
@@ -44,60 +44,12 @@ public abstract class UnstructuredConfig {
     }
 
     /**
-     * A builder class for creating new {@link io.github.kale_ko.ejcl.UnstructuredConfig}s
+     * Create a new Config
      *
-     * @version 4.0.0
-     * @since 4.0.0
+     * @since 3.0.0
      */
-    protected abstract static class Builder {
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        protected @NotNull ObjectProcessor processor;
-
-        /**
-         * Create a new {@link io.github.kale_ko.ejcl.UnstructuredConfig} builder
-         *
-         * @since 4.0.0
-         */
-        protected Builder() {
-            this.processor = new ObjectProcessor.Builder().build();
-        }
-
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @return The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull ObjectProcessor getProcessor() {
-            return this.processor;
-        }
-
-        /**
-         * The ObjectProcessor to use for serialization/deserialization
-         *
-         * @param processor The ObjectProcessor to use for serialization/deserialization
-         *
-         * @since 4.0.0
-         */
-        public @NotNull Builder setProcessor(@NotNull ObjectProcessor processor) {
-            this.processor = processor;
-
-            return this;
-        }
-
-        /**
-         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.UnstructuredConfig}
-         *
-         * @return A new {@link io.github.kale_ko.ejcl.UnstructuredConfig} instance
-         *
-         * @since 4.0.0
-         */
-        public abstract @NotNull UnstructuredConfig build();
+    protected UnstructuredConfig() {
+        this(new ObjectProcessor.Builder().build());
     }
 
     /**
