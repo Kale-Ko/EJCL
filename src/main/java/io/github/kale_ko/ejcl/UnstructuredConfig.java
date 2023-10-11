@@ -99,7 +99,7 @@ public abstract class UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public void set(@NotNull String path, @NotNull Object value) {
+    public void set(@NotNull String path, @Nullable Object value) {
         if (this.config != null) {
             PathResolver.update(this.config, path, value, true);
         }
