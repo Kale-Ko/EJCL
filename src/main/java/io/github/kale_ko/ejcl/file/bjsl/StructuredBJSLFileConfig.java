@@ -41,24 +41,11 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.parser = parser;
         this.processor = processor;
-    }
-
-    /**
-     * Create a new StructuredBJSLFileConfig
-     *
-     * @param clazz  The class of the data being stored
-     * @param file   The file where data is being stored
-     * @param parser The parser/processor to use for parsing and serialization
-     *
-     * @since 2.0.0
-     */
-    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
-        this(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**

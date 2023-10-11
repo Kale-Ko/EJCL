@@ -1,7 +1,9 @@
 package io.github.kale_ko.ejcl.memory;
 
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An Unstructured Memory Config for storing data in memory
@@ -15,8 +17,37 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMemoryConfig() {
-        super();
+    protected UnstructuredMemoryConfig(@NotNull ObjectProcessor processor) {
+        super(processor);
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder extends UnstructuredConfig.Builder {
+        /**
+         * Create a new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig} builder
+         *
+         * @since 4.0.0
+         */
+        public Builder() {
+            super();
+        }
+
+        /**
+         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig} instance
+         *
+         * @since 4.0.0
+         */
+        @Override
+        public @NotNull UnstructuredMemoryConfig build() {
+            return new UnstructuredMemoryConfig(this.processor);
+        }
     }
 
     /**
