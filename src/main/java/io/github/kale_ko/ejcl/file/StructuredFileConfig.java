@@ -103,8 +103,10 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
          *
          * @since 4.0.0
          */
-        public void setFile(@NotNull File file) {
+        public StructuredFileConfig.Builder<T> setFile(@NotNull File file) {
             this.file = file;
+
+            return this;
         }
 
         /**

@@ -32,6 +32,37 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
     }
 
     /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder extends UnstructuredFileConfig.Builder {
+        /**
+         * Create a new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig} builder
+         *
+         * @param file The file where data is stored
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull File file) {
+            super(file);
+        }
+
+        /**
+         * Uses the current settings to build a new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig} instance
+         *
+         * @since 4.0.0
+         */
+        @Override
+        public @NotNull UnstructuredSimpleFileConfig build() {
+            return new UnstructuredSimpleFileConfig(this.file, this.processor);
+        }
+    }
+
+    /**
      * Create a blank config file
      *
      * @return The config bytes
