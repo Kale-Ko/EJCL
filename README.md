@@ -17,7 +17,7 @@ Calling `config#get()` will return an instance of the type passed to the constru
 
 ### Unstructured
 
-Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data. (If you are using `MySQLConfig` it also provides a performance boost)\
+Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data. (If you are using `MySQLConfig` it also provides a performance & safety boost)\
 To get or set data on an unstructured config you can call `config#get(path)` or `config#set(path, value)` to do so (`path` can be any string and `value` can be any object).
 
 ## Storage types
@@ -28,18 +28,17 @@ EJCL also offers a variety of storage options listed below.
 
 Configs can be stored locally on the filesystem using classes from the `io.github.kale_ko.ejcl.file` package.
 
-This includes a `SimpleFileConfig` which is an unstructured config that stores key/value pairs in a very simple format `{key}={value}` and may lead to errors if special characters are used.
+This includes a `SimpleFileConfig` which is a config that stores key/value pairs in a very simple format, `{key}={value}`.
 
-There is also `BJSLFileConfig` which is a structured config that stores data in different common formats (JSON, YAML, TOML, XML, CSV, Java Properties, and Json Smile)\
+There is also `BJSLFileConfig` which is a config that stores data in different common formats (JSON, YAML, TOML, XML, CSV, Java Properties, and Json Smile)\
 Each of these different formats can be used with their respective classes `{format}FileConfig`
 
 ### MySQL Server
 
 Configs can also be stored on a MySQL server using classes from the `io.github.kale_ko.ejcl.mysql` package.
 
-There is both a structured (`StructuredMySQLConfig`) and unstructured (`UnstructuredMySQLConfig`) version to use.\
-The structured version is slower to save and load but can be easier to work with.\
-The unstructured version also has the advantage of drastically lowering the chances of overwriting a value twice.
+The structured version is slower to save and load but can be easier to work with,
+while the unstructured version has the advantage of drastically lowering the chances of overwriting a value.
 
 ### In memory
 

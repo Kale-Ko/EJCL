@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured File Config for storing data in a file
  *
- * @version 3.0.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 public abstract class UnstructuredFileConfig extends UnstructuredConfig {

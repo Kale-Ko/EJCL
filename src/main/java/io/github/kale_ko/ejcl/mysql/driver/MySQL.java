@@ -129,28 +129,4 @@ public class MySQL {
 
         return statement.executeQuery();
     }
-
-    /**
-     * Execute a mysql query and return the result
-     * <p>
-     * <b>The returned {@link ResultSet} *must* be closed by you to prevent memory leaks</b>
-     *
-     * @param connection The connection to execute on
-     * @param query      The base query to send
-     * @param args       Extra args to replace into the query
-     *
-     * @return The result of the query
-     *
-     * @throws SQLException When an SQLException is throw by the driver
-     * @since 3.4.0
-     */
-    public static ResultSet queryStream(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchSize(Integer.MIN_VALUE);
-        for (int i = 0; i < args.length; i++) {
-            statement.setString(i + 1, args[i]);
-        }
-
-        return statement.executeQuery();
-    }
 }

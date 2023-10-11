@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 2.0.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
