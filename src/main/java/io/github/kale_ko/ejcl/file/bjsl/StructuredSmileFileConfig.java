@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 4.0.0
+ * @version 3.9.0
  * @since 1.0.0
  */
 public class StructuredSmileFileConfig<T> extends StructuredBJSLFileConfig<T> {

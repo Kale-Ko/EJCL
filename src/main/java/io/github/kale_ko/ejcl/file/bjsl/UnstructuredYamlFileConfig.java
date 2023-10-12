@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured YAML File Config for storing YAML data in a File
  *
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.9.0
+ * @since 3.9.0
  */
 public class UnstructuredYamlFileConfig extends UnstructuredBJSLFileConfig {
     /**

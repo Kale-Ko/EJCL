@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured BJSL File Config for storing BJSL data in a File
  *
- * @version 4.0.0
+ * @version 3.9.0
  * @since 2.0.0
  */
 public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {

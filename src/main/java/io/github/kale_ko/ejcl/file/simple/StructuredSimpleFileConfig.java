@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A Simple Structured File Config for storing key/value pairs in a File
  *
- * @version 4.0.0
- * @since 4.0.0
+ * @version 3.9.0
+ * @since 3.9.0
  */
 public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
     /**
