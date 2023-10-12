@@ -7,14 +7,24 @@ project.group = "io.github.kale_ko"
 project.version = project.project_version
 
 repositories {
+    if (project.useLocal) {
+        mavenLocal()
+    }
     mavenCentral()
+
     maven {
-        url "https://jitpack.io"
+        name = "GitHub-Packages"
+        url = "https://maven.pkg.github.com/Kale-Ko/BJSL"
+
+        credentials {
+            username = System.getenv("GH_PACKAGES_USER")
+            password = System.getenv("GH_PACKAGES_TOKEN")
+        }
     }
 }
 
 dependencies {
-    implementation "com.github.Kale-Ko:BJSL:${project.bjsl_version}"
+    implementation "io.github.kale_ko:bjsl:${project.bjsl_version}"
 
     compileOnly "org.jetbrains:annotations:24.0.1"
 
