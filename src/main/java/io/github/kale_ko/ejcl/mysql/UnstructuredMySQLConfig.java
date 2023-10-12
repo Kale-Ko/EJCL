@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * An Unstructured MySQL Config for storing data on a MySQL server
  *
- * @version 4.0.0
+ * @version 3.9.0
  * @since 3.0.0
  */
 public class UnstructuredMySQLConfig extends UnstructuredConfig {

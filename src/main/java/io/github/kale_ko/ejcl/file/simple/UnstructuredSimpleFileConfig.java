@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A Simple Unstructured File Config for storing key/value pairs in a File
  *
- * @version 4.0.0
+ * @version 3.9.0
  * @since 2.0.0
  */
 public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
