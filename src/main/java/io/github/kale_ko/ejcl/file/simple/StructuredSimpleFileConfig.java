@@ -123,7 +123,7 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
         for (String key : PathResolver.getKeys(object, false)) {
             ParsedElement element = PathResolver.resolveElement(object, key);
             if (element != null) {
-                data.append(key).append("=").append(element.asPrimitive().get().toString());
+                data.append(key).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
             } else {
                 throw new ProcessorException(new NullPointerException("Key does not exist on object"));
             }
