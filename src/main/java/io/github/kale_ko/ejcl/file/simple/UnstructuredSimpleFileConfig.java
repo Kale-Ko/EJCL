@@ -106,7 +106,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
 
         for (Map.Entry<String, ParsedElement> entry : this.config.getEntries()) {
             if (entry.getValue().isPrimitive()) {
-                data.append(entry.getKey()).append("=").append(entry.getValue().asPrimitive().get().toString());
+                data.append(entry.getKey()).append("=").append(!entry.getValue().asPrimitive().isNull() ? entry.getValue().asPrimitive().get().toString() : "null");
             }
         }
 
