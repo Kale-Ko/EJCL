@@ -10,11 +10,6 @@ repositories {
     maven {
         name = "Kales-Maven"
         url = "https://maven.kaleko.dev/public-snapshot/"
-
-        credentials {
-            username = System.getenv("MAVEN_USER")
-            password = System.getenv("MAVEN_TOKEN")
-        }
     }
     mavenCentral()
 }
@@ -100,7 +95,7 @@ javadoc {
 publishing {
     repositories {
         maven {
-            name = "Kales-Maven"
+            name = "Kales-Maven-Snapshot"
             url = "https://maven.kaleko.dev/public-snapshot/"
 
             credentials {
@@ -111,7 +106,7 @@ publishing {
 
         if ("release".equalsIgnoreCase(System.getenv("MAVEN_TYPE"))) {
             maven {
-                name = "Kales-Maven"
+                name = "Kales-Maven-Release"
                 url = "https://maven.kaleko.dev/public-release/"
 
                 credentials {
@@ -120,7 +115,7 @@ publishing {
                 }
             }
             maven {
-                name = "GitHub-Packages"
+                name = "GitHub-Packages-Release"
                 url = "https://maven.pkg.github.com/Kale-Ko/EJCL/"
 
                 credentials {
