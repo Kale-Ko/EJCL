@@ -37,8 +37,7 @@ Each of these different formats can be used with their respective classes `{form
 
 Configs can also be stored on a MySQL server using classes from the `io.github.kale_ko.ejcl.mysql` package.
 
-The structured version is slower to save and load but can be easier to work with,
-while the unstructured version has the advantage of drastically lowering the chances of overwriting a value.
+The structured version is slower to save and load but can be easier to work with, while the unstructured version has the advantage of drastically lowering the chances of overwriting a value.
 
 ### In memory
 
