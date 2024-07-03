@@ -1,13 +1,11 @@
 package io.github.kale_ko.ejcl.mysql;
 
 import io.github.kale_ko.bjsl.elements.ParsedObject;
-import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
-import io.github.kale_ko.bjsl.processor.reflection.InitializationUtil;
 import io.github.kale_ko.ejcl.PathResolver;
 import io.github.kale_ko.ejcl.StructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
-import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
+import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
 import io.github.kale_ko.ejcl.mysql.driver.MySQL;
@@ -17,9 +15,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -108,6 +104,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @since 1.1.0
      */
     protected long configExpires = -1L;
+
+    /**
+     * A copy of the data that was fetched
+     *
+     * @since 3.10.0
+     */
+    protected @Nullable ParsedObject configBackup = null;
 
     /**
      * The lock used when saving and loading the config
@@ -329,7 +332,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
-            ParsedObject object = this.processor.toElement(this.config).asObject();
+            ParsedObject object = ParsedObject.create();
 
             try (ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table)) {
                 while (result.next()) {
@@ -341,6 +344,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             this.config = this.processor.toObject(object, this.clazz);
             this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
+
+            this.configBackup = this.processor.toElement(this.config).asObject();
         }
 
         if (save) {
@@ -374,40 +379,33 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
-            ParsedObject currentObject = ParsedObject.create();
-
-            try (ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table)) {
-                while (result.next()) {
-                    currentObject.set(result.getString("path"), ParsedPrimitive.fromString(result.getString("value")));
-                }
-            } catch (SQLException e) {
-                throw new IOException(e);
-            }
-
             ParsedObject object = this.processor.toElement(this.config).asObject();
-            List<String> keys = PathResolver.getKeys(object, false);
+            Set<String> keys = PathResolver.getKeys(object, false);
+            Set<String> oldKeys = PathResolver.getKeys(this.configBackup, false);
+
+            Set<String> toDelete = new HashSet<>(oldKeys);
+            toDelete.removeAll(keys);
 
             List<String> queryArgs = new ArrayList<>();
             for (String key : keys) {
                 Object value = PathResolver.resolve(object, key, false);
+                Object oldValue = PathResolver.resolve(this.configBackup, key, false);
 
-                if (!currentObject.has(key) || !currentObject.get(key).asPrimitive().asString().equals(value != null ? value.toString() : "null")) {
+                if (!((value == null && oldValue == null) || (value != null && (value == oldValue || value.equals(oldValue))))) {
                     queryArgs.add(key);
                     queryArgs.add(value != null ? value.toString() : "null");
                 }
-
-                if (currentObject.has(key)) {
-                    currentObject.remove(key);
-                }
             }
+
+            this.configBackup = object;
 
             try {
                 if (!queryArgs.isEmpty()) {
                     MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
                 }
 
-                if (!currentObject.getKeys().isEmpty()) {
-                    MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, currentObject.getKeys());
+                if (!toDelete.isEmpty()) {
+                    MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, List.copyOf(toDelete));
                 }
             } catch (SQLException e) {
                 throw new IOException(e);
