@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigLoadException;
+import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,8 +40,6 @@ public abstract class UnstructuredConfig {
      */
     protected UnstructuredConfig(@NotNull ObjectProcessor processor) {
         this.processor = processor;
-
-        this.config = ParsedObject.create();
     }
 
     /**
@@ -70,7 +69,10 @@ public abstract class UnstructuredConfig {
             }
         }
 
-        assert this.config != null;
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
+        }
+
         return PathResolver.resolve(this.config, path);
     }
 
@@ -84,11 +86,11 @@ public abstract class UnstructuredConfig {
      * @since 3.5.0
      */
     public @Nullable Object getCached(@NotNull String path) {
-        if (this.config != null) {
-            return PathResolver.resolve(this.config, path);
-        } else {
-            return null;
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
         }
+
+        return PathResolver.resolve(this.config, path);
     }
 
     /**
@@ -100,9 +102,11 @@ public abstract class UnstructuredConfig {
      * @since 3.0.0
      */
     public void set(@NotNull String path, @Nullable Object value) {
-        if (this.config != null) {
-            PathResolver.update(this.config, path, value, true);
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
         }
+
+        PathResolver.update(this.config, path, value, true);
     }
 
     /**

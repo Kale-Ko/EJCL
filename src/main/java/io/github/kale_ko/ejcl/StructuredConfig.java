@@ -2,6 +2,7 @@ package io.github.kale_ko.ejcl;
 
 import io.github.kale_ko.bjsl.parsers.exception.InvalidTypeException;
 import io.github.kale_ko.ejcl.exception.ConfigLoadException;
+import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +63,10 @@ public abstract class StructuredConfig<T> {
             }
         }
 
-        assert this.config != null;
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
+        }
+
         return this.config;
     }
 
@@ -74,6 +78,10 @@ public abstract class StructuredConfig<T> {
      * @since 3.5.0
      */
     public @Nullable T getCached() {
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
+        }
+
         return this.config;
     }
 

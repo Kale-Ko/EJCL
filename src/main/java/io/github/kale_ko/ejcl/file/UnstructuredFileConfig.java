@@ -3,6 +3,7 @@ package io.github.kale_ko.ejcl.file;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
+import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -132,6 +133,9 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
     public void save() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
+        }
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
         }
 
         synchronized (SAVELOAD_LOCK) {
