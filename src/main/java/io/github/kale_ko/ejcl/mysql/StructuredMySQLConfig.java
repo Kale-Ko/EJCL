@@ -153,11 +153,6 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         this.password = password;
 
         this.cacheLength = cacheLength;
-
-        this.config = InitializationUtil.initializeUnsafe(clazz);
-        if (this.config == null) {
-            throw new ConfigInitializationException(clazz);
-        }
     }
 
     /**
@@ -363,6 +358,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     public void save() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
+        }
+        if (this.config == null || this.configBackup == null) {
+            throw new ConfigNotLoadedException();
         }
 
         if (!this.getConnected()) {

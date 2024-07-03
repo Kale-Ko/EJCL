@@ -1,9 +1,8 @@
 package io.github.kale_ko.ejcl.file;
 
-import io.github.kale_ko.bjsl.processor.reflection.InitializationUtil;
 import io.github.kale_ko.ejcl.StructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
-import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
+import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,11 +50,6 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
         super(clazz);
 
         this.file = file;
-
-        this.config = InitializationUtil.initializeUnsafe(clazz);
-        if (this.config == null) {
-            throw new ConfigInitializationException(clazz);
-        }
     }
 
     /**
@@ -129,6 +123,9 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
     public void save() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
+        }
+        if (this.config == null) {
+            throw new ConfigNotLoadedException();
         }
 
         synchronized (SAVELOAD_LOCK) {
