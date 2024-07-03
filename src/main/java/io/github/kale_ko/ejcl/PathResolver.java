@@ -4,9 +4,7 @@ import io.github.kale_ko.bjsl.elements.ParsedArray;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -406,7 +404,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @NotNull List<String> getKeys(@NotNull ParsedElement element) {
+    public static @NotNull Set<String> getKeys(@NotNull ParsedElement element) {
         return getKeys(element, true);
     }
 
@@ -420,7 +418,7 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    public static @NotNull List<String> getKeys(@NotNull ParsedElement element, boolean returnObjArrKeys) {
+    public static @NotNull Set<String> getKeys(@NotNull ParsedElement element, boolean returnObjArrKeys) {
         return getKeys(element, "", returnObjArrKeys);
     }
 
@@ -435,8 +433,8 @@ public class PathResolver {
      *
      * @since 1.0.0
      */
-    protected static @NotNull List<String> getKeys(@NotNull ParsedElement element, @NotNull String path, boolean returnObjArrKeys) {
-        List<String> keys = new ArrayList<>();
+    protected static @NotNull Set<String> getKeys(@NotNull ParsedElement element, @NotNull String path, boolean returnObjArrKeys) {
+        Set<String> keys = new HashSet<>();
 
         if (element.isObject()) {
             ParsedObject object = element.asObject();
