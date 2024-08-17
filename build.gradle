@@ -20,6 +20,7 @@ dependencies {
     compileOnly "org.jetbrains:annotations:24.0.1"
 
     runtimeOnly "com.mysql:mysql-connector-j:${project.mysql_connector_version}"
+    runtimeOnly "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_connector_version}"
 }
 
 java {

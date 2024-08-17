@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An Unstructured MySQL Config for storing data on a MySQL server
+ * An Unstructured MySQL Config for storing data on a MySQL or MariaDB server
  *
  * @version 3.9.0
  * @since 3.0.0
@@ -65,6 +65,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     protected final @Nullable String password;
 
     /**
+     * Weather to use the MariaDB driver
+     *
+     * @since 3.11.0
+     */
+    protected final boolean useMariadb;
+
+    /**
      * The connection to the server
      *
      * @since 3.0.0
@@ -93,7 +100,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     protected boolean closed = false;
 
     /**
-     * Create a new MySQLConfig
+     * Create a new UnstructuredMySQLConfig
      *
      * @param host      The host of the server
      * @param port      The port of the server
@@ -116,10 +123,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
 
         this.username = username;
         this.password = password;
+
+        this.useMariadb = false /*TODO In next release*/;
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new UnstructuredMySQLConfig
      *
      * @param host     The host of the server
      * @param port     The port of the server
@@ -135,7 +144,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new UnstructuredMySQLConfig
      *
      * @param host      The host of the server
      * @param port      The port of the server
@@ -150,7 +159,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new UnstructuredMySQLConfig
      *
      * @param host     The host of the server
      * @param port     The port of the server
@@ -352,7 +361,17 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                     }
                 }
 
-                this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
+                try {
+                    if (this.useMariadb) {
+                        Class.forName("org.mariadb.jdbc.Driver");
+                    } else {
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                    }
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.host + ":" + this.port + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;

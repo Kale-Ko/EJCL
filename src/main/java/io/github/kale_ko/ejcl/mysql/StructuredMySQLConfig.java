@@ -20,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A Structured MySQL Config for storing data on a MySQL server
+ * A Structured MySQL Config for storing data on a MySQL or MariaDB server
  *
  * @param <T> The type of the data being stored
  *
- * @version 3.9.0
+ * @version 3.11.0
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -78,6 +78,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected final @Nullable String password;
 
     /**
+     * Weather to use the MariaDB driver
+     *
+     * @since 3.11.0
+     */
+    protected final boolean useMariadb;
+
+    /**
      * The connection to the server
      *
      * @since 1.0.0
@@ -127,7 +134,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected boolean closed = false;
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz       The class of the data being stored
      * @param host        The host of the server
@@ -139,7 +146,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @param processor   The ObjectProcessor to use for serialization/deserialization
      * @param cacheLength How long to cache the config in memory
      *
-     * @since 2.0.0
+     * @since 3.11.0
      */
     public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor, long cacheLength) {
         super(clazz);
@@ -155,11 +162,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         this.username = username;
         this.password = password;
 
+        this.useMariadb = false /*TODO In next release*/;
+
         this.cacheLength = cacheLength;
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz     The class of the data being stored
      * @param host      The host of the server
@@ -177,7 +186,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz    The class of the data being stored
      * @param host     The host of the server
@@ -194,7 +203,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz       The class of the data being stored
      * @param host        The host of the server
@@ -212,7 +221,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz     The class of the data being stored
      * @param host      The host of the server
@@ -228,7 +237,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     }
 
     /**
-     * Create a new MySQLConfig
+     * Create a new StructuredMySQLConfig
      *
      * @param clazz    The class of the data being stored
      * @param host     The host of the server
@@ -292,7 +301,17 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                     }
                 }
 
-                this.connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, properties);
+                try {
+                    if (this.useMariadb) {
+                        Class.forName("org.mariadb.jdbc.Driver");
+                    } else {
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                    }
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.host + ":" + this.port + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;
