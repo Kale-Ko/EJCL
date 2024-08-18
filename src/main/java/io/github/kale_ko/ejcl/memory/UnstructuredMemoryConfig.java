@@ -1,7 +1,9 @@
 package io.github.kale_ko.ejcl.memory;
 
+import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
 import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An Unstructured Memory Config for storing data in memory
@@ -13,10 +15,21 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
     /**
      * Create a new UnstructuredMemoryConfig
      *
+     * @param processor The ObjectProcessor to use for serialization/deserialization
+     *
+     * @since 3.0.0
+     */
+    public UnstructuredMemoryConfig(@NotNull ObjectProcessor processor) {
+        super(processor);
+    }
+
+    /**
+     * Create a new UnstructuredMemoryConfig
+     *
      * @since 3.0.0
      */
     public UnstructuredMemoryConfig() {
-        super();
+        this(new ObjectProcessor.Builder().build());
     }
 
     /**

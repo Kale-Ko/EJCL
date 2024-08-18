@@ -407,8 +407,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             List<String> queryArgs = new ArrayList<>();
             for (String key : keys) {
-                Object value = PathResolver.resolve(object, key, false);
-                Object oldValue = PathResolver.resolve(this.configBackup, key, false);
+                Object value = PathResolver.resolve(object, key);
+                Object oldValue = PathResolver.resolve(this.configBackup, key);
 
                 if (!((value == null && oldValue == null) || (value != null && (value == oldValue || value.equals(oldValue))))) {
                     queryArgs.add(key);
