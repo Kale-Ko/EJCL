@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @version 3.0.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 public abstract class UnstructuredConfig {
@@ -40,15 +40,6 @@ public abstract class UnstructuredConfig {
      */
     protected UnstructuredConfig(@NotNull ObjectProcessor processor) {
         this.processor = processor;
-    }
-
-    /**
-     * Create a new Config
-     *
-     * @since 3.0.0
-     */
-    protected UnstructuredConfig() {
-        this(new ObjectProcessor.Builder().build());
     }
 
     /**
