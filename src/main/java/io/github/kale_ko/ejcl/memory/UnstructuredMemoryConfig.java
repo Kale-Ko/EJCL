@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured Memory Config for storing data in memory
  *
- * @version 3.9.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 public class UnstructuredMemoryConfig extends UnstructuredConfig {
@@ -19,17 +19,8 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    public UnstructuredMemoryConfig(@NotNull ObjectProcessor processor) {
+    protected UnstructuredMemoryConfig(@NotNull ObjectProcessor processor) {
         super(processor);
-    }
-
-    /**
-     * Create a new UnstructuredMemoryConfig
-     *
-     * @since 3.0.0
-     */
-    public UnstructuredMemoryConfig() {
-        this(new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -86,5 +77,58 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
      */
     public boolean isClosed() {
         return this.config == null;
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder {
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull ObjectProcessor processor;
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig} builder
+         *
+         * @since 4.0.0
+         */
+        public Builder() {
+            this.processor = new ObjectProcessor.Builder().build();
+        }
+
+        /**
+         * Get the ObjectProcessor to use for serialization/deserialization
+         *
+         * @return The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull ObjectProcessor getProcessor() {
+            return processor;
+        }
+
+        /**
+         * Set the ObjectProcessor to use for serialization/deserialization
+         *
+         * @param processor The ObjectProcessor to use for serialization/deserialization
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder setProcessor(@NotNull ObjectProcessor processor) {
+            this.processor = processor;
+            return this;
+        }
+
+        public @NotNull UnstructuredMemoryConfig build() {
+            return new UnstructuredMemoryConfig(this.processor);
+        }
     }
 }

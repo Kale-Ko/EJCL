@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 3.9.0
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
@@ -85,5 +85,46 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
      */
     public boolean isClosed() {
         return this.config == null;
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder<T> {
+        /**
+         * The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        protected final @NotNull Class<T> clazz;
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        /**
+         * Get the class of the data being stored
+         *
+         * @return The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Class<T> getClazz() {
+            return this.clazz;
+        }
+
+        public @NotNull StructuredMemoryConfig<T> build() {
+            return new StructuredMemoryConfig<>(this.clazz);
+        }
     }
 }

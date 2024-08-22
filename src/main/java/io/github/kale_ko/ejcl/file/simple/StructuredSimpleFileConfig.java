@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A Simple Structured File Config for storing key/value pairs in a File
  *
- * @version 3.9.0
+ * @version 4.0.0
  * @since 3.9.0
  */
 public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
@@ -36,22 +36,10 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredSimpleFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull ObjectProcessor processor) {
+    protected StructuredSimpleFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.processor = processor;
-    }
-
-    /**
-     * Create a new StructuredSimpleFileConfig
-     *
-     * @param clazz The class of the data being stored
-     * @param file  The file where data is being stored
-     *
-     * @since 2.0.0
-     */
-    public StructuredSimpleFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
-        this(clazz, file, new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -130,5 +118,115 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
         }
 
         return data.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder<T> {
+        /**
+         * The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        protected final @NotNull Class<T> clazz;
+
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull ObjectProcessor processor;
+
+        /**
+         * The file to use
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull File file;
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz, @NotNull File file) {
+            this.clazz = clazz;
+
+            this.processor = new ObjectProcessor.Builder().build();
+
+            this.file = file;
+        }
+
+        /**
+         * Get the class of the data being stored
+         *
+         * @return The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Class<T> getClazz() {
+            return this.clazz;
+        }
+
+        /**
+         * Get the ObjectProcessor to use for serialization/deserialization
+         *
+         * @return The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull ObjectProcessor getProcessor() {
+            return processor;
+        }
+
+        /**
+         * Set the ObjectProcessor to use for serialization/deserialization
+         *
+         * @param processor The ObjectProcessor to use for serialization/deserialization
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setProcessor(@NotNull ObjectProcessor processor) {
+            this.processor = processor;
+            return this;
+        }
+
+        /**
+         * Get the file to use
+         *
+         * @return The file to use
+         *
+         * @since 4.0.0
+         */
+        public @NotNull File getFile() {
+            return this.file;
+        }
+
+        /**
+         * Set the file to use
+         *
+         * @param file The file to use
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setFile(@NotNull File file) {
+            this.file = file;
+            return this;
+        }
+
+        public @NotNull StructuredSimpleFileConfig<T> build() {
+            return new StructuredSimpleFileConfig<>(this.clazz, this.file, this.processor);
+        }
     }
 }

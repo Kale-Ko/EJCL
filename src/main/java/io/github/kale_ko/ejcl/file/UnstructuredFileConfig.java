@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured File Config for storing data in a file
  *
- * @version 3.9.0
+ * @version 4.0.0
  * @since 3.0.0
  */
 public abstract class UnstructuredFileConfig extends UnstructuredConfig {
@@ -49,17 +49,6 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
         super(processor);
 
         this.file = file;
-    }
-
-    /**
-     * Create a new FileConfig
-     *
-     * @param file The file where data is being stored
-     *
-     * @since 3.0.0
-     */
-    protected UnstructuredFileConfig(@NotNull File file) {
-        this(file, new ObjectProcessor.Builder().build());
     }
 
     /**
