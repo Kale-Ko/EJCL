@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 3.11.0
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -47,7 +47,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected final int port;
+    protected final short port;
 
     /**
      * The database on the server
@@ -143,12 +143,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @param table       The table of the database
      * @param username    The username to the server
      * @param password    The password to the server
-     * @param processor   The ObjectProcessor to use for serialization/deserialization
+     * @param useMariadb  Weather to use the MariaDB driver
      * @param cacheLength How long to cache the config in memory
+     * @param processor   The ObjectProcessor to use for serialization/deserialization
      *
      * @since 3.11.0
      */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor, long cacheLength) {
+    protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, long cacheLength, @NotNull ObjectProcessor processor) {
         super(clazz);
 
         this.processor = processor;
@@ -162,93 +163,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         this.username = username;
         this.password = password;
 
-        this.useMariadb = false /*TODO In next release*/;
+        this.useMariadb = useMariadb;
 
         this.cacheLength = cacheLength;
-    }
-
-    /**
-     * Create a new StructuredMySQLConfig
-     *
-     * @param clazz     The class of the data being stored
-     * @param host      The host of the server
-     * @param port      The port of the server
-     * @param database  The database on the server
-     * @param table     The table of the database
-     * @param username  The username to the server
-     * @param password  The password to the server
-     * @param processor The ObjectProcessor to use for serialization/deserialization
-     *
-     * @since 2.0.0
-     */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, @NotNull ObjectProcessor processor) {
-        this(clazz, host, port, database, table, username, password, processor, 1L);
-    }
-
-    /**
-     * Create a new StructuredMySQLConfig
-     *
-     * @param clazz    The class of the data being stored
-     * @param host     The host of the server
-     * @param port     The port of the server
-     * @param database The database on the server
-     * @param table    The table of the database
-     * @param username The username to the server
-     * @param password The password to the server
-     *
-     * @since 2.0.0
-     */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password) {
-        this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build());
-    }
-
-    /**
-     * Create a new StructuredMySQLConfig
-     *
-     * @param clazz       The class of the data being stored
-     * @param host        The host of the server
-     * @param port        The port of the server
-     * @param database    The database on the server
-     * @param table       The table of the database
-     * @param username    The username to the server
-     * @param password    The password to the server
-     * @param cacheLength How long to cache the config in memory
-     *
-     * @since 2.0.0
-     */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, long cacheLength) {
-        this(clazz, host, port, database, table, username, password, new ObjectProcessor.Builder().build(), cacheLength);
-    }
-
-    /**
-     * Create a new StructuredMySQLConfig
-     *
-     * @param clazz     The class of the data being stored
-     * @param host      The host of the server
-     * @param port      The port of the server
-     * @param database  The database on the server
-     * @param table     The table of the database
-     * @param processor The ObjectProcessor to use for serialization/deserialization
-     *
-     * @since 2.0.0
-     */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table, @NotNull ObjectProcessor processor) {
-        this(clazz, host, port, database, table, null, null, processor);
-    }
-
-    /**
-     * Create a new StructuredMySQLConfig
-     *
-     * @param clazz    The class of the data being stored
-     * @param host     The host of the server
-     * @param port     The port of the server
-     * @param database The database on the server
-     * @param table    The table of the database
-     *
-     * @since 2.0.0
-     */
-    public StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, int port, @NotNull String database, @NotNull String table) {
-        this(clazz, host, port, database, table, null, null, new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -464,5 +381,370 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      */
     public boolean isClosed() {
         return this.closed;
+    }
+
+    /**
+     * A builder class for creating new {@link StructuredMySQLConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder<T> {
+        /**
+         * The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        protected final @NotNull Class<T> clazz;
+
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull ObjectProcessor processor;
+
+        /**
+         * The host of the server
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull String host;
+
+        /**
+         * The port of the server
+         *
+         * @since 4.0.0
+         */
+        protected short port;
+
+        /**
+         * The database on the server
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull String database;
+
+        /**
+         * The table of the database
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull String table;
+
+        /**
+         * The username to the server
+         * <p>
+         * Default is null
+         *
+         * @since 4.0.0
+         */
+        protected @Nullable String username = null;
+
+        /**
+         * The password to the server
+         * <p>
+         * Default is null
+         *
+         * @since 4.0.0
+         */
+        protected @Nullable String password = null;
+
+        /**
+         * Weather to use the MariaDB driver
+         * <p>
+         * Default is false
+         *
+         * @since 4.0.0
+         */
+        protected boolean useMariadb = false;
+
+        /**
+         * How long to cache the config in memory
+         * <p>
+         * Default is 3s
+         *
+         * @since 4.0.0
+         */
+        protected long cacheLength = 3000;
+
+        /**
+         * Create an {@link StructuredMySQLConfig} builder
+         *
+         * @param clazz    The class of the data being stored
+         * @param host     The host of the server
+         * @param port     The port of the server
+         * @param database The database on the server
+         * @param table    The table of the database
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table) {
+            this.clazz = clazz;
+
+            this.processor = new ObjectProcessor.Builder().build();
+
+            this.host = host;
+            this.port = port;
+
+            this.database = database;
+            this.table = table;
+        }
+
+        /**
+         * Get the class of the data being stored
+         *
+         * @return The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Class<T> getClazz() {
+            return this.clazz;
+        }
+
+        /**
+         * Get the ObjectProcessor to use for serialization/deserialization
+         *
+         * @return The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull ObjectProcessor getProcessor() {
+            return processor;
+        }
+
+        /**
+         * Set the ObjectProcessor to use for serialization/deserialization
+         *
+         * @param processor The ObjectProcessor to use for serialization/deserialization
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setProcessor(@NotNull ObjectProcessor processor) {
+            this.processor = processor;
+            return this;
+        }
+
+        /**
+         * Get the host of the server
+         *
+         * @return The host of the server
+         *
+         * @since 4.0.0
+         */
+        public @NotNull String getHost() {
+            return this.host;
+        }
+
+        /**
+         * Set the host of the server
+         *
+         * @param host The host of the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setHost(@NotNull String host) {
+            this.host = host;
+            return this;
+        }
+
+        /**
+         * Get the port of the server
+         *
+         * @return The port of the server
+         *
+         * @since 4.0.0
+         */
+        public short getPort() {
+            return this.port;
+        }
+
+        /**
+         * Set the port of the server
+         *
+         * @param port The port of the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setPort(short port) {
+            this.port = port;
+            return this;
+        }
+
+        /**
+         * Get the database on the server
+         *
+         * @return The database on the server
+         *
+         * @since 4.0.0
+         */
+        public @NotNull String getDatabase() {
+            return this.database;
+        }
+
+        /**
+         * Set the database on the server
+         *
+         * @param database The database on the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setDatabase(@NotNull String database) {
+            this.database = database;
+            return this;
+        }
+
+        /**
+         * Get the table of the database
+         *
+         * @return The table of the database
+         *
+         * @since 4.0.0
+         */
+        public @NotNull String getTable() {
+            return this.table;
+        }
+
+        /**
+         * Set the table of the database
+         *
+         * @param table The table of the database
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setTable(@NotNull String table) {
+            this.table = table;
+            return this;
+        }
+
+        /**
+         * Get the username to the server
+         * <p>
+         * Default is null
+         *
+         * @return The username to the server
+         *
+         * @since 4.0.0
+         */
+        public @Nullable String getUsername() {
+            return this.username;
+        }
+
+        /**
+         * Set the username to the server
+         * <p>
+         * Default is null
+         *
+         * @param username The username to the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setUsername(@Nullable String username) {
+            this.username = username;
+            return this;
+        }
+
+        /**
+         * Get the password to the server
+         * <p>
+         * Default is null
+         *
+         * @return The password to the server
+         *
+         * @since 4.0.0
+         */
+        public @Nullable String getPassword() {
+            return this.password;
+        }
+
+        /**
+         * Set the password to the server
+         * <p>
+         * Default is null
+         *
+         * @param password The password to the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setPassword(@Nullable String password) {
+            this.password = password;
+            return this;
+        }
+
+        /**
+         * Get weather to use the MariaDB driver
+         * <p>
+         * Default is false
+         *
+         * @return Weather to use the MariaDB driver
+         *
+         * @since 4.0.0
+         */
+        public boolean getUseMariadb() {
+            return this.useMariadb;
+        }
+
+        /**
+         * Set weather to use the MariaDB driver
+         * <p>
+         * Default is false
+         *
+         * @param useMariadb Weather to use the MariaDB driver
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setUseMariadb(boolean useMariadb) {
+            this.useMariadb = useMariadb;
+            return this;
+        }
+
+        /**
+         * Get how long to cache the config in memory
+         * <p>
+         * Default is 3s
+         *
+         * @return How long to cache the config in memory
+         *
+         * @since 4.0.0
+         */
+        public long getCacheLength() {
+            return this.cacheLength;
+        }
+
+        /**
+         * Set how long to cache the config in memory
+         * <p>
+         * Default is 3s
+         *
+         * @param cacheLength How long to cache the config in memory
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setCacheLength(long cacheLength) {
+            this.cacheLength = cacheLength;
+            return this;
+        }
+
+        public @NotNull StructuredMySQLConfig<T> build() {
+            return new StructuredMySQLConfig<>(this.clazz, this.host, this.port, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);
+        }
     }
 }

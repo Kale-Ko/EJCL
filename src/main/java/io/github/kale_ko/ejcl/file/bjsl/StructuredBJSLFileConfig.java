@@ -1,6 +1,6 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.bjsl.parsers.*;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.StructuredFileConfig;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 3.9.0
+ * @version 4.0.0
  * @since 2.0.0
  */
 public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
@@ -41,24 +41,11 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.parser = parser;
         this.processor = processor;
-    }
-
-    /**
-     * Create a new StructuredBJSLFileConfig
-     *
-     * @param clazz  The class of the data being stored
-     * @param file   The file where data is being stored
-     * @param parser The parser/processor to use for parsing and serialization
-     *
-     * @since 2.0.0
-     */
-    public StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
-        this(clazz, file, parser, new ObjectProcessor.Builder().build());
     }
 
     /**
@@ -116,5 +103,255 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
         }
 
         return this.parser.toBytes(this.processor.toElement(this.config));
+    }
+
+    /**
+     * A builder class for creating new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}s
+     *
+     * @version 4.0.0
+     * @since 4.0.0
+     */
+    public static class Builder<T> {
+        /**
+         * The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        protected final @NotNull Class<T> clazz;
+
+        /**
+         * The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull ObjectProcessor processor;
+
+        /**
+         * The file to use
+         *
+         * @since 4.0.0
+         */
+        protected @NotNull File file;
+
+        /**
+         * The parser/processor to use for parsing and serialization
+         *
+         * @since 2.0.0
+         */
+        protected @NotNull Parser<?, ?> parser;
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz  The class of the data being stored
+         * @param file   The file to use
+         * @param parser The parser/processor to use for parsing and serialization
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
+            this.clazz = clazz;
+
+            this.processor = new ObjectProcessor.Builder().build();
+
+            this.file = file;
+
+            this.parser = parser;
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createCsv(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new CsvParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createJson(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new JsonParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createProperties(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new PropertiesParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new SmileParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createToml(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new TomlParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createXml(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new XmlParser.Builder().build());
+        }
+
+        /**
+         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
+         *
+         * @param clazz The class of the data being stored
+         * @param file  The file to use
+         * @param <T>   The type of the data being stored
+         *
+         * @return A new Builder
+         *
+         * @since 4.0.0
+         */
+        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new YamlParser.Builder().build());
+        }
+
+        /**
+         * Get the class of the data being stored
+         *
+         * @return The class of the data being stored
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Class<T> getClazz() {
+            return this.clazz;
+        }
+
+        /**
+         * Get the ObjectProcessor to use for serialization/deserialization
+         *
+         * @return The ObjectProcessor to use for serialization/deserialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull ObjectProcessor getProcessor() {
+            return processor;
+        }
+
+        /**
+         * Set the ObjectProcessor to use for serialization/deserialization
+         *
+         * @param processor The ObjectProcessor to use for serialization/deserialization
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setProcessor(@NotNull ObjectProcessor processor) {
+            this.processor = processor;
+            return this;
+        }
+
+        /**
+         * Get the file to use
+         *
+         * @return The file to use
+         *
+         * @since 4.0.0
+         */
+        public @NotNull File getFile() {
+            return this.file;
+        }
+
+        /**
+         * Set the file to use
+         *
+         * @param file The file to use
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setFile(@NotNull File file) {
+            this.file = file;
+            return this;
+        }
+
+        /**
+         * Get the parser/processor to use for parsing and serialization
+         *
+         * @return The parser/processor to use for parsing and serialization
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Parser<?, ?> getParser() {
+            return this.parser;
+        }
+
+        /**
+         * Set the parser/processor to use for parsing and serialization
+         *
+         * @param parser The parser/processor to use for parsing and serialization
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setParser(@NotNull Parser<?, ?> parser) {
+            this.parser = parser;
+            return this;
+        }
+
+        public @NotNull StructuredBJSLFileConfig<T> build() {
+            return new StructuredBJSLFileConfig<>(this.clazz, this.file, this.parser, this.processor);
+        }
     }
 }
