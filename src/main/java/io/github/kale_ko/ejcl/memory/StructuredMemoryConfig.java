@@ -25,7 +25,7 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
     protected StructuredMemoryConfig(@NotNull Class<T> clazz) {
         super(clazz);
 
-        this.config = InitializationUtil.initializeUnsafe(clazz);
+        this.config = InitializationUtil.initialize(clazz);
         if (this.config == null) {
             throw new ConfigInitializationException(clazz);
         }
