@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id "io.github.kale_ko.gradleshade" version "1.2.0"
     id "maven-publish"
 }
 
@@ -48,29 +49,14 @@ jar {
                 "Sealed": true
     }
 }
+import io.github.kale_ko.gradleshade.ShadeMode
 
-tasks.register("fatJar", Jar) {
-    archiveClassifier = "fat"
-    manifest {
-        attributes "Name": "io/github/kale_ko/ejcl/",
-                "Specification-Title": "EJCL",
-                "Specification-Version": project.version,
-                "Specification-Vendor": "Kale-Ko",
-                "Implementation-Title": "io.github.kale_ko.ejcl",
-                "Implementation-Version": project.version,
-                "Implementation-Vendor": "Kale-Ko",
-                "Sealed": true
-    }
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(sourceSets.main.output)
-    from(configurations.runtimeClasspath.collect {
-        it.isDirectory() ? null : zipTree(it)
-    })
+shade {
+    mode = ShadeMode.EMBED_CLASSES
 }
 
-build {
-    finalizedBy tasks.fatJar
+shadedJar {
+    archiveClassifier = "fat"
 }
 
 javadoc {
@@ -134,7 +120,7 @@ publishing {
             version = project.version
 
             artifact tasks.jar
-            artifact tasks.fatJar
+            artifact tasks.shadedJar
             artifact tasks.sourcesJar
             artifact tasks.javadocJar
 
