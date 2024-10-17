@@ -1,11 +1,12 @@
 plugins {
     id "java"
-    id "com.gradleup.shadow" version "8.3.0"
+    id "java-library"
+    id "com.gradleup.shadow" version "8.3.3"
     id "maven-publish"
 }
 
-project.group = "io.github.kale_ko"
-project.version = project.project_version
+group = "io.github.kale_ko"
+version = project_version
 
 repositories {
     maven {
@@ -16,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation "io.github.kale_ko:bjsl:${project.bjsl_version}"
+    api "io.github.kale_ko:bjsl:${project.bjsl_version}"
 
     compileOnly "org.jetbrains:annotations:24.0.1"
 
@@ -26,7 +27,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(project.java_version)
+        languageVersion = JavaLanguageVersion.of(java_version)
     }
 
     withSourcesJar()
@@ -41,10 +42,10 @@ jar {
     manifest {
         attributes "Name": "io/github/kale_ko/ejcl/",
                 "Specification-Title": "EJCL",
-                "Specification-Version": project.version,
+                "Specification-Version": project_version,
                 "Specification-Vendor": "Kale-Ko",
                 "Implementation-Title": "io.github.kale_ko.ejcl",
-                "Implementation-Version": project.version,
+                "Implementation-Version": project_version,
                 "Implementation-Vendor": "Kale-Ko",
                 "Sealed": true
     }
@@ -59,7 +60,7 @@ build {
 }
 
 javadoc {
-    title = project.name + " " + project.version
+    title = name + " " + project_version
 
     options.encoding = "UTF-8"
     options.locale = "en"
@@ -70,7 +71,7 @@ javadoc {
     doFirst {
         mkdir "./build/"
         mkdir "./build/docs/"
-        file("./build/docs/overview.html").text = "<html><body><p class=\"overview\">" + project.project_description + "</p></body></html>"
+        file("./build/docs/overview.html").text = "<html><body><p class=\"overview\">" + project_description + "</p></body></html>"
     }
 
     options {
@@ -116,9 +117,9 @@ publishing {
 
     publications {
         main(MavenPublication) {
-            groupId = project.group
+            groupId = group
             artifactId = "ejcl"
-            version = project.version
+            version = project_version
 
             artifact tasks.jar
             artifact tasks.shadowJar
@@ -137,25 +138,39 @@ publishing {
                 def developerNode = node.appendNode("developers").appendNode("developer")
                 developerNode.appendNode("id", "kale-ko")
                 developerNode.appendNode("name", "Kale Ko")
-                developerNode.appendNode("url", "https://kaleko.dev/")
+                developerNode.appendNode("url", "https://www.kaleko.dev/")
                 developerNode.appendNode("email", "contact@kaleko.dev")
 
                 def scmNode = node.appendNode("scm")
                 scmNode.appendNode("connection", "scm:git:git@github.com:Kale-Ko/EJCL.git")
                 scmNode.appendNode("developerConnection", "scm:git:git@github.com:Kale-Ko/EJCL.git")
-                scmNode.appendNode("tag", "master")
+                scmNode.appendNode("tag", "main")
                 scmNode.appendNode("url", "https://github.com/Kale-Ko/EJCL/")
 
                 def dependenciesNode = node.appendNode("dependencies")
 
-                def dependencyManagementNode = node.appendNode("dependencyManagement")
-                dependencyManagementNode.appendNode("dependencies")
+                def compileDependencies = []
 
                 configurations.compileClasspath.resolvedConfiguration.getFirstLevelModuleDependencies().each {
                     def dependencyNode = dependenciesNode.appendNode("dependency")
                     dependencyNode.appendNode("groupId", it.moduleGroup)
                     dependencyNode.appendNode("artifactId", it.moduleName)
                     dependencyNode.appendNode("version", it.moduleVersion)
+                    dependencyNode.appendNode("scope", "compile")
+
+                    compileDependencies.push(it.moduleGroup + ":" + it.moduleName + ":" + it.moduleVersion)
+                }
+
+                configurations.runtimeClasspath.resolvedConfiguration.getFirstLevelModuleDependencies().each {
+                    if (compileDependencies.contains(it.moduleGroup + ":" + it.moduleName + ":" + it.moduleVersion)) {
+                        return
+                    }
+
+                    def dependencyNode = dependenciesNode.appendNode("dependency")
+                    dependencyNode.appendNode("groupId", it.moduleGroup)
+                    dependencyNode.appendNode("artifactId", it.moduleName)
+                    dependencyNode.appendNode("version", it.moduleVersion)
+                    dependencyNode.appendNode("scope", "runtime")
                 }
             }
         }
