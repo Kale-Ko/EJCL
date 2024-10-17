@@ -13,18 +13,12 @@ EJCL has two basic config types, structured and unstructured.
 ### Structured (Recommended)
 
 Structured configs are created with a Java class used as the "structure".\
-Calling
-`config#get()` will return an instance of the type passed to the constructor for easy use of the object.
+Calling `config#get()` will return an instance of the type passed to the constructor for easy use of the object.
 
 ### Unstructured
 
-Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data. (If you are using
-`MySQLConfig` it also provides a performance & safety boost)\
-To get or set data on an unstructured config you can call
-`config#get(path)` or
-`config#set(path, value)` to do so (
-`path` can be any string and
-`value` can be any object).
+Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data.\
+To get or set data on an unstructured config you can call `config#get(path)` or `config#set(path, value)` to do so (`path` can be any string and `value` can be any object).
 
 ## Storage types
 
@@ -32,24 +26,20 @@ EJCL also offers a variety of storage options listed below.
 
 ### Local filesystem
 
-Configs can be stored locally on the filesystem using classes from the
-`io.github.kale_ko.ejcl.file` package.
+Configs can be stored locally on the filesystem using classes from the `io.github.kale_ko.ejcl.file` package.
 
-This includes a
-`SimpleFileConfig` which is a config that stores key/value pairs in a very simple format,
-`{key}={value}`.
+This includes a `SimpleFileConfig` which is a config that stores key/value pairs in a very simple format, `{key}={value}`.
 
-There is also
-`BJSLFileConfig` which is a config that stores data in different common formats (JSON, YAML, TOML, XML, CSV, Java Properties, and Json Smile)\
-Each of these different formats can be used with their respective classes
-`{format}FileConfig`
+There is also `BJSLFileConfig` which is a config that stores data in different common formats (JSON, YAML, TOML, XML, CSV, Java Properties, and Json Smile)\
+Each of these different formats can be used by passing their respective parsers to the constructor `{format}Parser`
 
 ### MySQL Server
 
-Configs can also be stored on a MySQL server using classes from the
-`io.github.kale_ko.ejcl.mysql` package.
+Configs can also be stored on a MySQL server using classes from the `io.github.kale_ko.ejcl.mysql` package.
 
-The structured version is slower to save and load but can be easier to work with, while the unstructured version has the advantage of drastically lowering the chances of overwriting a value.
+The structured version is slower to load but can be easier to work with, while the unstructured version has the advantage of only fetching the data you need.
+
+Note: The structured version only writes changed values to prevent overwriting others changes.
 
 ### In memory
 
