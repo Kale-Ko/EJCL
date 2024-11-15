@@ -17,12 +17,15 @@ repositories {
 }
 
 dependencies {
-    api "io.github.kale_ko:bjsl:${project.bjsl_version}"
+    api "io.github.kale_ko:bjsl:${bjsl_version}"
 
-    compileOnly "org.jetbrains:annotations:24.0.1"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junit_jupiter_version}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
-    runtimeOnly "com.mysql:mysql-connector-j:${project.mysql_connector_version}"
-    runtimeOnly "org.mariadb.jdbc:mariadb-java-client:${project.mariadb_connector_version}"
+    compileOnly "org.jetbrains:annotations:${annotations_version}"
+
+    runtimeOnly "com.mysql:mysql-connector-j:${mysql_connector_version}"
+    runtimeOnly "org.mariadb.jdbc:mariadb-java-client:${mariadb_connector_version}"
 }
 
 java {
@@ -60,23 +63,39 @@ build {
 }
 
 javadoc {
-    title = name + " " + project_version
+    title = project.name + " " + project.version
 
     options.encoding = "UTF-8"
     options.locale = "en"
 
+    options.source = JavaLanguageVersion.of(java_version).asInt()
+
+    options.showFromProtected()
+
+    options.linkSource = true
+    options.noDeprecatedList = true
+
     options.author = true
     options.version = true
 
+    int javaVersion = JavaLanguageVersion.of(java_version).asInt()
+    options.links = [javaVersion < 11 ? ("https://docs.oracle.com/javase/" + javaVersion + "/docs/api/") : ("https://docs.oracle.com/en/java/javase/" + javaVersion + "/docs/api/"),
+                     "https://maven.kaleko.dev/javadoc/public-snapshot/io/github/kale_ko/bjsl/" + bjsl_version + "/raw/",
+                     "https://javadoc.io/doc/org.jetbrains/annotations/" + annotations_version + "/"]
+
+    options.tags = ["apiNote:TCMF:API note:", "implNote:TCMF:Implementation note:"]
+
     doFirst {
-        mkdir "./build/"
-        mkdir "./build/docs/"
-        file("./build/docs/overview.html").text = "<html><body><p class=\"overview\">" + project_description + "</p></body></html>"
+        mkdir "build/"
+        mkdir "build/docs/"
+        file("build/docs/overview.html").text = "<html><body><p class=\"overview\">" + project_description + "</p></body></html>"
     }
 
-    options {
-        overview "build/docs/overview.html"
-    }
+    options.overview "build/docs/overview.html"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 publishing {
