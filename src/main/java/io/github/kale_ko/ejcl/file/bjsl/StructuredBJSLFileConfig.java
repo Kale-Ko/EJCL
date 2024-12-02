@@ -1,6 +1,9 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.*;
+import io.github.kale_ko.bjsl.parsers.JsonParser;
+import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.bjsl.parsers.SmileParser;
+import io.github.kale_ko.bjsl.parsers.YamlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.StructuredFileConfig;
@@ -22,7 +25,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    protected final @NotNull Parser<?, ?> parser;
+    protected final @NotNull Parser parser;
 
     /**
      * The ObjectProcessor to use for serialization/deserialization
@@ -41,7 +44,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.parser = parser;
@@ -138,7 +141,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 2.0.0
          */
-        protected @NotNull Parser<?, ?> parser;
+        protected @NotNull Parser parser;
 
         /**
          * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
@@ -149,7 +152,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public Builder(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser<?, ?> parser) {
+        public Builder(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser parser) {
             this.clazz = clazz;
 
             this.processor = new ObjectProcessor.Builder().build();
@@ -157,21 +160,6 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
             this.file = file;
 
             this.parser = parser;
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
-         *
-         * @param clazz The class of the data being stored
-         * @param file  The file to use
-         * @param <T>   The type of the data being stored
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static <T> Builder<T> createCsv(@NotNull Class<T> clazz, @NotNull File file) {
-            return new Builder<>(clazz, file, new CsvParser.Builder().build());
         }
 
         /**
@@ -200,8 +188,8 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createProperties(@NotNull Class<T> clazz, @NotNull File file) {
-            return new Builder<>(clazz, file, new PropertiesParser.Builder().build());
+        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull File file) {
+            return new Builder<>(clazz, file, new YamlParser.Builder().build());
         }
 
         /**
@@ -217,51 +205,6 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          */
         public static <T> Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull File file) {
             return new Builder<>(clazz, file, new SmileParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
-         *
-         * @param clazz The class of the data being stored
-         * @param file  The file to use
-         * @param <T>   The type of the data being stored
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static <T> Builder<T> createToml(@NotNull Class<T> clazz, @NotNull File file) {
-            return new Builder<>(clazz, file, new TomlParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
-         *
-         * @param clazz The class of the data being stored
-         * @param file  The file to use
-         * @param <T>   The type of the data being stored
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static <T> Builder<T> createXml(@NotNull Class<T> clazz, @NotNull File file) {
-            return new Builder<>(clazz, file, new XmlParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig} builder
-         *
-         * @param clazz The class of the data being stored
-         * @param file  The file to use
-         * @param <T>   The type of the data being stored
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull File file) {
-            return new Builder<>(clazz, file, new YamlParser.Builder().build());
         }
 
         /**
@@ -332,7 +275,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public @NotNull Parser<?, ?> getParser() {
+        public @NotNull Parser getParser() {
             return this.parser;
         }
 
@@ -345,7 +288,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public @NotNull Builder<T> setParser(@NotNull Parser<?, ?> parser) {
+        public @NotNull Builder<T> setParser(@NotNull Parser parser) {
             this.parser = parser;
             return this;
         }

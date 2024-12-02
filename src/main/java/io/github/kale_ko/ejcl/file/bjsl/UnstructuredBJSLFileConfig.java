@@ -1,6 +1,9 @@
 package io.github.kale_ko.ejcl.file.bjsl;
 
-import io.github.kale_ko.bjsl.parsers.*;
+import io.github.kale_ko.bjsl.parsers.JsonParser;
+import io.github.kale_ko.bjsl.parsers.Parser;
+import io.github.kale_ko.bjsl.parsers.SmileParser;
+import io.github.kale_ko.bjsl.parsers.YamlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
@@ -20,7 +23,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    protected final @NotNull Parser<?, ?> parser;
+    protected final @NotNull Parser parser;
 
     /**
      * Create a new UnstructuredBJSLFileConfig
@@ -31,7 +34,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    protected UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser<?, ?> parser, @NotNull ObjectProcessor processor) {
+    protected UnstructuredBJSLFileConfig(@NotNull File file, @NotNull Parser parser, @NotNull ObjectProcessor processor) {
         super(file, processor);
 
         this.parser = parser;
@@ -120,7 +123,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 2.0.0
          */
-        protected @NotNull Parser<?, ?> parser;
+        protected @NotNull Parser parser;
 
         /**
          * Create an {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
@@ -130,26 +133,13 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public Builder(@NotNull File file, @NotNull Parser<?, ?> parser) {
+        public Builder(@NotNull File file, @NotNull Parser parser) {
 
             this.processor = new ObjectProcessor.Builder().build();
 
             this.file = file;
 
             this.parser = parser;
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
-         *
-         * @param file The file to use
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static UnstructuredBJSLFileConfig.Builder createCsv(@NotNull File file) {
-            return new UnstructuredBJSLFileConfig.Builder(file, new CsvParser.Builder().build());
         }
 
         /**
@@ -174,8 +164,8 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public static UnstructuredBJSLFileConfig.Builder createProperties(@NotNull File file) {
-            return new UnstructuredBJSLFileConfig.Builder(file, new PropertiesParser.Builder().build());
+        public static UnstructuredBJSLFileConfig.Builder createYaml(@NotNull File file) {
+            return new UnstructuredBJSLFileConfig.Builder(file, new YamlParser.Builder().build());
         }
 
         /**
@@ -189,45 +179,6 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          */
         public static UnstructuredBJSLFileConfig.Builder createSmile(@NotNull File file) {
             return new UnstructuredBJSLFileConfig.Builder(file, new SmileParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
-         *
-         * @param file The file to use
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static UnstructuredBJSLFileConfig.Builder createToml(@NotNull File file) {
-            return new UnstructuredBJSLFileConfig.Builder(file, new TomlParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
-         *
-         * @param file The file to use
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static UnstructuredBJSLFileConfig.Builder createXml(@NotNull File file) {
-            return new UnstructuredBJSLFileConfig.Builder(file, new XmlParser.Builder().build());
-        }
-
-        /**
-         * Create an {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig} builder
-         *
-         * @param file The file to use
-         *
-         * @return A new Builder
-         *
-         * @since 4.0.0
-         */
-        public static UnstructuredBJSLFileConfig.Builder createYaml(@NotNull File file) {
-            return new UnstructuredBJSLFileConfig.Builder(file, new YamlParser.Builder().build());
         }
 
         /**
@@ -287,7 +238,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public @NotNull Parser<?, ?> getParser() {
+        public @NotNull Parser getParser() {
             return this.parser;
         }
 
@@ -300,7 +251,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public @NotNull UnstructuredBJSLFileConfig.Builder setParser(@NotNull Parser<?, ?> parser) {
+        public @NotNull UnstructuredBJSLFileConfig.Builder setParser(@NotNull Parser parser) {
             this.parser = parser;
             return this;
         }
