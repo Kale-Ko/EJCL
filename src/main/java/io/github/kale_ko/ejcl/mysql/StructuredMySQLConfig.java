@@ -510,7 +510,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          */
         public @NotNull ObjectProcessor getProcessor() {
-            return processor;
+            return this.processor;
         }
 
         /**

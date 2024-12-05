@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * An Unstructured Memory Config for storing data in memory
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.0.0
  */
 public class UnstructuredMemoryConfig extends UnstructuredConfig {
@@ -82,7 +82,7 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
     /**
      * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder {
@@ -110,7 +110,7 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
          * @since 4.0.0
          */
         public @NotNull ObjectProcessor getProcessor() {
-            return processor;
+            return this.processor;
         }
 
         /**

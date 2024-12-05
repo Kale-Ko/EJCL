@@ -2,7 +2,6 @@ package io.github.kale_ko.ejcl.memory;
 
 import io.github.kale_ko.bjsl.processor.reflection.InitializationUtil;
 import io.github.kale_ko.ejcl.StructuredConfig;
-import io.github.kale_ko.ejcl.exception.ConfigInitializationException;
 import java.io.IOException;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 2.0.0
  */
 public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
@@ -26,9 +25,6 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
         super(clazz);
 
         this.config = InitializationUtil.initialize(clazz);
-        if (this.config == null) {
-            throw new ConfigInitializationException(clazz);
-        }
     }
 
     /**
@@ -90,7 +86,7 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
     /**
      * A builder class for creating new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder<T> {

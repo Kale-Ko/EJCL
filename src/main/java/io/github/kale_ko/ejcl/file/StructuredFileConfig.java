@@ -3,9 +3,9 @@ package io.github.kale_ko.ejcl.file;
 import io.github.kale_ko.ejcl.StructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
@@ -22,7 +22,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected final @NotNull File file;
+    protected final @NotNull Path file;
 
     /**
      * The lock used when saving and loading the config
@@ -46,7 +46,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    protected StructuredFileConfig(@NotNull Class<T> clazz, @NotNull File file) {
+    protected StructuredFileConfig(@NotNull Class<T> clazz, @NotNull Path file) {
         super(clazz);
 
         this.file = file;
@@ -59,7 +59,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.0.0
      */
-    public @NotNull File getFile() {
+    public @NotNull Path getFile() {
         return this.file;
     }
 
@@ -105,12 +105,11 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @since 1.0.0
      */
     protected byte @NotNull [] loadRaw() throws IOException {
-        if (!Files.exists(this.file.toPath())) {
-            Files.createFile(this.file.toPath());
-            Files.write(this.file.toPath(), this.create());
+        if (!Files.exists(this.file)) {
+            return this.create();
         }
 
-        return Files.readAllBytes(this.file.toPath());
+        return Files.readAllBytes(this.file);
     }
 
     /**
@@ -129,10 +128,10 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
         }
 
         synchronized (SAVELOAD_LOCK) {
-            if (!Files.exists(this.file.toPath())) {
-                Files.createFile(this.file.toPath());
+            if (!Files.exists(this.file)) {
+                Files.createFile(this.file);
             }
-            Files.write(this.file.toPath(), this.saveRaw());
+            Files.write(this.file, this.saveRaw());
         }
     }
 
