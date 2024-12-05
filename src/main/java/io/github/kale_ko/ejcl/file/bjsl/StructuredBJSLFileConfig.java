@@ -7,8 +7,8 @@ import io.github.kale_ko.bjsl.parsers.YamlParser;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.StructuredFileConfig;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <T> The type of the data being stored
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 2.0.0
  */
 public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
@@ -44,7 +44,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      *
      * @since 2.0.0
      */
-    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser parser, @NotNull ObjectProcessor processor) {
+    protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull Path file, @NotNull Parser parser, @NotNull ObjectProcessor processor) {
         super(clazz, file);
 
         this.parser = parser;
@@ -111,7 +111,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
     /**
      * A builder class for creating new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder<T> {
@@ -134,7 +134,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        protected @NotNull File file;
+        protected @NotNull Path file;
 
         /**
          * The parser/processor to use for parsing and serialization
@@ -152,7 +152,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public Builder(@NotNull Class<T> clazz, @NotNull File file, @NotNull Parser parser) {
+        public Builder(@NotNull Class<T> clazz, @NotNull Path file, @NotNull Parser parser) {
             this.clazz = clazz;
 
             this.processor = new ObjectProcessor.Builder().build();
@@ -173,7 +173,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createJson(@NotNull Class<T> clazz, @NotNull File file) {
+        public static <T> Builder<T> createJson(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new JsonParser.Builder().build());
         }
 
@@ -188,7 +188,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull File file) {
+        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new YamlParser.Builder().build());
         }
 
@@ -203,7 +203,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull File file) {
+        public static <T> Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new SmileParser.Builder().build());
         }
 
@@ -226,7 +226,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          * @since 4.0.0
          */
         public @NotNull ObjectProcessor getProcessor() {
-            return processor;
+            return this.processor;
         }
 
         /**
@@ -250,7 +250,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public @NotNull File getFile() {
+        public @NotNull Path getFile() {
             return this.file;
         }
 
@@ -263,7 +263,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public @NotNull Builder<T> setFile(@NotNull File file) {
+        public @NotNull Builder<T> setFile(@NotNull Path file) {
             this.file = file;
             return this;
         }

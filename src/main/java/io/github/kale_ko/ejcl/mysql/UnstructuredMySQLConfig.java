@@ -495,7 +495,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          */
         public @NotNull ObjectProcessor getProcessor() {
-            return processor;
+            return this.processor;
         }
 
         /**

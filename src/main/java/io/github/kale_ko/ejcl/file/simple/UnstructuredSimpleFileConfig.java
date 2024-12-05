@@ -1,21 +1,23 @@
 package io.github.kale_ko.ejcl.file.simple;
 
+import com.fasterxml.jackson.core.io.BigDecimalParser;
+import com.fasterxml.jackson.core.io.BigIntegerParser;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.file.UnstructuredFileConfig;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A Simple Unstructured File Config for storing key/value pairs in a File
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 2.0.0
  */
 public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
@@ -27,7 +29,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
      *
      * @since 2.0.0
      */
-    protected UnstructuredSimpleFileConfig(@NotNull File file, @NotNull ObjectProcessor processor) {
+    protected UnstructuredSimpleFileConfig(@NotNull Path file, @NotNull ObjectProcessor processor) {
         super(file, processor);
     }
 
@@ -67,8 +69,73 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
 
             for (String line : new String(this.loadRaw(), StandardCharsets.UTF_8).split("\n")) {
                 line = line.trim();
+                if (line.isBlank()) {
+                    continue;
+                }
 
-                this.config.set(line.split("=", 2)[0].trim(), ParsedPrimitive.fromString(line.split("=", 2)[1].trim()));
+                String[] splitLine = line.split("=", 3);
+
+                String path = splitLine[0].trim();
+                String type = splitLine[1].trim().toUpperCase();
+                ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
+                String value = splitLine[2].trim();
+
+                ParsedPrimitive element;
+                switch (primitiveType) {
+                    case STRING: {
+                        element = ParsedPrimitive.fromString(value);
+                        break;
+                    }
+                    case BYTE: {
+                        element = ParsedPrimitive.fromByte(Byte.parseByte(value));
+                        break;
+                    }
+                    case CHAR: {
+                        element = ParsedPrimitive.fromChar((char) Short.parseShort(value));
+                        break;
+                    }
+                    case SHORT: {
+                        element = ParsedPrimitive.fromShort(Short.parseShort(value));
+                        break;
+                    }
+                    case INTEGER: {
+                        element = ParsedPrimitive.fromInteger(Integer.parseInt(value));
+                        break;
+                    }
+                    case LONG: {
+                        element = ParsedPrimitive.fromLong(Long.parseLong(value));
+                        break;
+                    }
+                    case BIGINTEGER: {
+                        element = ParsedPrimitive.fromBigInteger(BigIntegerParser.parseWithFastParser(value));
+                        break;
+                    }
+                    case FLOAT: {
+                        element = ParsedPrimitive.fromFloat(Float.parseFloat(value));
+                        break;
+                    }
+                    case DOUBLE: {
+                        element = ParsedPrimitive.fromDouble(Double.parseDouble(value));
+                        break;
+                    }
+                    case BIGDECIMAL: {
+                        element = ParsedPrimitive.fromBigDecimal(BigDecimalParser.parse(value));
+                        break;
+                    }
+                    case BOOLEAN: {
+                        element = ParsedPrimitive.fromBoolean(Boolean.parseBoolean(value));
+                        break;
+                    }
+                    case NULL: {
+                        element = ParsedPrimitive.fromNull();
+                        break;
+                    }
+                    default: {
+                        throw new RuntimeException();
+                    }
+                }
+
+                this.config.set(path, element);
             }
 
             if (save) {
@@ -94,8 +161,13 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
         StringBuilder data = new StringBuilder();
 
         for (Map.Entry<String, ParsedElement> entry : this.config.getEntries()) {
-            if (entry.getValue().isPrimitive()) {
-                data.append(entry.getKey()).append("=").append(!entry.getValue().asPrimitive().isNull() ? entry.getValue().asPrimitive().get().toString() : "null");
+            String key = entry.getKey();
+            ParsedElement element = entry.getValue();
+            if (element.isPrimitive()) {
+                if (key.contains("=")) {
+                    throw new IllegalArgumentException("Key cannot contain '='");
+                }
+                data.append(key).append("=").append(element.asPrimitive().getType()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
             }
         }
 
@@ -105,11 +177,10 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
     /**
      * A builder class for creating new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder {
-
         /**
          * The ObjectProcessor to use for serialization/deserialization
          *
@@ -122,7 +193,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        protected @NotNull File file;
+        protected @NotNull Path file;
 
         /**
          * Create an {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig} builder
@@ -131,7 +202,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public Builder(@NotNull File file) {
+        public Builder(@NotNull Path file) {
             this.processor = new ObjectProcessor.Builder().build();
 
             this.file = file;
@@ -145,7 +216,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
          * @since 4.0.0
          */
         public @NotNull ObjectProcessor getProcessor() {
-            return processor;
+            return this.processor;
         }
 
         /**
@@ -169,7 +240,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public @NotNull File getFile() {
+        public @NotNull Path getFile() {
             return this.file;
         }
 
@@ -182,7 +253,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public @NotNull Builder setFile(@NotNull File file) {
+        public @NotNull Builder setFile(@NotNull Path file) {
             this.file = file;
             return this;
         }
