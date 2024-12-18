@@ -8,7 +8,7 @@ import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
-import io.github.kale_ko.ejcl.mysql.driver.MySQL;
+import io.github.kale_ko.ejcl.mysql.helper.MySQLHelper;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -233,7 +233,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;
 
-                    MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
                 } else {
                     throw new IOException("Failed to connect: Connection is not valid");
                 }
@@ -270,7 +270,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         synchronized (SAVELOAD_LOCK) {
             ParsedObject object = ParsedObject.create();
 
-            try (ResultSet result = MySQL.query(this.connection, "SELECT path,value FROM " + this.table)) {
+            try (ResultSet result = MySQLHelper.query(this.connection, "SELECT path,value FROM " + this.table)) {
                 while (result.next()) {
                     PathResolver.update(object, result.getString("path"), result.getString("value"), true);
                 }
@@ -337,11 +337,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             try {
                 if (!queryArgs.isEmpty()) {
-                    MySQL.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+                    MySQLHelper.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
                 }
 
                 if (!toDelete.isEmpty()) {
-                    MySQL.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, List.copyOf(toDelete));
+                    MySQLHelper.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, List.copyOf(toDelete));
                 }
             } catch (SQLException e) {
                 throw new IOException(e);
@@ -743,6 +743,13 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             return this;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull StructuredMySQLConfig<T> build() {
             return new StructuredMySQLConfig<>(this.clazz, this.host, this.port, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);
         }

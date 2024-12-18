@@ -5,7 +5,7 @@ import io.github.kale_ko.ejcl.UnstructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
 import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
-import io.github.kale_ko.ejcl.mysql.driver.MySQL;
+import io.github.kale_ko.ejcl.mysql.helper.MySQLHelper;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -158,7 +158,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new MySQLException(e);
         }
 
-        try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
+        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
             String value = null;
 
             while (result.next()) {
@@ -191,7 +191,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             return null;
         }
 
-        try (ResultSet result = MySQL.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
+        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
             String value = null;
 
             while (result.next()) {
@@ -239,7 +239,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            MySQL.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+            MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -265,7 +265,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            MySQL.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+            MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -332,7 +332,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;
 
-                    MySQL.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
                 } else {
                     throw new IOException("Failed to connect: Connection is not valid");
                 }
@@ -699,6 +699,13 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             return this;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.mysql.UnstructuredMySQLConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.mysql.UnstructuredMySQLConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull UnstructuredMySQLConfig build() {
             return new UnstructuredMySQLConfig(this.host, this.port, this.database, this.table, this.username, this.password, this.useMariadb, this.processor);
         }
