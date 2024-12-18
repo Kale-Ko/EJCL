@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A Simple Structured File Config for storing key/value pairs in a File
  *
+ * @param <T> The type of the data being stored
+ *
  * @version 5.0.0
  * @since 3.9.0
  */
@@ -52,7 +54,7 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
      * @since 1.0.0
      */
     @Override
-    public byte @NotNull [] create() throws IOException {
+    protected byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -180,7 +182,7 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
                 if (key.contains("=")) {
                     throw new IllegalArgumentException("Key cannot contain '='");
                 }
-                data.append(key).append("=").append(element.asPrimitive().getType()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
+                data.append(key).append("=").append(element.asPrimitive().getType().name()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
             }
         }
 
@@ -292,6 +294,13 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
             return this;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull StructuredSimpleFileConfig<T> build() {
             return new StructuredSimpleFileConfig<>(this.clazz, this.file, this.processor);
         }

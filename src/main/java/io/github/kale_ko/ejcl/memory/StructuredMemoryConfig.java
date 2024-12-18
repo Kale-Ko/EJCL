@@ -119,6 +119,13 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
             return this.clazz;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.memory.StructuredMemoryConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull StructuredMemoryConfig<T> build() {
             return new StructuredMemoryConfig<>(this.clazz);
         }

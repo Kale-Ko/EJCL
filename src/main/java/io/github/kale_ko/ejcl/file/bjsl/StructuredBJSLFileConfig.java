@@ -60,7 +60,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      * @since 1.0.0
      */
     @Override
-    public byte @NotNull [] create() throws IOException {
+    protected byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -293,6 +293,13 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
             return this;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.bjsl.StructuredBJSLFileConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull StructuredBJSLFileConfig<T> build() {
             return new StructuredBJSLFileConfig<>(this.clazz, this.file, this.parser, this.processor);
         }

@@ -49,7 +49,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte @NotNull [] create() throws IOException {
+    protected byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -255,6 +255,13 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
             return this;
         }
 
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.bjsl.UnstructuredBJSLFileConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull UnstructuredBJSLFileConfig build() {
             return new UnstructuredBJSLFileConfig(this.file, this.parser, this.processor);
         }

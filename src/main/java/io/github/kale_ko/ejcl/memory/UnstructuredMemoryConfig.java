@@ -127,6 +127,14 @@ public class UnstructuredMemoryConfig extends UnstructuredConfig {
             return this;
         }
 
+
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.memory.UnstructuredMemoryConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull UnstructuredMemoryConfig build() {
             return new UnstructuredMemoryConfig(this.processor);
         }
