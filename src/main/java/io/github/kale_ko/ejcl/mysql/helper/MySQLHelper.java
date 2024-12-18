@@ -1,4 +1,4 @@
-package io.github.kale_ko.ejcl.mysql.driver;
+package io.github.kale_ko.ejcl.mysql.helper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
  * @version 3.4.0
  * @since 3.4.0
  */
-public class MySQL {
-    private MySQL() {
+public class MySQLHelper {
+    private MySQLHelper() {
     }
 
     /**
@@ -121,7 +121,7 @@ public class MySQL {
      * @throws SQLException When an SQLException is throw by the driver
      * @since 3.4.0
      */
-    public static ResultSet query(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
+    public static @NotNull ResultSet query(@NotNull Connection connection, @NotNull String query, String @NotNull ... args) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query);
         for (int i = 0; i < args.length; i++) {
             statement.setString(i + 1, args[i]);
