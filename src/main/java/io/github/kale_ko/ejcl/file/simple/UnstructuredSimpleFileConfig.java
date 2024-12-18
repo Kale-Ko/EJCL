@@ -42,7 +42,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
      * @since 1.0.0
      */
     @Override
-    public byte @NotNull [] create() throws IOException {
+    protected byte @NotNull [] create() throws IOException {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -167,7 +167,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
                 if (key.contains("=")) {
                     throw new IllegalArgumentException("Key cannot contain '='");
                 }
-                data.append(key).append("=").append(element.asPrimitive().getType()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
+                data.append(key).append("=").append(element.asPrimitive().getType().name()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
             }
         }
 
@@ -258,6 +258,14 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
             return this;
         }
 
+
+        /**
+         * Creating a new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig}
+         *
+         * @return A new {@link io.github.kale_ko.ejcl.file.simple.UnstructuredSimpleFileConfig}
+         *
+         * @since 4.0.0
+         */
         public @NotNull UnstructuredSimpleFileConfig build() {
             return new UnstructuredSimpleFileConfig(this.file, this.processor);
         }

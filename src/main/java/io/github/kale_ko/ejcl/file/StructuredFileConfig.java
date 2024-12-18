@@ -6,6 +6,7 @@ import io.github.kale_ko.ejcl.exception.ConfigNotLoadedException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -83,7 +84,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @throws IOException On create error
      * @since 1.0.0
      */
-    public abstract byte @NotNull [] create() throws IOException;
+    protected abstract byte @NotNull [] create() throws IOException;
 
     /**
      * Load the config
@@ -131,7 +132,7 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
             if (!Files.exists(this.file)) {
                 Files.createFile(this.file);
             }
-            Files.write(this.file, this.saveRaw());
+            Files.write(this.file, this.saveRaw(), StandardOpenOption.TRUNCATE_EXISTING);
         }
     }
 
