@@ -29,7 +29,7 @@ public abstract class UnstructuredFileConfig extends UnstructuredConfig {
      *
      * @since 3.8.0
      */
-    protected final Object SAVELOAD_LOCK = new Object();
+    protected final @NotNull Object SAVELOAD_LOCK = new Object();
 
     /**
      * If this config is closed

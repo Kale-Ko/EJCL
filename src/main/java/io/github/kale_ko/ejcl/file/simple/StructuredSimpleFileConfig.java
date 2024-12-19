@@ -87,10 +87,10 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
 
                 String[] splitLine = line.split("=", 3);
 
-                String path = splitLine[0].trim();
-                String type = splitLine[1].trim().toUpperCase();
+                String path = splitLine[0];
+                String type = splitLine[1].toUpperCase();
                 ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
-                String value = splitLine[2].trim();
+                String value = splitLine[2];
 
                 ParsedPrimitive element;
                 switch (primitiveType) {
