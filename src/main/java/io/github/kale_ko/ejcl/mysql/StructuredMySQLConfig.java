@@ -10,6 +10,7 @@ import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
 import io.github.kale_ko.ejcl.mysql.helper.MySQLHelper;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -36,18 +37,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     protected final @NotNull ObjectProcessor processor;
 
     /**
-     * The host of the server
+     * The address of the server
      *
      * @since 1.0.0
      */
-    protected final @NotNull String host;
-
-    /**
-     * The port of the server
-     *
-     * @since 1.0.0
-     */
-    protected final short port;
+    protected final @NotNull InetSocketAddress address;
 
     /**
      * The database on the server
@@ -137,8 +131,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * Create a new StructuredMySQLConfig
      *
      * @param clazz       The class of the data being stored
-     * @param host        The host of the server
-     * @param port        The port of the server
+     * @param address     The address of the server
      * @param database    The database on the server
      * @param table       The table of the database
      * @param username    The username to the server
@@ -149,13 +142,12 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.11.0
      */
-    protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, long cacheLength, @NotNull ObjectProcessor processor) {
+    protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, long cacheLength, @NotNull ObjectProcessor processor) {
         super(clazz);
 
         this.processor = processor;
 
-        this.host = host;
-        this.port = port;
+        this.address = address;
 
         this.database = database;
         this.table = table;
@@ -228,7 +220,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                     throw new RuntimeException(e);
                 }
 
-                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.host + ":" + this.port + "/" + this.database, properties);
+                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.address.getHostString() + ":" + this.address.getPort() + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;
@@ -409,14 +401,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          *
          * @since 4.0.0
          */
-        protected @NotNull String host;
-
-        /**
-         * The port of the server
-         *
-         * @since 4.0.0
-         */
-        protected short port;
+        protected @NotNull InetSocketAddress address;
 
         /**
          * The database on the server
@@ -472,20 +457,42 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * Create an {@link StructuredMySQLConfig} builder
          *
          * @param clazz    The class of the data being stored
+         * @param address  The address of the server
+         * @param database The database on the server
+         * @param table    The table of the database
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull Class<T> clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table) {
+            this.clazz = clazz;
+
+            this.processor = new ObjectProcessor.Builder().build();
+
+            this.address = address;
+
+            this.database = database;
+            this.table = table;
+        }
+
+        /**
+         * Create an {@link StructuredMySQLConfig} builder
+         *
+         * @param clazz    The class of the data being stored
          * @param host     The host of the server
          * @param port     The port of the server
          * @param database The database on the server
          * @param table    The table of the database
          *
          * @since 4.0.0
+         * @deprecated Use {@link #Builder(Class, InetSocketAddress, String, String)} instead
          */
+        @Deprecated
         public Builder(@NotNull Class<T> clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table) {
             this.clazz = clazz;
 
             this.processor = new ObjectProcessor.Builder().build();
 
-            this.host = host;
-            this.port = port;
+            this.address = new InetSocketAddress(host, port);
 
             this.database = database;
             this.table = table;
@@ -528,14 +535,41 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         }
 
         /**
+         * Get the address of the server
+         *
+         * @return The address of the server
+         *
+         * @since 4.0.0
+         */
+        public @NotNull InetSocketAddress getAddress() {
+            return this.address;
+        }
+
+        /**
+         * Set the address of the server
+         *
+         * @param address The address of the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder<T> setAddress(@NotNull InetSocketAddress address) {
+            this.address = address;
+            return this;
+        }
+
+        /**
          * Get the host of the server
          *
          * @return The host of the server
          *
          * @since 4.0.0
+         * @deprecated Use {@link #getAddress()} instead
          */
+        @Deprecated
         public @NotNull String getHost() {
-            return this.host;
+            return this.address.getHostString();
         }
 
         /**
@@ -546,9 +580,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @return Self for chaining
          *
          * @since 4.0.0
+         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
+        @Deprecated
         public @NotNull Builder<T> setHost(@NotNull String host) {
-            this.host = host;
+            this.address = new InetSocketAddress(host, this.address.getPort());
             return this;
         }
 
@@ -558,9 +594,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @return The port of the server
          *
          * @since 4.0.0
+         * @deprecated Use {@link #getAddress()} instead
          */
+        @Deprecated
         public short getPort() {
-            return this.port;
+            return (short) this.address.getPort();
         }
 
         /**
@@ -571,9 +609,11 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @return Self for chaining
          *
          * @since 4.0.0
+         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
+        @Deprecated
         public @NotNull Builder<T> setPort(short port) {
-            this.port = port;
+            this.address = new InetSocketAddress(this.address.getAddress(), port);
             return this;
         }
 
@@ -751,7 +791,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          */
         public @NotNull StructuredMySQLConfig<T> build() {
-            return new StructuredMySQLConfig<>(this.clazz, this.host, this.port, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);
+            return new StructuredMySQLConfig<>(this.clazz, this.address, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);
         }
     }
 }
