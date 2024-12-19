@@ -1,6 +1,10 @@
 package io.github.kale_ko.ejcl.mysql;
 
+import com.fasterxml.jackson.core.io.BigDecimalParser;
+import com.fasterxml.jackson.core.io.BigIntegerParser;
+import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
+import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.PathResolver;
 import io.github.kale_ko.ejcl.StructuredConfig;
@@ -15,6 +19,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -90,7 +95,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.2.0
      */
-    protected final long cacheLength;
+    protected final @NotNull Duration cacheLength;
 
     /**
      * How many times we have tried to reconnect
@@ -104,7 +109,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 1.1.0
      */
-    protected long configExpires = -1L;
+    protected @NotNull Instant configExpires = Instant.ofEpochSecond(0);
 
     /**
      * A copy of the data that was fetched
@@ -118,7 +123,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.8.0
      */
-    protected final Object SAVELOAD_LOCK = new Object();
+    protected final @NotNull Object SAVELOAD_LOCK = new Object();
 
     /**
      * If this config is closed
@@ -142,7 +147,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      *
      * @since 3.11.0
      */
-    protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, long cacheLength, @NotNull ObjectProcessor processor) {
+    protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, @NotNull Duration cacheLength, @NotNull ObjectProcessor processor) {
         super(clazz);
 
         this.processor = processor;
@@ -173,7 +178,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             return false;
         }
 
-        return Instant.now().getEpochSecond() < configExpires;
+        return Instant.now().isBefore(this.configExpires);
     }
 
     /**
@@ -185,7 +190,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      */
     public boolean getConnected() {
         try {
-            return this.connection != null && this.connection.isValid(2);
+            return this.connection != null && this.connection.isValid(1);
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -223,10 +228,15 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.address.getHostString() + ":" + this.address.getPort() + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
-                    reconnectAttempts = 0;
+                    this.reconnectAttempts = 0;
 
-                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                    // TODO Migrate tables if exists
+                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, type varchar(16) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
                 } else {
+                    if (this.connection != null) {
+                        this.connection.close();
+                    }
+
                     throw new IOException("Failed to connect: Connection is not valid");
                 }
             } catch (SQLException e) {
@@ -249,9 +259,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigClosedException();
         }
 
-        if (!this.getConnected()) {
-            reconnectAttempts++;
-            if (reconnectAttempts > 5) {
+        while (!this.getConnected()) {
+            this.reconnectAttempts++;
+            if (this.reconnectAttempts > 5) {
                 throw new MaximumReconnectsException();
             }
 
@@ -262,18 +272,78 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         synchronized (SAVELOAD_LOCK) {
             ParsedObject object = ParsedObject.create();
 
-            try (ResultSet result = MySQLHelper.query(this.connection, "SELECT path,value FROM " + this.table)) {
+            try (ResultSet result = MySQLHelper.query(this.connection, "SELECT path,type,value FROM " + this.table)) {
                 while (result.next()) {
-                    PathResolver.update(object, result.getString("path"), result.getString("value"), true);
+                    String path = result.getString("path");
+                    String type = result.getString("type").toUpperCase();
+                    ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
+                    String value = result.getString("value");
+
+                    ParsedPrimitive element;
+                    switch (primitiveType) {
+                        case STRING: {
+                            element = ParsedPrimitive.fromString(value);
+                            break;
+                        }
+                        case BYTE: {
+                            element = ParsedPrimitive.fromByte(Byte.parseByte(value));
+                            break;
+                        }
+                        case CHAR: {
+                            element = ParsedPrimitive.fromChar((char) Short.parseShort(value));
+                            break;
+                        }
+                        case SHORT: {
+                            element = ParsedPrimitive.fromShort(Short.parseShort(value));
+                            break;
+                        }
+                        case INTEGER: {
+                            element = ParsedPrimitive.fromInteger(Integer.parseInt(value));
+                            break;
+                        }
+                        case LONG: {
+                            element = ParsedPrimitive.fromLong(Long.parseLong(value));
+                            break;
+                        }
+                        case BIGINTEGER: {
+                            element = ParsedPrimitive.fromBigInteger(BigIntegerParser.parseWithFastParser(value));
+                            break;
+                        }
+                        case FLOAT: {
+                            element = ParsedPrimitive.fromFloat(Float.parseFloat(value));
+                            break;
+                        }
+                        case DOUBLE: {
+                            element = ParsedPrimitive.fromDouble(Double.parseDouble(value));
+                            break;
+                        }
+                        case BIGDECIMAL: {
+                            element = ParsedPrimitive.fromBigDecimal(BigDecimalParser.parse(value));
+                            break;
+                        }
+                        case BOOLEAN: {
+                            element = ParsedPrimitive.fromBoolean(Boolean.parseBoolean(value));
+                            break;
+                        }
+                        case NULL: {
+                            element = ParsedPrimitive.fromNull();
+                            break;
+                        }
+                        default: {
+                            throw new RuntimeException();
+                        }
+                    }
+
+                    PathResolver.updateElement(object, path, element, true);
                 }
             } catch (SQLException e) {
                 throw new IOException(e);
             }
 
             this.config = this.processor.toObject(object, this.clazz);
-            this.configExpires = Instant.now().getEpochSecond() + this.cacheLength;
+            this.configExpires = Instant.now().plus(this.cacheLength);
 
-            this.configBackup = this.processor.toElement(this.config).asObject();
+            this.configBackup = object;
         }
 
         if (save) {
@@ -296,9 +366,9 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigNotLoadedException();
         }
 
-        if (!this.getConnected()) {
-            reconnectAttempts++;
-            if (reconnectAttempts > 5) {
+        while (!this.getConnected()) {
+            this.reconnectAttempts++;
+            if (this.reconnectAttempts > 5) {
                 throw new MaximumReconnectsException();
             }
 
@@ -316,12 +386,21 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             List<String> queryArgs = new ArrayList<>();
             for (String key : keys) {
-                Object value = PathResolver.resolve(object, key);
-                Object oldValue = PathResolver.resolve(this.configBackup, key);
+                ParsedElement _value = PathResolver.resolveElement(object, key);
+                ParsedElement _oldValue = PathResolver.resolveElement(this.configBackup, key);
 
-                if (!((value == null && oldValue == null) || (value != null && (value == oldValue || value.equals(oldValue))))) {
-                    queryArgs.add(key);
-                    queryArgs.add(value != null ? value.toString() : "null");
+                if (_value != null && _oldValue != null) {
+                    ParsedPrimitive value = _value.asPrimitive();
+                    ParsedPrimitive oldValue = _oldValue.asPrimitive();
+
+                    Object valueObj = value.get();
+                    Object oldValueObj = oldValue.get();
+
+                    if (!((value.isNull() && oldValue.isNull()) || (!value.isNull() && (valueObj == oldValueObj || valueObj.equals(oldValueObj))))) {
+                        queryArgs.add(key);
+                        queryArgs.add(value.getType().name());
+                        queryArgs.add(valueObj != null ? valueObj.toString() : "null");
+                    }
                 }
             }
 
@@ -329,7 +408,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             try {
                 if (!queryArgs.isEmpty()) {
-                    MySQLHelper.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", 2, queryArgs);
+                    MySQLHelper.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, type, value) VALUES (?, ?, ?);", 3, queryArgs);
                 }
 
                 if (!toDelete.isEmpty()) {
@@ -451,7 +530,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          *
          * @since 4.0.0
          */
-        protected long cacheLength = 3000;
+        protected @NotNull Duration cacheLength = Duration.ofMillis(1000);
 
         /**
          * Create an {@link StructuredMySQLConfig} builder
@@ -763,14 +842,14 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          *
          * @since 4.0.0
          */
-        public long getCacheLength() {
+        public @NotNull Duration getCacheLength() {
             return this.cacheLength;
         }
 
         /**
          * Set how long to cache the config in memory
          * <p>
-         * Default is 3s
+         * Default is 1s
          *
          * @param cacheLength How long to cache the config in memory
          *
@@ -778,8 +857,26 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          *
          * @since 4.0.0
          */
-        public @NotNull Builder<T> setCacheLength(long cacheLength) {
+        public @NotNull Builder<T> setCacheLength(@NotNull Duration cacheLength) {
             this.cacheLength = cacheLength;
+            return this;
+        }
+
+        /**
+         * Set how long to cache the config in memory
+         * <p>
+         * Default is 1s
+         *
+         * @param cacheLength How long to cache the config in memory
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         * @deprecated Use {@link #setCacheLength(Duration)} instead
+         */
+        @Deprecated
+        public @NotNull Builder<T> setCacheLength(long cacheLength) {
+            this.cacheLength = Duration.ofMillis(cacheLength);
             return this;
         }
 
