@@ -7,6 +7,7 @@ import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
 import io.github.kale_ko.ejcl.mysql.helper.MySQLHelper;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,14 +28,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected final @NotNull String host;
-
-    /**
-     * The port of the server
-     *
-     * @since 3.0.0
-     */
-    protected final int port;
+    protected final @NotNull InetSocketAddress address;
 
     /**
      * The database on the server
@@ -102,8 +96,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Create a new UnstructuredMySQLConfig
      *
-     * @param host       The host of the server
-     * @param port       The port of the server
+     * @param address    The address of the server
      * @param database   The database on the server
      * @param table      The table of the database
      * @param username   The username to the server
@@ -113,11 +106,10 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.0.0
      */
-    protected UnstructuredMySQLConfig(@NotNull String host, int port, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, @NotNull ObjectProcessor processor) {
+    protected UnstructuredMySQLConfig(@NotNull InetSocketAddress address, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, @NotNull ObjectProcessor processor) {
         super(processor);
 
-        this.host = host;
-        this.port = port;
+        this.address = address;
 
         this.database = database;
         this.table = table;
@@ -327,7 +319,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                     throw new RuntimeException(e);
                 }
 
-                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.host + ":" + this.port + "/" + this.database, properties);
+                this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.address.getHostString() + ":" + this.address.getPort() + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
                     reconnectAttempts = 0;
@@ -417,14 +409,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          *
          * @since 4.0.0
          */
-        protected @NotNull String host;
-
-        /**
-         * The port of the server
-         *
-         * @since 4.0.0
-         */
-        protected int port;
+        protected @NotNull InetSocketAddress address;
 
         /**
          * The database on the server
@@ -470,18 +455,37 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         /**
          * Create an {@link UnstructuredMySQLConfig} builder
          *
+         * @param address  The address of the server
+         * @param database The database on the server
+         * @param table    The table of the database
+         *
+         * @since 4.0.0
+         */
+        public Builder(@NotNull InetSocketAddress address, @NotNull String database, @NotNull String table) {
+            this.processor = new ObjectProcessor.Builder().build();
+
+            this.address = address;
+
+            this.database = database;
+            this.table = table;
+        }
+
+        /**
+         * Create an {@link UnstructuredMySQLConfig} builder
+         *
          * @param host     The host of the server
          * @param port     The port of the server
          * @param database The database on the server
          * @param table    The table of the database
          *
          * @since 4.0.0
+         * @deprecated Use {@link #Builder(InetSocketAddress, String, String)} instead
          */
+        @Deprecated
         public Builder(@NotNull String host, short port, @NotNull String database, @NotNull String table) {
             this.processor = new ObjectProcessor.Builder().build();
 
-            this.host = host;
-            this.port = port;
+            this.address = new InetSocketAddress(host, port);
 
             this.database = database;
             this.table = table;
@@ -513,14 +517,41 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         /**
+         * Get the address of the server
+         *
+         * @return The address of the server
+         *
+         * @since 4.0.0
+         */
+        public @NotNull InetSocketAddress getAddress() {
+            return this.address;
+        }
+
+        /**
+         * Set the address of the server
+         *
+         * @param address The address of the server
+         *
+         * @return Self for chaining
+         *
+         * @since 4.0.0
+         */
+        public @NotNull Builder setAddress(@NotNull InetSocketAddress address) {
+            this.address = address;
+            return this;
+        }
+
+        /**
          * Get the host of the server
          *
          * @return The host of the server
          *
          * @since 4.0.0
+         * @deprecated Use {@link #getAddress()} instead
          */
+        @Deprecated
         public @NotNull String getHost() {
-            return this.host;
+            return this.address.getHostString();
         }
 
         /**
@@ -531,9 +562,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @return Self for chaining
          *
          * @since 4.0.0
+         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
+        @Deprecated
         public @NotNull Builder setHost(@NotNull String host) {
-            this.host = host;
+            this.address = new InetSocketAddress(host, this.address.getPort());
             return this;
         }
 
@@ -543,9 +576,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @return The port of the server
          *
          * @since 4.0.0
+         * @deprecated Use {@link #getAddress()} instead
          */
-        public int getPort() {
-            return this.port;
+        @Deprecated
+        public short getPort() {
+            return (short) this.address.getPort();
         }
 
         /**
@@ -556,9 +591,11 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @return Self for chaining
          *
          * @since 4.0.0
+         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        public @NotNull Builder setPort(int port) {
-            this.port = port;
+        @Deprecated
+        public @NotNull Builder setPort(short port) {
+            this.address = new InetSocketAddress(this.address.getAddress(), port);
             return this;
         }
 
@@ -707,7 +744,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          */
         public @NotNull UnstructuredMySQLConfig build() {
-            return new UnstructuredMySQLConfig(this.host, this.port, this.database, this.table, this.username, this.password, this.useMariadb, this.processor);
+            return new UnstructuredMySQLConfig(this.address, this.database, this.table, this.username, this.password, this.useMariadb, this.processor);
         }
     }
 }
