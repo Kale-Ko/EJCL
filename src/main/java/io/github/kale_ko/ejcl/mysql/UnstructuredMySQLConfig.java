@@ -611,7 +611,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #Builder(InetSocketAddress, String, String)} instead
          */
-        @Deprecated
+        @Deprecated(since = "5.0.0")
         public Builder(@NotNull String host, short port, @NotNull String database, @NotNull String table) {
             this.processor = new ObjectProcessor.Builder().build();
 
@@ -679,7 +679,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated
+        @Deprecated(since = "5.0.0")
         public @NotNull String getHost() {
             return this.address.getHostString();
         }
@@ -694,7 +694,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated
+        @Deprecated(since = "5.0.0")
         public @NotNull Builder setHost(@NotNull String host) {
             this.address = new InetSocketAddress(host, this.address.getPort());
             return this;
@@ -708,7 +708,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated
+        @Deprecated(since = "5.0.0")
         public short getPort() {
             return (short) this.address.getPort();
         }
@@ -723,7 +723,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated
+        @Deprecated(since = "5.0.0")
         public @NotNull Builder setPort(short port) {
             this.address = new InetSocketAddress(this.address.getAddress(), port);
             return this;
