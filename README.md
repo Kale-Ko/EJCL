@@ -4,11 +4,11 @@ EJCL is an advanced configuration library for Java with support for local files,
 
 EJCL is fully documented at [ejcl.kaleko.dev/docs](https://ejcl.kaleko.dev/docs/)
 
-## Config types
+## Config Types
 
 EJCL has two basic config types, structured and unstructured.
 
-### Structured (Recommended)
+### Structured
 
 Structured configs are created with a Java class used as the "structure".\
 Calling `config#get()` will return an instance of the type passed to the constructor for easy use of the object.
@@ -18,11 +18,11 @@ Calling `config#get()` will return an instance of the type passed to the constru
 Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data.\
 To get or set data on an unstructured config you can call `config#get(path)` or `config#set(path, value)` to do so (`path` can be any string and `value` can be any primitive).
 
-## Storage types
+## Storage Types
 
 EJCL also offers a variety of storage options listed below.
 
-### Local filesystem
+### Local Filesystem
 
 Configs can be stored locally on the filesystem using classes from the `io.github.kale_ko.ejcl.file` package.
 
@@ -39,13 +39,13 @@ The structured version is slower to load but can be easier to work with, while t
 
 Note: The structured version only writes changed values to prevent overwriting others changes.
 
-### In memory
+### In Memory
 
 If you want you can also use EJCL to store a config in memory but there is not much point to this unless you are using an API that only accepts Config objects.
 
 ## Type Processors
 
-Type processors are a way to convert between any Java type and object trees for storage. They can be created using `Builder#setProcessor(new ObjectProcessor.Builder().setX(y).build())`
+Type processors are a way to convert between any Java type and object trees for storage. They can be created using `Builder#setProcessor(new ObjectProcessor.Builder().setX(y).build())`.
 
 See [https://github.com/Kale-Ko/BJSL](https://github.com/Kale-Ko/BJSL?tab=readme-ov-file#type-processors) for information.
 
