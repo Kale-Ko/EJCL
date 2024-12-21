@@ -280,11 +280,24 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
         while (!this.getConnected()) {
             this.reconnectAttempts++;
+
+            try {
+                this.connect();
+            } catch (IOException e) {
+                try {
+                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+
+                if (this.reconnectAttempts > 5) {
+                    throw new MaximumReconnectsException(e);
+                }
+            }
+
             if (this.reconnectAttempts > 5) {
                 throw new MaximumReconnectsException();
             }
-
-            this.connect();
         }
         assert this.connection != null;
 
@@ -387,11 +400,24 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
         while (!this.getConnected()) {
             this.reconnectAttempts++;
+
+            try {
+                this.connect();
+            } catch (IOException e) {
+                try {
+                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+
+                if (this.reconnectAttempts > 5) {
+                    throw new MaximumReconnectsException(e);
+                }
+            }
+
             if (this.reconnectAttempts > 5) {
                 throw new MaximumReconnectsException();
             }
-
-            this.connect();
         }
         assert this.connection != null;
 
