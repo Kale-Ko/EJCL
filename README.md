@@ -6,17 +6,17 @@ EJCL is fully documented at [ejcl.kaleko.dev/docs](https://ejcl.kaleko.dev/docs/
 
 ## Config Types
 
-EJCL has two basic config types, structured and unstructured.
+EJCL has two basic config types, [Structured](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/StructuredConfig.html) and [Unstructured](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/UnstructuredConfig.html).
 
 ### Structured
 
 Structured configs are created with a Java class used as the "structure".\
-Calling `config#get()` will return an instance of the type passed to the constructor for easy use of the object.
+Calling [`config#get()`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/StructuredConfig.html#get()) will return an instance of the type passed to the constructor for easy use of the object.
 
 ### Unstructured
 
 Unstructured configs are not created with a defined "structure" and such can be used to store more dynamic data.\
-To get or set data on an unstructured config you can call `config#get(path)` or `config#set(path, value)` to do so (`path` can be any string and `value` can be any primitive).
+To get or set data on an unstructured config you can call [`config#get(path)`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/UnstructuredConfig.html#get(java.lang.String)) or [`config#set(path, value)`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/UnstructuredConfig.html#set(java.lang.String,java.lang.Object)) to do so (`path` can be any string and `value` can be any primitive).
 
 ## Storage Types
 
@@ -24,16 +24,16 @@ EJCL also offers a variety of storage options listed below.
 
 ### Local Filesystem
 
-Configs can be stored locally on the filesystem using classes from the `io.github.kale_ko.ejcl.file` package.
+Configs can be stored locally on the filesystem using classes from the [`io.github.kale_ko.ejcl.file`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/file/package-summary.html) package.
 
-This includes a `SimpleFileConfig` which is a config that stores key/value pairs in a very simple format, `{key}={type}={value}`.
+This includes a [`SimpleFileConfig`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/file/simple/package-summary.html) which is a config that stores key/value pairs in a very simple format, `{key}={type}={value}`.
 
-There is also `BJSLFileConfig` which is a config that stores data in a few common formats (JSON, YAML, and Json Smile).\
-Each of these different formats can be used by passing their respective parsers (`{format}Parser`) to the constructor.
+There is also [`BJSLFileConfig`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/file/bjsl/package-summary.html) which is a config that stores data in a few common formats (JSON, YAML, and Json Smile).\
+Each of these different formats can be used by passing their respective parsers ([`{format}Parser`](https://bjsl.kaleko.dev/docs/io/github/kale_ko/bjsl/parsers/package-summary.html)) to the constructor.
 
 ### MySQL/MariaDB Server
 
-Configs can also be stored on a MySQL or MariaDB server using classes from the `io.github.kale_ko.ejcl.mysql` package.
+Configs can also be stored on a MySQL or MariaDB server using classes from the [`io.github.kale_ko.ejcl.mysql`](https://ejcl.kaleko.dev/docs/io/github/kale_ko/ejcl/mysql/package-summary.html) package.
 
 The structured version is slower to load but can be easier to work with, while the unstructured version has the advantage of only fetching the data you need.
 
