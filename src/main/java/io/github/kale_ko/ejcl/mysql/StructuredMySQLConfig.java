@@ -31,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 5.0.0
+ * @version 5.0.1
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -195,6 +195,15 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
+    }
+
+    /**
+     * Act as if the config was just fetched, sets the expiration time to {@link #cacheLength} into the future.
+     *
+     * @since 5.0.1
+     */
+    public void revalidateCache() {
+        this.configExpires = Instant.now().plus(this.cacheLength);
     }
 
     /**
