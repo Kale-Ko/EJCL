@@ -4,6 +4,7 @@ io.github.kale_ko.ejcl.exception.mysql
 io.github.kale_ko.ejcl.file
 io.github.kale_ko.ejcl.file.bjsl
 io.github.kale_ko.ejcl.file.simple
+io.github.kale_ko.ejcl.legacy
 io.github.kale_ko.ejcl.memory
 io.github.kale_ko.ejcl.mysql
-io.github.kale_ko.ejcl.mysql.driver
+io.github.kale_ko.ejcl.mysql.helper
