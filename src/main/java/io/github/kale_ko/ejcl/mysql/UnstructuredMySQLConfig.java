@@ -139,20 +139,29 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new ConfigClosedException();
         }
 
-        try {
-            while (!this.getConnected()) {
-                this.reconnectAttempts++;
-                if (this.reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException();
+        while (!this.getConnected()) {
+            this.reconnectAttempts++;
+
+            try {
+                this.connect();
+            } catch (IOException e) {
+                try {
+                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
                 }
 
-                this.connect();
+                if (this.reconnectAttempts > 5) {
+                    throw new MaximumReconnectsException(e);
+                }
             }
 
-            assert this.connection != null;
-        } catch (IOException e) {
-            throw new MySQLException(e);
+            if (this.reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
         }
+
+        assert this.connection != null;
 
         try (ResultSet result = MySQLHelper.query(this.connection, "SELECT type,value FROM " + this.table + " WHERE path=?", path)) {
             Object parsedValue = null;
@@ -331,20 +340,29 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new ConfigClosedException();
         }
 
-        try {
-            while (!this.getConnected()) {
-                this.reconnectAttempts++;
-                if (this.reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException();
+        while (!this.getConnected()) {
+            this.reconnectAttempts++;
+
+            try {
+                this.connect();
+            } catch (IOException e) {
+                try {
+                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
                 }
 
-                this.connect();
+                if (this.reconnectAttempts > 5) {
+                    throw new MaximumReconnectsException(e);
+                }
             }
 
-            assert this.connection != null;
-        } catch (IOException e) {
-            throw new MySQLException(e);
+            if (this.reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
         }
+
+        assert this.connection != null;
 
         try {
             if (value != null) {
