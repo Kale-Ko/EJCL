@@ -6,6 +6,7 @@ import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
+import io.github.kale_ko.ejcl.exception.mysql.DriverLoadException;
 import io.github.kale_ko.ejcl.exception.mysql.MaximumReconnectsException;
 import io.github.kale_ko.ejcl.exception.mysql.MySQLException;
 import io.github.kale_ko.ejcl.mysql.helper.MySQLHelper;
@@ -441,7 +442,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                         Class.forName("com.mysql.cj.jdbc.Driver");
                     }
                 } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+                    throw new DriverLoadException(e);
                 }
 
                 this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.address.getHostString() + ":" + this.address.getPort() + "/" + this.database, properties);
