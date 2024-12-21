@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A utility class for executing MySQL statements and queries
  *
- * @version 3.4.0
+ * @version 5.0.0
  * @since 3.4.0
  */
 public class MySQLHelper {
