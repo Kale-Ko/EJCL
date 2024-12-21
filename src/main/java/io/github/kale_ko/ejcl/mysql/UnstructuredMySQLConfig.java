@@ -1,5 +1,8 @@
 package io.github.kale_ko.ejcl.mysql;
 
+import com.fasterxml.jackson.core.io.BigDecimalParser;
+import com.fasterxml.jackson.core.io.BigIntegerParser;
+import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
 import io.github.kale_ko.bjsl.processor.ObjectProcessor;
 import io.github.kale_ko.ejcl.UnstructuredConfig;
 import io.github.kale_ko.ejcl.exception.ConfigClosedException;
@@ -19,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * An Unstructured MySQL Config for storing data on a MySQL or MariaDB server
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.0.0
  */
 public class UnstructuredMySQLConfig extends UnstructuredConfig {
@@ -84,7 +87,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.8.0
      */
-    protected final Object SAVELOAD_LOCK = new Object();
+    protected final @NotNull Object SAVELOAD_LOCK = new Object();
 
     /**
      * If this config is closed
@@ -130,15 +133,15 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @since 3.0.0
      */
     @Override
-    public @Nullable String get(@NotNull String path) {
+    public @Nullable Object get(@NotNull String path) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
 
         try {
-            if (!this.getConnected()) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
+            while (!this.getConnected()) {
+                this.reconnectAttempts++;
+                if (this.reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
                 }
 
@@ -150,14 +153,70 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             throw new MySQLException(e);
         }
 
-        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
-            String value = null;
+        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT type,value FROM " + this.table + " WHERE path=?", path)) {
+            Object parsedValue = null;
 
             while (result.next()) {
-                value = result.getString("value");
+                String type = result.getString("type").toUpperCase();
+                ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
+                String value = result.getString("value");
+
+                switch (primitiveType) {
+                    case STRING: {
+                        parsedValue = value;
+                        break;
+                    }
+                    case BYTE: {
+                        parsedValue = Byte.parseByte(value);
+                        break;
+                    }
+                    case CHAR: {
+                        parsedValue = (char) Short.parseShort(value);
+                        break;
+                    }
+                    case SHORT: {
+                        parsedValue = Short.parseShort(value);
+                        break;
+                    }
+                    case INTEGER: {
+                        parsedValue = Integer.parseInt(value);
+                        break;
+                    }
+                    case LONG: {
+                        parsedValue = Long.parseLong(value);
+                        break;
+                    }
+                    case BIGINTEGER: {
+                        parsedValue = BigIntegerParser.parseWithFastParser(value);
+                        break;
+                    }
+                    case FLOAT: {
+                        parsedValue = Float.parseFloat(value);
+                        break;
+                    }
+                    case DOUBLE: {
+                        parsedValue = Double.parseDouble(value);
+                        break;
+                    }
+                    case BIGDECIMAL: {
+                        parsedValue = BigDecimalParser.parse(value);
+                        break;
+                    }
+                    case BOOLEAN: {
+                        parsedValue = Boolean.parseBoolean(value);
+                        break;
+                    }
+                    case NULL: {
+                        parsedValue = null;
+                        break;
+                    }
+                    default: {
+                        throw new RuntimeException();
+                    }
+                }
             }
 
-            return value;
+            return parsedValue;
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -174,7 +233,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      *
      * @since 3.5.0
      */
-    public @Nullable String fastGet(@NotNull String path) {
+    public @Nullable Object fastGet(@NotNull String path) {
         if (this.closed) {
             throw new ConfigClosedException();
         }
@@ -183,14 +242,70 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
             return null;
         }
 
-        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT value FROM " + this.table + " WHERE path=?", path)) {
-            String value = null;
+        try (ResultSet result = MySQLHelper.query(this.connection, "SELECT type,value FROM " + this.table + " WHERE path=?", path)) {
+            Object parsedValue = null;
 
             while (result.next()) {
-                value = result.getString("value");
+                String type = result.getString("type").toUpperCase();
+                ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
+                String value = result.getString("value");
+
+                switch (primitiveType) {
+                    case STRING: {
+                        parsedValue = value;
+                        break;
+                    }
+                    case BYTE: {
+                        parsedValue = Byte.parseByte(value);
+                        break;
+                    }
+                    case CHAR: {
+                        parsedValue = (char) Short.parseShort(value);
+                        break;
+                    }
+                    case SHORT: {
+                        parsedValue = Short.parseShort(value);
+                        break;
+                    }
+                    case INTEGER: {
+                        parsedValue = Integer.parseInt(value);
+                        break;
+                    }
+                    case LONG: {
+                        parsedValue = Long.parseLong(value);
+                        break;
+                    }
+                    case BIGINTEGER: {
+                        parsedValue = BigIntegerParser.parseWithFastParser(value);
+                        break;
+                    }
+                    case FLOAT: {
+                        parsedValue = Float.parseFloat(value);
+                        break;
+                    }
+                    case DOUBLE: {
+                        parsedValue = Double.parseDouble(value);
+                        break;
+                    }
+                    case BIGDECIMAL: {
+                        parsedValue = BigDecimalParser.parse(value);
+                        break;
+                    }
+                    case BOOLEAN: {
+                        parsedValue = Boolean.parseBoolean(value);
+                        break;
+                    }
+                    case NULL: {
+                        parsedValue = null;
+                        break;
+                    }
+                    default: {
+                        throw new RuntimeException();
+                    }
+                }
             }
 
-            return value;
+            return parsedValue;
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -216,9 +331,9 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            if (!this.getConnected()) {
-                reconnectAttempts++;
-                if (reconnectAttempts > 5) {
+            while (!this.getConnected()) {
+                this.reconnectAttempts++;
+                if (this.reconnectAttempts > 5) {
                     throw new MaximumReconnectsException();
                 }
 
@@ -231,7 +346,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+            if (value != null) {
+                ParsedPrimitive.PrimitiveType type = ParsedPrimitive.from(value).getType();
+                MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, type, value) VALUES (?, ?, ?);", path, type.name(), value.toString());
+            } else {
+                MySQLHelper.execute(this.connection, "DELETE FROM " + this.table + " WHERE path=?", path);
+            }
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -257,7 +377,12 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         }
 
         try {
-            MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, value) VALUES (?, ?);", path, (value != null ? value.toString() : "null"));
+            if (value != null) {
+                ParsedPrimitive.PrimitiveType type = ParsedPrimitive.from(value).getType();
+                MySQLHelper.execute(this.connection, "REPLACE INTO " + this.table + " (path, type, value) VALUES (?, ?, ?);", path, type.name(), value.toString());
+            } else {
+                MySQLHelper.execute(this.connection, "DELETE FROM " + this.table + " WHERE path=?", path);
+            }
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -284,7 +409,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      */
     public boolean getConnected() {
         try {
-            return this.connection != null && this.connection.isValid(2);
+            return this.connection != null && this.connection.isValid(1);
         } catch (SQLException e) {
             throw new MySQLException(e);
         }
@@ -322,10 +447,15 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 this.connection = DriverManager.getConnection("jdbc:" + (this.useMariadb ? "mariadb:" : "mysql:") + "//" + this.address.getHostString() + ":" + this.address.getPort() + "/" + this.database, properties);
 
                 if (this.connection.isValid(3)) {
-                    reconnectAttempts = 0;
+                    this.reconnectAttempts = 0;
 
-                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+                    // TODO Migrate tables if exists
+                    MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, type varchar(16) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
                 } else {
+                    if (this.connection != null) {
+                        this.connection.close();
+                    }
+
                     throw new IOException("Failed to connect: Connection is not valid");
                 }
             } catch (SQLException e) {
@@ -393,7 +523,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * A builder class for creating new {@link UnstructuredMySQLConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder {

@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -457,7 +457,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * A builder class for creating new {@link StructuredMySQLConfig}s
      *
-     * @version 4.0.0
+     * @version 5.0.0
      * @since 4.0.0
      */
     public static class Builder<T> {
