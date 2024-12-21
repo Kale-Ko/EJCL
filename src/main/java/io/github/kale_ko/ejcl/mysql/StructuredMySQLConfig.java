@@ -386,12 +386,12 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
             List<String> queryArgs = new ArrayList<>();
             for (String key : keys) {
-                ParsedElement _value = PathResolver.resolveElement(object, key);
-                ParsedElement _oldValue = PathResolver.resolveElement(this.configBackup, key);
+                ParsedElement valueElement = PathResolver.resolveElement(object, key);
+                ParsedElement oldValueElement = PathResolver.resolveElement(this.configBackup, key);
 
-                if (_value != null && _oldValue != null) {
-                    ParsedPrimitive value = _value.asPrimitive();
-                    ParsedPrimitive oldValue = _oldValue.asPrimitive();
+                if (valueElement != null && oldValueElement != null) {
+                    ParsedPrimitive value = valueElement.asPrimitive();
+                    ParsedPrimitive oldValue = oldValueElement.asPrimitive();
 
                     Object valueObj = value.get();
                     Object oldValueObj = oldValue.get();
@@ -565,7 +565,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #Builder(Class, InetSocketAddress, String, String)} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public Builder(@NotNull Class<T> clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table) {
             this.clazz = clazz;
 
@@ -646,7 +646,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public @NotNull String getHost() {
             return this.address.getHostString();
         }
@@ -661,7 +661,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public @NotNull Builder<T> setHost(@NotNull String host) {
             this.address = new InetSocketAddress(host, this.address.getPort());
             return this;
@@ -675,7 +675,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public short getPort() {
             return (short) this.address.getPort();
         }
@@ -690,7 +690,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public @NotNull Builder<T> setPort(short port) {
             this.address = new InetSocketAddress(this.address.getAddress(), port);
             return this;
@@ -874,7 +874,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
          * @since 4.0.0
          * @deprecated Use {@link #setCacheLength(Duration)} instead
          */
-        @Deprecated
+        @Deprecated(since="5.0.0")
         public @NotNull Builder<T> setCacheLength(long cacheLength) {
             this.cacheLength = Duration.ofMillis(cacheLength);
             return this;

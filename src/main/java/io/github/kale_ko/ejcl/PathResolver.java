@@ -269,8 +269,6 @@ public class PathResolver {
 
         List<String> keys = Arrays.asList(pathSplitPattern.split(path));
 
-        System.out.println(keys);
-
         ParsedElement resolved = element;
 
         for (int i = 0; i < keys.size() - 1; i++) {
