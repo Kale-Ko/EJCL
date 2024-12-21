@@ -230,8 +230,26 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 if (this.connection.isValid(3)) {
                     this.reconnectAttempts = 0;
 
-                    // TODO Migrate tables if exists
                     MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, type varchar(16) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+
+                    try (ResultSet result = MySQLHelper.query(this.connection, "DESCRIBE " + this.table + ";")) {
+                        boolean typeExists = false;
+
+                        while (result.next()) {
+                            String name = result.getString("Field");
+                            if (name.equals("type")) {
+                                typeExists = true;
+                            }
+                        }
+
+                        if (!typeExists) {
+                            MySQLHelper.execute(this.connection, "ALTER TABLE " + this.table + " ADD COLUMN type varchar(16) CHARACTER SET utf8 NOT NULL AFTER path;");
+
+                            MySQLHelper.execute(this.connection, "UPDATE " + this.table + " SET type='STRING';");
+                        }
+                    } catch (SQLException e) {
+                        throw new IOException(e);
+                    }
                 } else {
                     if (this.connection != null) {
                         this.connection.close();

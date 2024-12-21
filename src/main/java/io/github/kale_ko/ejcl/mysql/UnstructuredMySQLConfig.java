@@ -449,8 +449,26 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
                 if (this.connection.isValid(3)) {
                     this.reconnectAttempts = 0;
 
-                    // TODO Migrate tables if exists
                     MySQLHelper.execute(this.connection, "CREATE TABLE IF NOT EXISTS " + this.table + " (path varchar(256) CHARACTER SET utf8 NOT NULL, type varchar(16) CHARACTER SET utf8 NOT NULL, value varchar(4096) CHARACTER SET utf8, PRIMARY KEY (path)) CHARACTER SET utf8;");
+
+                    try (ResultSet result = MySQLHelper.query(this.connection, "DESCRIBE " + this.table + ";")) {
+                        boolean typeExists = false;
+
+                        while (result.next()) {
+                            String name = result.getString("Field");
+                            if (name.equals("type")) {
+                                typeExists = true;
+                            }
+                        }
+
+                        if (!typeExists) {
+                            MySQLHelper.execute(this.connection, "ALTER TABLE " + this.table + " ADD COLUMN type varchar(16) CHARACTER SET utf8 NOT NULL AFTER path;");
+
+                            MySQLHelper.execute(this.connection, "UPDATE " + this.table + " SET type='STRING';");
+                        }
+                    } catch (SQLException e) {
+                        throw new IOException(e);
+                    }
                 } else {
                     if (this.connection != null) {
                         this.connection.close();
@@ -611,7 +629,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #Builder(InetSocketAddress, String, String)} instead
          */
-        @Deprecated(since = "5.0.0")
+        @Deprecated(since="5.0.0")
         public Builder(@NotNull String host, short port, @NotNull String database, @NotNull String table) {
             this.processor = new ObjectProcessor.Builder().build();
 
@@ -679,7 +697,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated(since = "5.0.0")
+        @Deprecated(since="5.0.0")
         public @NotNull String getHost() {
             return this.address.getHostString();
         }
@@ -694,7 +712,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated(since = "5.0.0")
+        @Deprecated(since="5.0.0")
         public @NotNull Builder setHost(@NotNull String host) {
             this.address = new InetSocketAddress(host, this.address.getPort());
             return this;
@@ -708,7 +726,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #getAddress()} instead
          */
-        @Deprecated(since = "5.0.0")
+        @Deprecated(since="5.0.0")
         public short getPort() {
             return (short) this.address.getPort();
         }
@@ -723,7 +741,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * @since 4.0.0
          * @deprecated Use {@link #setAddress(InetSocketAddress)} instead
          */
-        @Deprecated(since = "5.0.0")
+        @Deprecated(since="5.0.0")
         public @NotNull Builder setPort(short port) {
             this.address = new InetSocketAddress(this.address.getAddress(), port);
             return this;
