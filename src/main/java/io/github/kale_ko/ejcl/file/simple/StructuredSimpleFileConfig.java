@@ -167,7 +167,7 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
      * @since 1.0.0
      */
     @Override
-    public byte @NotNull [] saveRaw() throws IOException {
+    protected byte @NotNull [] saveRaw() throws IOException {
         if (this.config == null) {
             return this.create();
         }
