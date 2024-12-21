@@ -22,7 +22,7 @@ public class StructuredMemoryConfig<T> extends StructuredConfig<T> {
      * @since 2.0.0
      */
     protected StructuredMemoryConfig(@NotNull Class<T> clazz) {
-        super(clazz);
+        super(clazz, true);
 
         this.config = InitializationUtil.initialize(clazz);
     }

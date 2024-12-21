@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @version 4.0.0
+ * @version 5.0.0
  * @since 3.0.0
  */
 public abstract class UnstructuredConfig {
