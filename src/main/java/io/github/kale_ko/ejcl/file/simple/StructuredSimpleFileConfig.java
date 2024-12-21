@@ -40,7 +40,7 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
      * @since 2.0.0
      */
     protected StructuredSimpleFileConfig(@NotNull Class<T> clazz, @NotNull Path file, @NotNull ObjectProcessor processor) {
-        super(clazz, file);
+        super(clazz, file, false);
 
         this.processor = processor;
     }

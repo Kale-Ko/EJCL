@@ -45,7 +45,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
      * @since 2.0.0
      */
     protected StructuredBJSLFileConfig(@NotNull Class<T> clazz, @NotNull Path file, @NotNull Parser parser, @NotNull ObjectProcessor processor) {
-        super(clazz, file);
+        super(clazz, file, true);
 
         this.parser = parser;
         this.processor = processor;

@@ -48,7 +48,20 @@ public abstract class StructuredFileConfig<T> extends StructuredConfig<T> {
      * @since 1.0.0
      */
     protected StructuredFileConfig(@NotNull Class<T> clazz, @NotNull Path file) {
-        super(clazz);
+        this(clazz, file, false);
+    }
+
+    /**
+     * Create a new FileConfig
+     *
+     * @param clazz          The class of the data being stored
+     * @param file           The file where data is being stored
+     * @param supportsArrays If the config supports storing arrays
+     *
+     * @since 5.0.0
+     */
+    protected StructuredFileConfig(@NotNull Class<T> clazz, @NotNull Path file, boolean supportsArrays) {
+        super(clazz, supportsArrays);
 
         this.file = file;
     }

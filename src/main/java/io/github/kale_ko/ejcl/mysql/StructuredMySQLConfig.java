@@ -148,7 +148,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
      * @since 3.11.0
      */
     protected StructuredMySQLConfig(@NotNull Class<T> clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table, @Nullable String username, @Nullable String password, boolean useMariadb, @NotNull Duration cacheLength, @NotNull ObjectProcessor processor) {
-        super(clazz);
+        super(clazz, false);
 
         this.processor = processor;
 
