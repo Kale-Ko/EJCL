@@ -192,6 +192,8 @@ public class StructuredSimpleFileConfig<T> extends StructuredFileConfig<T> {
     /**
      * A builder class for creating new {@link io.github.kale_ko.ejcl.file.simple.StructuredSimpleFileConfig}s
      *
+     * @param <T> The type of the data to be stored
+     *
      * @version 5.0.0
      * @since 4.0.0
      */
