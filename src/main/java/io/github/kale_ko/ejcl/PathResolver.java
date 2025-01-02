@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
  * @since 1.0.0
  */
 public class PathResolver {
-    protected static final Pattern arrayPathFixPattern = Pattern.compile("\\[([0-9]*)]");
-    protected static final Pattern pathSplitPattern = Pattern.compile("(?<!\\\\)(?:\\\\\\\\)*\\.");
+    private static final Pattern arrayPathFixPattern = Pattern.compile("\\[([0-9]*)]");
+    private static final Pattern pathSplitPattern = Pattern.compile("(?<!\\\\)(?:\\\\\\\\)*\\.");
 
     private PathResolver() {
     }

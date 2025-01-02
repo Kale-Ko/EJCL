@@ -511,6 +511,8 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
     /**
      * A builder class for creating new {@link StructuredMySQLConfig}s
      *
+     * @param <T> The type of the data to be stored
+     *
      * @version 5.0.0
      * @since 4.0.0
      */
