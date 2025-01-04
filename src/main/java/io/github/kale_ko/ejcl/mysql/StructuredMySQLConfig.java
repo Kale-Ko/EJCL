@@ -1,7 +1,5 @@
 package io.github.kale_ko.ejcl.mysql;
 
-import com.fasterxml.jackson.core.io.BigDecimalParser;
-import com.fasterxml.jackson.core.io.BigIntegerParser;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
@@ -31,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 5.0.1
+ * @version 5.1.0
  * @since 1.0.0
  */
 public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
@@ -247,7 +245,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
 
                         while (result.next()) {
                             String name = result.getString("Field");
-                            if (name.equals("type")) {
+                            if ("type".equals(name)) {
                                 typeExists = true;
                             }
                         }
@@ -298,10 +296,6 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
-
-                if (this.reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException(e);
-                }
             }
 
             if (this.reconnectAttempts > 5) {
@@ -320,60 +314,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                     ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
                     String value = result.getString("value");
 
-                    ParsedPrimitive element;
-                    switch (primitiveType) {
-                        case STRING: {
-                            element = ParsedPrimitive.fromString(value);
-                            break;
-                        }
-                        case BYTE: {
-                            element = ParsedPrimitive.fromByte(Byte.parseByte(value));
-                            break;
-                        }
-                        case CHAR: {
-                            element = ParsedPrimitive.fromChar((char) Short.parseShort(value));
-                            break;
-                        }
-                        case SHORT: {
-                            element = ParsedPrimitive.fromShort(Short.parseShort(value));
-                            break;
-                        }
-                        case INTEGER: {
-                            element = ParsedPrimitive.fromInteger(Integer.parseInt(value));
-                            break;
-                        }
-                        case LONG: {
-                            element = ParsedPrimitive.fromLong(Long.parseLong(value));
-                            break;
-                        }
-                        case BIGINTEGER: {
-                            element = ParsedPrimitive.fromBigInteger(BigIntegerParser.parseWithFastParser(value));
-                            break;
-                        }
-                        case FLOAT: {
-                            element = ParsedPrimitive.fromFloat(Float.parseFloat(value));
-                            break;
-                        }
-                        case DOUBLE: {
-                            element = ParsedPrimitive.fromDouble(Double.parseDouble(value));
-                            break;
-                        }
-                        case BIGDECIMAL: {
-                            element = ParsedPrimitive.fromBigDecimal(BigDecimalParser.parse(value));
-                            break;
-                        }
-                        case BOOLEAN: {
-                            element = ParsedPrimitive.fromBoolean(Boolean.parseBoolean(value));
-                            break;
-                        }
-                        case NULL: {
-                            element = ParsedPrimitive.fromNull();
-                            break;
-                        }
-                        default: {
-                            throw new RuntimeException();
-                        }
-                    }
+                    ParsedElement element = ParsedPrimitive.from(ParsedPrimitive.fromString(value).to(primitiveType));
 
                     PathResolver.updateElement(object, path, element, true);
                 }
@@ -418,10 +359,6 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
-
-                if (this.reconnectAttempts > 5) {
-                    throw new MaximumReconnectsException(e);
-                }
             }
 
             if (this.reconnectAttempts > 5) {
@@ -453,7 +390,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                     if (!((value.isNull() && oldValue.isNull()) || (!value.isNull() && (valueObj == oldValueObj || valueObj.equals(oldValueObj))))) {
                         queryArgs.add(key);
                         queryArgs.add(value.getType().name());
-                        queryArgs.add(valueObj != null ? valueObj.toString() : "null");
+                        queryArgs.add(!value.isNull() ? valueObj.toString() : "null");
                     }
                 }
             }

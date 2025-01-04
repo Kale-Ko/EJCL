@@ -1,7 +1,5 @@
 package io.github.kale_ko.ejcl.file.simple;
 
-import com.fasterxml.jackson.core.io.BigDecimalParser;
-import com.fasterxml.jackson.core.io.BigIntegerParser;
 import io.github.kale_ko.bjsl.elements.ParsedElement;
 import io.github.kale_ko.bjsl.elements.ParsedObject;
 import io.github.kale_ko.bjsl.elements.ParsedPrimitive;
@@ -17,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A Simple Unstructured File Config for storing key/value pairs in a File
  *
- * @version 5.0.0
+ * @version 5.1.0
  * @since 2.0.0
  */
 public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
@@ -80,60 +78,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
                 ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);
                 String value = splitLine[2];
 
-                ParsedPrimitive element;
-                switch (primitiveType) {
-                    case STRING: {
-                        element = ParsedPrimitive.fromString(value);
-                        break;
-                    }
-                    case BYTE: {
-                        element = ParsedPrimitive.fromByte(Byte.parseByte(value));
-                        break;
-                    }
-                    case CHAR: {
-                        element = ParsedPrimitive.fromChar((char) Short.parseShort(value));
-                        break;
-                    }
-                    case SHORT: {
-                        element = ParsedPrimitive.fromShort(Short.parseShort(value));
-                        break;
-                    }
-                    case INTEGER: {
-                        element = ParsedPrimitive.fromInteger(Integer.parseInt(value));
-                        break;
-                    }
-                    case LONG: {
-                        element = ParsedPrimitive.fromLong(Long.parseLong(value));
-                        break;
-                    }
-                    case BIGINTEGER: {
-                        element = ParsedPrimitive.fromBigInteger(BigIntegerParser.parseWithFastParser(value));
-                        break;
-                    }
-                    case FLOAT: {
-                        element = ParsedPrimitive.fromFloat(Float.parseFloat(value));
-                        break;
-                    }
-                    case DOUBLE: {
-                        element = ParsedPrimitive.fromDouble(Double.parseDouble(value));
-                        break;
-                    }
-                    case BIGDECIMAL: {
-                        element = ParsedPrimitive.fromBigDecimal(BigDecimalParser.parse(value));
-                        break;
-                    }
-                    case BOOLEAN: {
-                        element = ParsedPrimitive.fromBoolean(Boolean.parseBoolean(value));
-                        break;
-                    }
-                    case NULL: {
-                        element = ParsedPrimitive.fromNull();
-                        break;
-                    }
-                    default: {
-                        throw new RuntimeException();
-                    }
-                }
+                ParsedPrimitive element = ParsedPrimitive.from(ParsedPrimitive.fromString(value).to(primitiveType));
 
                 this.config.set(path, element);
             }
@@ -167,7 +112,7 @@ public class UnstructuredSimpleFileConfig extends UnstructuredFileConfig {
                 if (key.contains("=")) {
                     throw new IllegalArgumentException("Key cannot contain '='");
                 }
-                data.append(key).append("=").append(element.asPrimitive().getType().name()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null");
+                data.append(key).append("=").append(element.asPrimitive().getType().name()).append("=").append(!element.asPrimitive().isNull() ? element.asPrimitive().get().toString() : "null").append("\n");
             }
         }
 
