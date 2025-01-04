@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A utility class for executing MySQL statements and queries
  *
- * @version 5.0.0
+ * @version 5.1.0
  * @since 3.4.0
  */
 public class MySQLHelper {
@@ -125,6 +125,29 @@ public class MySQLHelper {
         PreparedStatement statement = connection.prepareStatement(query);
         for (int i = 0; i < args.length; i++) {
             statement.setString(i + 1, args[i]);
+        }
+
+        return statement.executeQuery();
+    }
+
+    /**
+     * Execute a mysql query and return the result
+     * <p>
+     * <b>The returned {@link ResultSet} *must* be closed by you to prevent memory leaks</b>
+     *
+     * @param connection The connection to execute on
+     * @param query      The base query to send
+     * @param args       Extra args to replace into the query
+     *
+     * @return The result of the query
+     *
+     * @throws SQLException When an SQLException is throw by the driver
+     * @since 3.4.0
+     */
+    public static @NotNull ResultSet query(@NotNull Connection connection, @NotNull String query, @NotNull List<String> args) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(query);
+        for (int i = 0; i < args.size(); i++) {
+            statement.setString(i + 1, args.get(i));
         }
 
         return statement.executeQuery();
