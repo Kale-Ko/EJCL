@@ -150,7 +150,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public static UnstructuredBJSLFileConfig.Builder createJson(@NotNull Path file) {
+        public static @NotNull UnstructuredBJSLFileConfig.Builder createJson(@NotNull Path file) {
             return new UnstructuredBJSLFileConfig.Builder(file, new JsonParser.Builder().build());
         }
 
@@ -163,7 +163,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public static UnstructuredBJSLFileConfig.Builder createYaml(@NotNull Path file) {
+        public static @NotNull UnstructuredBJSLFileConfig.Builder createYaml(@NotNull Path file) {
             return new UnstructuredBJSLFileConfig.Builder(file, new YamlParser.Builder().build());
         }
 
@@ -176,7 +176,7 @@ public class UnstructuredBJSLFileConfig extends UnstructuredFileConfig {
          *
          * @since 4.0.0
          */
-        public static UnstructuredBJSLFileConfig.Builder createSmile(@NotNull Path file) {
+        public static @NotNull UnstructuredBJSLFileConfig.Builder createSmile(@NotNull Path file) {
             return new UnstructuredBJSLFileConfig.Builder(file, new SmileParser.Builder().build());
         }
 

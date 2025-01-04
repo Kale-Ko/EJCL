@@ -175,7 +175,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createJson(@NotNull Class<T> clazz, @NotNull Path file) {
+        public static <T> @NotNull Builder<T> createJson(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new JsonParser.Builder().build());
         }
 
@@ -190,7 +190,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull Path file) {
+        public static <T> @NotNull Builder<T> createYaml(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new YamlParser.Builder().build());
         }
 
@@ -205,7 +205,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
          *
          * @since 4.0.0
          */
-        public static <T> Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull Path file) {
+        public static <T> @NotNull Builder<T> createSmile(@NotNull Class<T> clazz, @NotNull Path file) {
             return new Builder<>(clazz, file, new SmileParser.Builder().build());
         }
 

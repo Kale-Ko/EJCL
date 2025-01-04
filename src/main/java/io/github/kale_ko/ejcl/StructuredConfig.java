@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> The type of the data being stored
  *
- * @version 5.0.0
+ * @version 5.1.0
  * @since 1.0.0
  */
 public abstract class StructuredConfig<T> {
@@ -52,7 +52,7 @@ public abstract class StructuredConfig<T> {
      * @since 5.0.0
      */
     protected StructuredConfig(@NotNull Class<T> clazz, boolean supportsArrays) {
-        if (clazz.isInterface() || clazz.isEnum()) {
+        if (clazz.isInterface() || clazz.isEnum() || clazz == String.class || clazz == Byte.class || clazz == Character.class || clazz == Short.class || clazz == Integer.class || clazz == Long.class || clazz == Float.class || clazz == Double.class || clazz == Boolean.class) {
             throw new InvalidTypeException(clazz);
         }
         if (clazz.isArray() && !supportsArrays) {
@@ -127,7 +127,7 @@ public abstract class StructuredConfig<T> {
      * @since 1.0.0
      */
     public void load() throws IOException {
-        load(false);
+        this.load(false);
     }
 
     /**

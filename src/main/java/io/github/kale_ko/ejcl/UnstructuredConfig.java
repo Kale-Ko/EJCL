@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * Contains all the logic for getting/setting values
  *
- * @version 5.0.0
+ * @version 5.1.0
  * @since 3.0.0
  */
 public abstract class UnstructuredConfig {
@@ -77,7 +77,7 @@ public abstract class UnstructuredConfig {
      * @since 3.5.0
      */
     public @Nullable Object getCached(@NotNull String path) {
-        if (this.config == null) {
+        if (!this.getLoaded() || this.config == null) {
             throw new ConfigNotLoadedException();
         }
 
@@ -93,7 +93,7 @@ public abstract class UnstructuredConfig {
      * @since 3.0.0
      */
     public void set(@NotNull String path, @Nullable Object value) {
-        if (this.config == null) {
+        if (!this.getLoaded() || this.config == null) {
             throw new ConfigNotLoadedException();
         }
 
@@ -116,7 +116,7 @@ public abstract class UnstructuredConfig {
      * @since 3.0.0
      */
     public void load() throws IOException {
-        load(false);
+        this.load(false);
     }
 
     /**
