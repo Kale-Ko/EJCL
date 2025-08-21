@@ -54,6 +54,17 @@ public class PathResolver {
     }
 
     /**
+     * Properly escape a key to be used in a path
+     *
+     * @param key The key to escape
+     * @return The escaped key
+     */
+    private static @NotNull String escapePathKey(@NotNull String key) {
+        // Replace literal dots with escaped dots to prevent confusion with path separators
+        return key.replace("\\", "\\\\").replace(".", "\\.");
+    }
+
+    /**
      * Resolve a value on an element
      *
      * @param element The element to resolve on
@@ -64,6 +75,10 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static @Nullable Object resolve(@NotNull ParsedElement element, @NotNull String path) {
+        if (path.trim().isEmpty()) {
+            return element.isPrimitive() ? element.asPrimitive().get() : null;
+        }
+        
         path = arrayPathFixPattern.matcher(path).replaceAll(".[$1]");
 
         List<String> keys = Arrays.asList(pathSplitPattern.split(path));
@@ -87,7 +102,7 @@ public class PathResolver {
                         break;
                     }
 
-                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                    if (index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         resolved = null;
@@ -121,6 +136,10 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static @Nullable ParsedElement resolveElement(@NotNull ParsedElement element, @NotNull String path) {
+        if (path.trim().isEmpty()) {
+            return element;
+        }
+        
         path = arrayPathFixPattern.matcher(path).replaceAll(".[$1]");
 
         List<String> keys = Arrays.asList(pathSplitPattern.split(path));
@@ -144,7 +163,7 @@ public class PathResolver {
                         break;
                     }
 
-                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                    if (index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         resolved = null;
@@ -191,6 +210,11 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static @NotNull ParsedElement update(@NotNull ParsedElement element, @NotNull String path, @Nullable Object value, boolean force) {
+        if (path.trim().isEmpty()) {
+            // Cannot update root element with primitive value
+            return element;
+        }
+        
         path = arrayPathFixPattern.matcher(path).replaceAll(".[$1]");
 
         List<String> keys = Arrays.asList(pathSplitPattern.split(path));
@@ -221,10 +245,16 @@ public class PathResolver {
                         break;
                     }
 
-                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                    if (index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
+                            // Safety check to prevent excessive memory usage
+                            if (index > 10000) {
+                                resolved = null;
+                                break;
+                            }
+                            
                             while (resolved.asArray().getSize() <= index) {
                                 ParsedElement elementToAdd = createElementForNextKey(keys, i);
                                     resolved.asArray().add(elementToAdd);
@@ -265,7 +295,7 @@ public class PathResolver {
                     return element;
                 }
 
-                if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
+                if (resolvedValueKey < resolved.asArray().getSize()) {
                     if (resolved.asArray().get(resolvedValueKey).isPrimitive()) {
                         resolved.asArray().set(resolvedValueKey, ParsedPrimitive.from(value));
                     }
@@ -306,6 +336,11 @@ public class PathResolver {
      * @since 1.0.0
      */
     public static @NotNull ParsedElement updateElement(@NotNull ParsedElement element, @NotNull String path, @NotNull ParsedElement value, boolean force) {
+        if (path.trim().isEmpty()) {
+            // Cannot replace root element entirely
+            return element;
+        }
+        
         path = arrayPathFixPattern.matcher(path).replaceAll(".[$1]");
 
         List<String> keys = Arrays.asList(pathSplitPattern.split(path));
@@ -336,10 +371,16 @@ public class PathResolver {
                         break;
                     }
 
-                    if (index >= 0 && index < resolved.asArray().getSize()) {
+                    if (index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
+                            // Safety check to prevent excessive memory usage
+                            if (index > 10000) {
+                                resolved = null;
+                                break;
+                            }
+                            
                             while (resolved.asArray().getSize() <= index) {
                                 ParsedElement elementToAdd = createElementForNextKey(keys, i);
                                     resolved.asArray().add(elementToAdd);
@@ -374,7 +415,7 @@ public class PathResolver {
                     return element;
                 }
 
-                if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
+                if (resolvedValueKey < resolved.asArray().getSize()) {
                     resolved.asArray().set(resolvedValueKey, value);
                 } else {
                     resolved.asArray().add(value);
@@ -432,16 +473,16 @@ public class PathResolver {
             for (Map.Entry<String, ParsedElement> entry : object.getEntries()) {
                 if (entry.getValue().isObject()) {
                     if (returnObjArrKeys) {
-                        keys.add(path + entry.getKey().replace(".", "\\.")); // FIXME \. -> \\. -> split
+                        keys.add(path + escapePathKey(entry.getKey()));
                     }
-                    keys.addAll(getKeys(entry.getValue(), path + entry.getKey().replace(".", "\\.") + ".", returnObjArrKeys));
+                    keys.addAll(getKeys(entry.getValue(), path + escapePathKey(entry.getKey()) + ".", returnObjArrKeys));
                 } else if (entry.getValue().isArray()) {
                     if (returnObjArrKeys) {
-                        keys.add(path + entry.getKey().replace(".", "\\."));
+                        keys.add(path + escapePathKey(entry.getKey()));
                     }
-                    keys.addAll(getKeys(entry.getValue(), path + entry.getKey().replace(".", "\\."), returnObjArrKeys));
+                    keys.addAll(getKeys(entry.getValue(), path + escapePathKey(entry.getKey()), returnObjArrKeys));
                 } else if (entry.getValue().isPrimitive()) {
-                    keys.add(path + entry.getKey().replace(".", "\\."));
+                    keys.add(path + escapePathKey(entry.getKey()));
                 }
             }
         } else if (element.isArray()) {
