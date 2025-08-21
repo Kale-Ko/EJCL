@@ -61,7 +61,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     protected final @Nullable String password;
 
     /**
-     * Weather to use the MariaDB driver
+     * Whether to use the MariaDB driver
      *
      * @since 3.11.0
      */
@@ -103,7 +103,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
      * @param table      The table of the database
      * @param username   The username to the server
      * @param password   The password to the server
-     * @param useMariadb Weather to use the MariaDB driver
+     * @param useMariadb Whether to use the MariaDB driver
      * @param processor  The ObjectProcessor to use for serialization/deserialization
      *
      * @since 3.0.0
@@ -140,20 +140,25 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         while (!this.getConnected()) {
             this.reconnectAttempts++;
 
+            if (this.reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
+
             try {
                 this.connect();
             } catch (IOException e) {
                 try {
-                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                    // Exponential backoff with maximum cap to prevent overflow
+                    long sleepTime = Math.min((long) (Math.pow(2, this.reconnectAttempts) * 1000), 30000);
+                    Thread.sleep(sleepTime);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
+                    throw new IOException("Connection interrupted", ex);
                 }
             }
-
-            if (this.reconnectAttempts > 5) {
-                throw new MaximumReconnectsException();
-            }
         }
+        // Reset reconnect attempts on successful connection
+        this.reconnectAttempts = 0;
         assert this.connection != null;
 
         try (ResultSet result = MySQLHelper.query(this.connection, "SELECT type,value FROM " + this.table + " WHERE path=?", path)) {
@@ -230,20 +235,25 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         while (!this.getConnected()) {
             this.reconnectAttempts++;
 
+            if (this.reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
+
             try {
                 this.connect();
             } catch (IOException e) {
                 try {
-                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));
+                    // Exponential backoff with maximum cap to prevent overflow
+                    long sleepTime = Math.min((long) (Math.pow(2, this.reconnectAttempts) * 1000), 30000);
+                    Thread.sleep(sleepTime);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
+                    throw new IOException("Connection interrupted", ex);
                 }
             }
-
-            if (this.reconnectAttempts > 5) {
-                throw new MaximumReconnectsException();
-            }
         }
+        // Reset reconnect attempts on successful connection
+        this.reconnectAttempts = 0;
         assert this.connection != null;
 
         try {
@@ -384,7 +394,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
     /**
      * Load the config
      *
-     * @param save Weather to save the config after loaded (To update the template)
+     * @param save Whether to save the config after loaded (To update the template)
      *
      * @throws IOException On load error
      * @since 1.3.0
@@ -491,7 +501,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
         protected @Nullable String password = null;
 
         /**
-         * Weather to use the MariaDB driver
+         * Whether to use the MariaDB driver
          * <p>
          * Default is false
          *
@@ -759,7 +769,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * <p>
          * Default is false
          *
-         * @return Weather to use the MariaDB driver
+         * @return Whether to use the MariaDB driver
          *
          * @since 4.0.0
          */
@@ -772,7 +782,7 @@ public class UnstructuredMySQLConfig extends UnstructuredConfig {
          * <p>
          * Default is false
          *
-         * @param useMariadb Weather to use the MariaDB driver
+         * @param useMariadb Whether to use the MariaDB driver
          *
          * @return Self for chaining
          *
