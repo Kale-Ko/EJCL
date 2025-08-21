@@ -71,7 +71,7 @@ public class StructuredBJSLFileConfig<T> extends StructuredFileConfig<T> {
     /**
      * Load the config
      *
-     * @param save Weather to save the config after loaded (To update the template)
+     * @param save Whether to save the config after loaded (To update the template)
      *
      * @throws IOException On load error
      * @since 1.3.0

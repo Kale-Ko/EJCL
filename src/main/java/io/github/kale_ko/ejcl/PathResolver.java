@@ -23,6 +23,37 @@ public class PathResolver {
     }
 
     /**
+     * Safely parse array index from a string, returning -1 if invalid
+     *
+     * @param arrayKey The array key to parse (e.g., "[5]")
+     * @return The parsed index, or -1 if invalid
+     */
+    private static int parseArrayIndex(@NotNull String arrayKey) {
+        try {
+            return Integer.parseInt(arrayPathFixPattern.matcher(arrayKey).replaceAll(".[$1]"));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Determines what type of element should be created for the next key in the path
+     *
+     * @param keys The list of keys in the path
+     * @param currentIndex The current index in the keys list
+     * @return The appropriate ParsedElement to create
+     */
+    private static @NotNull ParsedElement createElementForNextKey(@NotNull List<String> keys, int currentIndex) {
+        if (currentIndex + 1 < keys.size() && keys.get(currentIndex + 1).startsWith("[") && keys.get(currentIndex + 1).endsWith("]")) {
+            return ParsedArray.create();
+        } else if (keys.size() > currentIndex + 1) {
+            return ParsedObject.create();
+        } else {
+            return ParsedPrimitive.fromNull();
+        }
+    }
+
+    /**
      * Resolve a value on an element
      *
      * @param element The element to resolve on
@@ -49,7 +80,12 @@ public class PathResolver {
                 }
             } else if (resolved.isArray()) {
                 if (keys.get(i).startsWith("[") && keys.get(i).endsWith("]")) {
-                    int index = Integer.parseInt(arrayPathFixPattern.matcher(keys.get(i)).replaceAll(".[$1]"));
+                    int index = parseArrayIndex(keys.get(i));
+                    
+                    if (index < 0) {
+                        resolved = null;
+                        break;
+                    }
 
                     if (index >= 0 && index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
@@ -101,7 +137,12 @@ public class PathResolver {
                 }
             } else if (resolved.isArray()) {
                 if (keys.get(i).startsWith("[") && keys.get(i).endsWith("]")) {
-                    int index = Integer.parseInt(arrayPathFixPattern.matcher(keys.get(i)).replaceAll(".[$1]"));
+                    int index = parseArrayIndex(keys.get(i));
+                    
+                    if (index < 0) {
+                        resolved = null;
+                        break;
+                    }
 
                     if (index >= 0 && index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
@@ -162,13 +203,8 @@ public class PathResolver {
                     resolved = resolved.asObject().get(keys.get(i));
                 } else {
                     if (force) {
-                        if (keys.get(i + 1).startsWith("[") && keys.get(i + 1).endsWith("]")) {
-                            resolved.asObject().set(keys.get(i), ParsedArray.create());
-                        } else if (keys.size() > i + 1) {
-                            resolved.asObject().set(keys.get(i), ParsedObject.create());
-                        } else {
-                            resolved.asObject().set(keys.get(i), ParsedPrimitive.fromNull());
-                        }
+                        ParsedElement elementToCreate = createElementForNextKey(keys, i);
+                        resolved.asObject().set(keys.get(i), elementToCreate);
 
                         resolved = resolved.asObject().get(keys.get(i));
                     } else {
@@ -178,20 +214,20 @@ public class PathResolver {
                 }
             } else if (resolved.isArray()) {
                 if (keys.get(i).startsWith("[") && keys.get(i).endsWith("]")) {
-                    int index = Integer.parseInt(arrayPathFixPattern.matcher(keys.get(i)).replaceAll(".[$1]"));
+                    int index = parseArrayIndex(keys.get(i));
+                    
+                    if (index < 0) {
+                        resolved = null;
+                        break;
+                    }
 
                     if (index >= 0 && index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
                             while (resolved.asArray().getSize() <= index) {
-                                if (keys.get(i + 1).startsWith("[") && keys.get(i + 1).endsWith("]")) {
-                                    resolved.asArray().add(ParsedArray.create());
-                                } else if (keys.size() > i + 1) {
-                                    resolved.asArray().add(ParsedObject.create());
-                                } else {
-                                    resolved.asArray().add(ParsedPrimitive.fromNull());
-                                }
+                                ParsedElement elementToAdd = createElementForNextKey(keys, i);
+                                    resolved.asArray().add(elementToAdd);
                             }
 
                             resolved = resolved.asArray().get(index);
@@ -222,7 +258,12 @@ public class PathResolver {
                     resolved.asObject().set(valueKey, ParsedPrimitive.from(value));
                 }
             } else if (resolved.isArray() && (valueKey.startsWith("[") && valueKey.endsWith("]"))) {
-                int resolvedValueKey = Integer.parseInt(arrayPathFixPattern.matcher(valueKey).replaceAll(".[$1]"));
+                int resolvedValueKey = parseArrayIndex(valueKey);
+                
+                if (resolvedValueKey < 0) {
+                    // Invalid array index, skip
+                    return element;
+                }
 
                 if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
                     if (resolved.asArray().get(resolvedValueKey).isPrimitive()) {
@@ -277,13 +318,8 @@ public class PathResolver {
                     resolved = resolved.asObject().get(keys.get(i));
                 } else {
                     if (force) {
-                        if (keys.get(i + 1).startsWith("[") && keys.get(i + 1).endsWith("]")) {
-                            resolved.asObject().set(keys.get(i), ParsedArray.create());
-                        } else if (keys.size() > i + 1) {
-                            resolved.asObject().set(keys.get(i), ParsedObject.create());
-                        } else {
-                            resolved.asObject().set(keys.get(i), ParsedPrimitive.fromNull());
-                        }
+                        ParsedElement elementToCreate = createElementForNextKey(keys, i);
+                        resolved.asObject().set(keys.get(i), elementToCreate);
 
                         resolved = resolved.asObject().get(keys.get(i));
                     } else {
@@ -293,20 +329,20 @@ public class PathResolver {
                 }
             } else if (resolved.isArray()) {
                 if (keys.get(i).startsWith("[") && keys.get(i).endsWith("]")) {
-                    int index = Integer.parseInt(arrayPathFixPattern.matcher(keys.get(i)).replaceAll(".[$1]"));
+                    int index = parseArrayIndex(keys.get(i));
+                    
+                    if (index < 0) {
+                        resolved = null;
+                        break;
+                    }
 
                     if (index >= 0 && index < resolved.asArray().getSize()) {
                         resolved = resolved.asArray().get(index);
                     } else {
                         if (force) {
                             while (resolved.asArray().getSize() <= index) {
-                                if (keys.get(i + 1).startsWith("[") && keys.get(i + 1).endsWith("]")) {
-                                    resolved.asArray().add(ParsedArray.create());
-                                } else if (keys.size() > i + 1) {
-                                    resolved.asArray().add(ParsedObject.create());
-                                } else {
-                                    resolved.asArray().add(ParsedPrimitive.fromNull());
-                                }
+                                ParsedElement elementToAdd = createElementForNextKey(keys, i);
+                                    resolved.asArray().add(elementToAdd);
                             }
 
                             resolved = resolved.asArray().get(index);
@@ -331,7 +367,12 @@ public class PathResolver {
             if (resolved.isObject()) {
                 resolved.asObject().set(valueKey, value);
             } else if (resolved.isArray() && (valueKey.startsWith("[") && valueKey.endsWith("]"))) {
-                int resolvedValueKey = Integer.parseInt(arrayPathFixPattern.matcher(valueKey).replaceAll(".[$1]"));
+                int resolvedValueKey = parseArrayIndex(valueKey);
+                
+                if (resolvedValueKey < 0) {
+                    // Invalid array index, skip
+                    return element;
+                }
 
                 if (resolvedValueKey >= 0 && resolvedValueKey < resolved.asArray().getSize()) {
                     resolved.asArray().set(resolvedValueKey, value);
@@ -361,7 +402,7 @@ public class PathResolver {
      * Get all the keys in an element
      *
      * @param element          The element to get the keys of
-     * @param returnObjArrKeys Weather or not to return the keys for objects and arrays
+     * @param returnObjArrKeys Whether or not to return the keys for objects and arrays
      *
      * @return A list of all the keys
      *
@@ -376,7 +417,7 @@ public class PathResolver {
      *
      * @param element          The element to get the keys of
      * @param path             The current path
-     * @param returnObjArrKeys Weather or not to return the keys for objects and arrays
+     * @param returnObjArrKeys Whether or not to return the keys for objects and arrays
      *
      * @return A list of all the keys
      *
