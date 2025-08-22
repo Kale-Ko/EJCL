@@ -285,28 +285,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigClosedException();
         }
 
-        while (!this.getConnected()) {
-            this.reconnectAttempts++;
-
-            if (this.reconnectAttempts > 5) {
-                throw new MaximumReconnectsException();
-            }
-
-            try {
-                this.connect();
-            } catch (IOException e) {
-                try {
-                    // Exponential backoff with maximum cap to prevent overflow
-                    long sleepTime = Math.min((long) (Math.pow(2, this.reconnectAttempts) * 1000), 30000);
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Connection interrupted", ex);
-                }
-            }
-        }
-        // Reset reconnect attempts on successful connection
-        this.reconnectAttempts = 0;
+        this.ensureConnected();
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
@@ -353,28 +332,7 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
             throw new ConfigNotLoadedException();
         }
 
-        while (!this.getConnected()) {
-            this.reconnectAttempts++;
-
-            if (this.reconnectAttempts > 5) {
-                throw new MaximumReconnectsException();
-            }
-
-            try {
-                this.connect();
-            } catch (IOException e) {
-                try {
-                    // Exponential backoff with maximum cap to prevent overflow
-                    long sleepTime = Math.min((long) (Math.pow(2, this.reconnectAttempts) * 1000), 30000);
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Connection interrupted", ex);
-                }
-            }
-        }
-        // Reset reconnect attempts on successful connection
-        this.reconnectAttempts = 0;
+        this.ensureConnected();
         assert this.connection != null;
 
         synchronized (SAVELOAD_LOCK) {
@@ -417,6 +375,25 @@ public class StructuredMySQLConfig<T> extends StructuredConfig<T> {
                 }
             } catch (SQLException e) {
                 throw new IOException(e);
+            }
+        }
+    }
+
+    private void ensureConnected() {
+        while (!this.getConnected()) {
+            this.reconnectAttempts++;
+            if (this.reconnectAttempts > 5) {
+                throw new MaximumReconnectsException();
+            }
+
+            try {
+                this.connect();
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(Math.min((int) (Math.pow(2, this.reconnectAttempts) * 1000), 60000));
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
