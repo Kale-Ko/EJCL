@@ -89,7 +89,7 @@
 <span class="source-line-no">076</span><span id="line-76">    protected final @Nullable String password;</span>
 <span class="source-line-no">077</span><span id="line-77"></span>
 <span class="source-line-no">078</span><span id="line-78">    /**</span>
-<span class="source-line-no">079</span><span id="line-79">     * Weather to use the MariaDB driver</span>
+<span class="source-line-no">079</span><span id="line-79">     * Whether to use the MariaDB driver</span>
 <span class="source-line-no">080</span><span id="line-80">     *</span>
 <span class="source-line-no">081</span><span id="line-81">     * @since 3.11.0</span>
 <span class="source-line-no">082</span><span id="line-82">     */</span>
@@ -153,7 +153,7 @@
 <span class="source-line-no">140</span><span id="line-140">     * @param table       The table of the database</span>
 <span class="source-line-no">141</span><span id="line-141">     * @param username    The username to the server</span>
 <span class="source-line-no">142</span><span id="line-142">     * @param password    The password to the server</span>
-<span class="source-line-no">143</span><span id="line-143">     * @param useMariadb  Weather to use the MariaDB driver</span>
+<span class="source-line-no">143</span><span id="line-143">     * @param useMariadb  Whether to use the MariaDB driver</span>
 <span class="source-line-no">144</span><span id="line-144">     * @param cacheLength How long to cache the config in memory</span>
 <span class="source-line-no">145</span><span id="line-145">     * @param processor   The ObjectProcessor to use for serialization/deserialization</span>
 <span class="source-line-no">146</span><span id="line-146">     *</span>
@@ -287,7 +287,7 @@
 <span class="source-line-no">274</span><span id="line-274">    /**</span>
 <span class="source-line-no">275</span><span id="line-275">     * Load the config</span>
 <span class="source-line-no">276</span><span id="line-276">     *</span>
-<span class="source-line-no">277</span><span id="line-277">     * @param save Weather to save the config after loaded (To update the template)</span>
+<span class="source-line-no">277</span><span id="line-277">     * @param save Whether to save the config after loaded (To update the template)</span>
 <span class="source-line-no">278</span><span id="line-278">     *</span>
 <span class="source-line-no">279</span><span id="line-279">     * @throws IOException On load error</span>
 <span class="source-line-no">280</span><span id="line-280">     * @since 1.3.0</span>
@@ -298,606 +298,593 @@
 <span class="source-line-no">285</span><span id="line-285">            throw new ConfigClosedException();</span>
 <span class="source-line-no">286</span><span id="line-286">        }</span>
 <span class="source-line-no">287</span><span id="line-287"></span>
-<span class="source-line-no">288</span><span id="line-288">        while (!this.getConnected()) {</span>
-<span class="source-line-no">289</span><span id="line-289">            this.reconnectAttempts++;</span>
+<span class="source-line-no">288</span><span id="line-288">        this.ensureConnected();</span>
+<span class="source-line-no">289</span><span id="line-289">        assert this.connection != null;</span>
 <span class="source-line-no">290</span><span id="line-290"></span>
-<span class="source-line-no">291</span><span id="line-291">            try {</span>
-<span class="source-line-no">292</span><span id="line-292">                this.connect();</span>
-<span class="source-line-no">293</span><span id="line-293">            } catch (IOException e) {</span>
-<span class="source-line-no">294</span><span id="line-294">                try {</span>
-<span class="source-line-no">295</span><span id="line-295">                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));</span>
-<span class="source-line-no">296</span><span id="line-296">                } catch (InterruptedException ex) {</span>
-<span class="source-line-no">297</span><span id="line-297">                    Thread.currentThread().interrupt();</span>
-<span class="source-line-no">298</span><span id="line-298">                }</span>
-<span class="source-line-no">299</span><span id="line-299">            }</span>
+<span class="source-line-no">291</span><span id="line-291">        synchronized (SAVELOAD_LOCK) {</span>
+<span class="source-line-no">292</span><span id="line-292">            ParsedObject object = ParsedObject.create();</span>
+<span class="source-line-no">293</span><span id="line-293"></span>
+<span class="source-line-no">294</span><span id="line-294">            try (ResultSet result = MySQLHelper.query(this.connection, "SELECT path,type,value FROM " + this.table)) {</span>
+<span class="source-line-no">295</span><span id="line-295">                while (result.next()) {</span>
+<span class="source-line-no">296</span><span id="line-296">                    String path = result.getString("path");</span>
+<span class="source-line-no">297</span><span id="line-297">                    String type = result.getString("type").toUpperCase();</span>
+<span class="source-line-no">298</span><span id="line-298">                    ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);</span>
+<span class="source-line-no">299</span><span id="line-299">                    String value = result.getString("value");</span>
 <span class="source-line-no">300</span><span id="line-300"></span>
-<span class="source-line-no">301</span><span id="line-301">            if (this.reconnectAttempts &gt; 5) {</span>
-<span class="source-line-no">302</span><span id="line-302">                throw new MaximumReconnectsException();</span>
-<span class="source-line-no">303</span><span id="line-303">            }</span>
-<span class="source-line-no">304</span><span id="line-304">        }</span>
-<span class="source-line-no">305</span><span id="line-305">        assert this.connection != null;</span>
-<span class="source-line-no">306</span><span id="line-306"></span>
-<span class="source-line-no">307</span><span id="line-307">        synchronized (SAVELOAD_LOCK) {</span>
-<span class="source-line-no">308</span><span id="line-308">            ParsedObject object = ParsedObject.create();</span>
-<span class="source-line-no">309</span><span id="line-309"></span>
-<span class="source-line-no">310</span><span id="line-310">            try (ResultSet result = MySQLHelper.query(this.connection, "SELECT path,type,value FROM " + this.table)) {</span>
-<span class="source-line-no">311</span><span id="line-311">                while (result.next()) {</span>
-<span class="source-line-no">312</span><span id="line-312">                    String path = result.getString("path");</span>
-<span class="source-line-no">313</span><span id="line-313">                    String type = result.getString("type").toUpperCase();</span>
-<span class="source-line-no">314</span><span id="line-314">                    ParsedPrimitive.PrimitiveType primitiveType = ParsedPrimitive.PrimitiveType.valueOf(type);</span>
-<span class="source-line-no">315</span><span id="line-315">                    String value = result.getString("value");</span>
-<span class="source-line-no">316</span><span id="line-316"></span>
-<span class="source-line-no">317</span><span id="line-317">                    ParsedElement element = ParsedPrimitive.from(ParsedPrimitive.fromString(value).to(primitiveType));</span>
-<span class="source-line-no">318</span><span id="line-318"></span>
-<span class="source-line-no">319</span><span id="line-319">                    PathResolver.updateElement(object, path, element, true);</span>
-<span class="source-line-no">320</span><span id="line-320">                }</span>
-<span class="source-line-no">321</span><span id="line-321">            } catch (SQLException e) {</span>
-<span class="source-line-no">322</span><span id="line-322">                throw new IOException(e);</span>
-<span class="source-line-no">323</span><span id="line-323">            }</span>
-<span class="source-line-no">324</span><span id="line-324"></span>
-<span class="source-line-no">325</span><span id="line-325">            this.config = this.processor.toObject(object, this.clazz);</span>
-<span class="source-line-no">326</span><span id="line-326">            this.configExpires = Instant.now().plus(this.cacheLength);</span>
-<span class="source-line-no">327</span><span id="line-327"></span>
-<span class="source-line-no">328</span><span id="line-328">            this.configBackup = object;</span>
-<span class="source-line-no">329</span><span id="line-329">        }</span>
-<span class="source-line-no">330</span><span id="line-330"></span>
-<span class="source-line-no">331</span><span id="line-331">        if (save) {</span>
-<span class="source-line-no">332</span><span id="line-332">            this.save();</span>
+<span class="source-line-no">301</span><span id="line-301">                    ParsedElement element = ParsedPrimitive.from(ParsedPrimitive.fromString(value).to(primitiveType));</span>
+<span class="source-line-no">302</span><span id="line-302"></span>
+<span class="source-line-no">303</span><span id="line-303">                    PathResolver.updateElement(object, path, element, true);</span>
+<span class="source-line-no">304</span><span id="line-304">                }</span>
+<span class="source-line-no">305</span><span id="line-305">            } catch (SQLException e) {</span>
+<span class="source-line-no">306</span><span id="line-306">                throw new IOException(e);</span>
+<span class="source-line-no">307</span><span id="line-307">            }</span>
+<span class="source-line-no">308</span><span id="line-308"></span>
+<span class="source-line-no">309</span><span id="line-309">            this.config = this.processor.toObject(object, this.clazz);</span>
+<span class="source-line-no">310</span><span id="line-310">            this.configExpires = Instant.now().plus(this.cacheLength);</span>
+<span class="source-line-no">311</span><span id="line-311"></span>
+<span class="source-line-no">312</span><span id="line-312">            this.configBackup = object;</span>
+<span class="source-line-no">313</span><span id="line-313">        }</span>
+<span class="source-line-no">314</span><span id="line-314"></span>
+<span class="source-line-no">315</span><span id="line-315">        if (save) {</span>
+<span class="source-line-no">316</span><span id="line-316">            this.save();</span>
+<span class="source-line-no">317</span><span id="line-317">        }</span>
+<span class="source-line-no">318</span><span id="line-318">    }</span>
+<span class="source-line-no">319</span><span id="line-319"></span>
+<span class="source-line-no">320</span><span id="line-320">    /**</span>
+<span class="source-line-no">321</span><span id="line-321">     * Save the config to the server</span>
+<span class="source-line-no">322</span><span id="line-322">     *</span>
+<span class="source-line-no">323</span><span id="line-323">     * @throws IOException On save error</span>
+<span class="source-line-no">324</span><span id="line-324">     * @since 1.0.0</span>
+<span class="source-line-no">325</span><span id="line-325">     */</span>
+<span class="source-line-no">326</span><span id="line-326">    @Override</span>
+<span class="source-line-no">327</span><span id="line-327">    public void save() throws IOException {</span>
+<span class="source-line-no">328</span><span id="line-328">        if (this.closed) {</span>
+<span class="source-line-no">329</span><span id="line-329">            throw new ConfigClosedException();</span>
+<span class="source-line-no">330</span><span id="line-330">        }</span>
+<span class="source-line-no">331</span><span id="line-331">        if (this.config == null || this.configBackup == null) {</span>
+<span class="source-line-no">332</span><span id="line-332">            throw new ConfigNotLoadedException();</span>
 <span class="source-line-no">333</span><span id="line-333">        }</span>
-<span class="source-line-no">334</span><span id="line-334">    }</span>
-<span class="source-line-no">335</span><span id="line-335"></span>
-<span class="source-line-no">336</span><span id="line-336">    /**</span>
-<span class="source-line-no">337</span><span id="line-337">     * Save the config to the server</span>
-<span class="source-line-no">338</span><span id="line-338">     *</span>
-<span class="source-line-no">339</span><span id="line-339">     * @throws IOException On save error</span>
-<span class="source-line-no">340</span><span id="line-340">     * @since 1.0.0</span>
-<span class="source-line-no">341</span><span id="line-341">     */</span>
-<span class="source-line-no">342</span><span id="line-342">    @Override</span>
-<span class="source-line-no">343</span><span id="line-343">    public void save() throws IOException {</span>
-<span class="source-line-no">344</span><span id="line-344">        if (this.closed) {</span>
-<span class="source-line-no">345</span><span id="line-345">            throw new ConfigClosedException();</span>
-<span class="source-line-no">346</span><span id="line-346">        }</span>
-<span class="source-line-no">347</span><span id="line-347">        if (this.config == null || this.configBackup == null) {</span>
-<span class="source-line-no">348</span><span id="line-348">            throw new ConfigNotLoadedException();</span>
-<span class="source-line-no">349</span><span id="line-349">        }</span>
+<span class="source-line-no">334</span><span id="line-334"></span>
+<span class="source-line-no">335</span><span id="line-335">        this.ensureConnected();</span>
+<span class="source-line-no">336</span><span id="line-336">        assert this.connection != null;</span>
+<span class="source-line-no">337</span><span id="line-337"></span>
+<span class="source-line-no">338</span><span id="line-338">        synchronized (SAVELOAD_LOCK) {</span>
+<span class="source-line-no">339</span><span id="line-339">            ParsedObject object = this.processor.toElement(this.config).asObject();</span>
+<span class="source-line-no">340</span><span id="line-340">            Set&lt;String&gt; keys = PathResolver.getKeys(object, false);</span>
+<span class="source-line-no">341</span><span id="line-341">            Set&lt;String&gt; oldKeys = PathResolver.getKeys(this.configBackup, false);</span>
+<span class="source-line-no">342</span><span id="line-342"></span>
+<span class="source-line-no">343</span><span id="line-343">            Set&lt;String&gt; toDelete = new HashSet&lt;&gt;(oldKeys);</span>
+<span class="source-line-no">344</span><span id="line-344">            toDelete.removeAll(keys);</span>
+<span class="source-line-no">345</span><span id="line-345"></span>
+<span class="source-line-no">346</span><span id="line-346">            List&lt;String&gt; queryArgs = new ArrayList&lt;&gt;();</span>
+<span class="source-line-no">347</span><span id="line-347">            for (String key : keys) {</span>
+<span class="source-line-no">348</span><span id="line-348">                ParsedElement valueElement = PathResolver.resolveElement(object, key);</span>
+<span class="source-line-no">349</span><span id="line-349">                ParsedElement oldValueElement = PathResolver.resolveElement(this.configBackup, key);</span>
 <span class="source-line-no">350</span><span id="line-350"></span>
-<span class="source-line-no">351</span><span id="line-351">        while (!this.getConnected()) {</span>
-<span class="source-line-no">352</span><span id="line-352">            this.reconnectAttempts++;</span>
-<span class="source-line-no">353</span><span id="line-353"></span>
-<span class="source-line-no">354</span><span id="line-354">            try {</span>
-<span class="source-line-no">355</span><span id="line-355">                this.connect();</span>
-<span class="source-line-no">356</span><span id="line-356">            } catch (IOException e) {</span>
-<span class="source-line-no">357</span><span id="line-357">                try {</span>
-<span class="source-line-no">358</span><span id="line-358">                    Thread.sleep((int) (Math.pow(2, this.reconnectAttempts) * 1000));</span>
-<span class="source-line-no">359</span><span id="line-359">                } catch (InterruptedException ex) {</span>
-<span class="source-line-no">360</span><span id="line-360">                    Thread.currentThread().interrupt();</span>
-<span class="source-line-no">361</span><span id="line-361">                }</span>
-<span class="source-line-no">362</span><span id="line-362">            }</span>
-<span class="source-line-no">363</span><span id="line-363"></span>
-<span class="source-line-no">364</span><span id="line-364">            if (this.reconnectAttempts &gt; 5) {</span>
-<span class="source-line-no">365</span><span id="line-365">                throw new MaximumReconnectsException();</span>
-<span class="source-line-no">366</span><span id="line-366">            }</span>
-<span class="source-line-no">367</span><span id="line-367">        }</span>
-<span class="source-line-no">368</span><span id="line-368">        assert this.connection != null;</span>
-<span class="source-line-no">369</span><span id="line-369"></span>
-<span class="source-line-no">370</span><span id="line-370">        synchronized (SAVELOAD_LOCK) {</span>
-<span class="source-line-no">371</span><span id="line-371">            ParsedObject object = this.processor.toElement(this.config).asObject();</span>
-<span class="source-line-no">372</span><span id="line-372">            Set&lt;String&gt; keys = PathResolver.getKeys(object, false);</span>
-<span class="source-line-no">373</span><span id="line-373">            Set&lt;String&gt; oldKeys = PathResolver.getKeys(this.configBackup, false);</span>
-<span class="source-line-no">374</span><span id="line-374"></span>
-<span class="source-line-no">375</span><span id="line-375">            Set&lt;String&gt; toDelete = new HashSet&lt;&gt;(oldKeys);</span>
-<span class="source-line-no">376</span><span id="line-376">            toDelete.removeAll(keys);</span>
-<span class="source-line-no">377</span><span id="line-377"></span>
-<span class="source-line-no">378</span><span id="line-378">            List&lt;String&gt; queryArgs = new ArrayList&lt;&gt;();</span>
-<span class="source-line-no">379</span><span id="line-379">            for (String key : keys) {</span>
-<span class="source-line-no">380</span><span id="line-380">                ParsedElement valueElement = PathResolver.resolveElement(object, key);</span>
-<span class="source-line-no">381</span><span id="line-381">                ParsedElement oldValueElement = PathResolver.resolveElement(this.configBackup, key);</span>
-<span class="source-line-no">382</span><span id="line-382"></span>
-<span class="source-line-no">383</span><span id="line-383">                if (valueElement != null &amp;&amp; oldValueElement != null) {</span>
-<span class="source-line-no">384</span><span id="line-384">                    ParsedPrimitive value = valueElement.asPrimitive();</span>
-<span class="source-line-no">385</span><span id="line-385">                    ParsedPrimitive oldValue = oldValueElement.asPrimitive();</span>
-<span class="source-line-no">386</span><span id="line-386"></span>
-<span class="source-line-no">387</span><span id="line-387">                    Object valueObj = value.get();</span>
-<span class="source-line-no">388</span><span id="line-388">                    Object oldValueObj = oldValue.get();</span>
-<span class="source-line-no">389</span><span id="line-389"></span>
-<span class="source-line-no">390</span><span id="line-390">                    if (!((value.isNull() &amp;&amp; oldValue.isNull()) || (!value.isNull() &amp;&amp; (valueObj == oldValueObj || valueObj.equals(oldValueObj))))) {</span>
-<span class="source-line-no">391</span><span id="line-391">                        queryArgs.add(key);</span>
-<span class="source-line-no">392</span><span id="line-392">                        queryArgs.add(value.getType().name());</span>
-<span class="source-line-no">393</span><span id="line-393">                        queryArgs.add(!value.isNull() ? valueObj.toString() : "null");</span>
-<span class="source-line-no">394</span><span id="line-394">                    }</span>
-<span class="source-line-no">395</span><span id="line-395">                }</span>
-<span class="source-line-no">396</span><span id="line-396">            }</span>
-<span class="source-line-no">397</span><span id="line-397"></span>
-<span class="source-line-no">398</span><span id="line-398">            this.configBackup = object;</span>
-<span class="source-line-no">399</span><span id="line-399"></span>
-<span class="source-line-no">400</span><span id="line-400">            try {</span>
-<span class="source-line-no">401</span><span id="line-401">                if (!queryArgs.isEmpty()) {</span>
-<span class="source-line-no">402</span><span id="line-402">                    MySQLHelper.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, type, value) VALUES (?, ?, ?);", 3, queryArgs);</span>
-<span class="source-line-no">403</span><span id="line-403">                }</span>
-<span class="source-line-no">404</span><span id="line-404"></span>
-<span class="source-line-no">405</span><span id="line-405">                if (!toDelete.isEmpty()) {</span>
-<span class="source-line-no">406</span><span id="line-406">                    MySQLHelper.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, List.copyOf(toDelete));</span>
-<span class="source-line-no">407</span><span id="line-407">                }</span>
-<span class="source-line-no">408</span><span id="line-408">            } catch (SQLException e) {</span>
-<span class="source-line-no">409</span><span id="line-409">                throw new IOException(e);</span>
-<span class="source-line-no">410</span><span id="line-410">            }</span>
+<span class="source-line-no">351</span><span id="line-351">                if (valueElement != null &amp;&amp; oldValueElement != null) {</span>
+<span class="source-line-no">352</span><span id="line-352">                    ParsedPrimitive value = valueElement.asPrimitive();</span>
+<span class="source-line-no">353</span><span id="line-353">                    ParsedPrimitive oldValue = oldValueElement.asPrimitive();</span>
+<span class="source-line-no">354</span><span id="line-354"></span>
+<span class="source-line-no">355</span><span id="line-355">                    Object valueObj = value.get();</span>
+<span class="source-line-no">356</span><span id="line-356">                    Object oldValueObj = oldValue.get();</span>
+<span class="source-line-no">357</span><span id="line-357"></span>
+<span class="source-line-no">358</span><span id="line-358">                    if (!((value.isNull() &amp;&amp; oldValue.isNull()) || (!value.isNull() &amp;&amp; (valueObj == oldValueObj || valueObj.equals(oldValueObj))))) {</span>
+<span class="source-line-no">359</span><span id="line-359">                        queryArgs.add(key);</span>
+<span class="source-line-no">360</span><span id="line-360">                        queryArgs.add(value.getType().name());</span>
+<span class="source-line-no">361</span><span id="line-361">                        queryArgs.add(!value.isNull() ? valueObj.toString() : "null");</span>
+<span class="source-line-no">362</span><span id="line-362">                    }</span>
+<span class="source-line-no">363</span><span id="line-363">                }</span>
+<span class="source-line-no">364</span><span id="line-364">            }</span>
+<span class="source-line-no">365</span><span id="line-365"></span>
+<span class="source-line-no">366</span><span id="line-366">            this.configBackup = object;</span>
+<span class="source-line-no">367</span><span id="line-367"></span>
+<span class="source-line-no">368</span><span id="line-368">            try {</span>
+<span class="source-line-no">369</span><span id="line-369">                if (!queryArgs.isEmpty()) {</span>
+<span class="source-line-no">370</span><span id="line-370">                    MySQLHelper.executeBatch(this.connection, "REPLACE INTO " + this.table + " (path, type, value) VALUES (?, ?, ?);", 3, queryArgs);</span>
+<span class="source-line-no">371</span><span id="line-371">                }</span>
+<span class="source-line-no">372</span><span id="line-372"></span>
+<span class="source-line-no">373</span><span id="line-373">                if (!toDelete.isEmpty()) {</span>
+<span class="source-line-no">374</span><span id="line-374">                    MySQLHelper.executeBatch(this.connection, "DELETE FROM " + this.table + " WHERE path=?;", 1, List.copyOf(toDelete));</span>
+<span class="source-line-no">375</span><span id="line-375">                }</span>
+<span class="source-line-no">376</span><span id="line-376">            } catch (SQLException e) {</span>
+<span class="source-line-no">377</span><span id="line-377">                throw new IOException(e);</span>
+<span class="source-line-no">378</span><span id="line-378">            }</span>
+<span class="source-line-no">379</span><span id="line-379">        }</span>
+<span class="source-line-no">380</span><span id="line-380">    }</span>
+<span class="source-line-no">381</span><span id="line-381"></span>
+<span class="source-line-no">382</span><span id="line-382">    private void ensureConnected() {</span>
+<span class="source-line-no">383</span><span id="line-383">        while (!this.getConnected()) {</span>
+<span class="source-line-no">384</span><span id="line-384">            this.reconnectAttempts++;</span>
+<span class="source-line-no">385</span><span id="line-385">            if (this.reconnectAttempts &gt; 5) {</span>
+<span class="source-line-no">386</span><span id="line-386">                throw new MaximumReconnectsException();</span>
+<span class="source-line-no">387</span><span id="line-387">            }</span>
+<span class="source-line-no">388</span><span id="line-388"></span>
+<span class="source-line-no">389</span><span id="line-389">            try {</span>
+<span class="source-line-no">390</span><span id="line-390">                this.connect();</span>
+<span class="source-line-no">391</span><span id="line-391">            } catch (IOException e) {</span>
+<span class="source-line-no">392</span><span id="line-392">                try {</span>
+<span class="source-line-no">393</span><span id="line-393">                    Thread.sleep(Math.min((int) (Math.pow(2, this.reconnectAttempts) * 1000), 60000));</span>
+<span class="source-line-no">394</span><span id="line-394">                } catch (InterruptedException ex) {</span>
+<span class="source-line-no">395</span><span id="line-395">                    Thread.currentThread().interrupt();</span>
+<span class="source-line-no">396</span><span id="line-396">                }</span>
+<span class="source-line-no">397</span><span id="line-397">            }</span>
+<span class="source-line-no">398</span><span id="line-398">        }</span>
+<span class="source-line-no">399</span><span id="line-399">    }</span>
+<span class="source-line-no">400</span><span id="line-400"></span>
+<span class="source-line-no">401</span><span id="line-401">    /**</span>
+<span class="source-line-no">402</span><span id="line-402">     * Close the config</span>
+<span class="source-line-no">403</span><span id="line-403">     *</span>
+<span class="source-line-no">404</span><span id="line-404">     * @throws IOException On close error</span>
+<span class="source-line-no">405</span><span id="line-405">     * @since 1.0.0</span>
+<span class="source-line-no">406</span><span id="line-406">     */</span>
+<span class="source-line-no">407</span><span id="line-407">    @Override</span>
+<span class="source-line-no">408</span><span id="line-408">    public void close() throws IOException {</span>
+<span class="source-line-no">409</span><span id="line-409">        if (this.closed) {</span>
+<span class="source-line-no">410</span><span id="line-410">            throw new ConfigClosedException();</span>
 <span class="source-line-no">411</span><span id="line-411">        }</span>
-<span class="source-line-no">412</span><span id="line-412">    }</span>
-<span class="source-line-no">413</span><span id="line-413"></span>
-<span class="source-line-no">414</span><span id="line-414">    /**</span>
-<span class="source-line-no">415</span><span id="line-415">     * Close the config</span>
-<span class="source-line-no">416</span><span id="line-416">     *</span>
-<span class="source-line-no">417</span><span id="line-417">     * @throws IOException On close error</span>
-<span class="source-line-no">418</span><span id="line-418">     * @since 1.0.0</span>
-<span class="source-line-no">419</span><span id="line-419">     */</span>
-<span class="source-line-no">420</span><span id="line-420">    @Override</span>
-<span class="source-line-no">421</span><span id="line-421">    public void close() throws IOException {</span>
-<span class="source-line-no">422</span><span id="line-422">        if (this.closed) {</span>
-<span class="source-line-no">423</span><span id="line-423">            throw new ConfigClosedException();</span>
-<span class="source-line-no">424</span><span id="line-424">        }</span>
-<span class="source-line-no">425</span><span id="line-425"></span>
-<span class="source-line-no">426</span><span id="line-426">        this.closed = true;</span>
-<span class="source-line-no">427</span><span id="line-427"></span>
-<span class="source-line-no">428</span><span id="line-428">        try {</span>
-<span class="source-line-no">429</span><span id="line-429">            if (this.connection != null) {</span>
-<span class="source-line-no">430</span><span id="line-430">                this.connection.close();</span>
-<span class="source-line-no">431</span><span id="line-431">            }</span>
-<span class="source-line-no">432</span><span id="line-432">        } catch (SQLException e) {</span>
-<span class="source-line-no">433</span><span id="line-433">            throw new IOException(e);</span>
-<span class="source-line-no">434</span><span id="line-434">        }</span>
-<span class="source-line-no">435</span><span id="line-435">    }</span>
-<span class="source-line-no">436</span><span id="line-436"></span>
-<span class="source-line-no">437</span><span id="line-437">    /**</span>
-<span class="source-line-no">438</span><span id="line-438">     * Get if the config is closed</span>
+<span class="source-line-no">412</span><span id="line-412"></span>
+<span class="source-line-no">413</span><span id="line-413">        this.closed = true;</span>
+<span class="source-line-no">414</span><span id="line-414"></span>
+<span class="source-line-no">415</span><span id="line-415">        try {</span>
+<span class="source-line-no">416</span><span id="line-416">            if (this.connection != null) {</span>
+<span class="source-line-no">417</span><span id="line-417">                this.connection.close();</span>
+<span class="source-line-no">418</span><span id="line-418">            }</span>
+<span class="source-line-no">419</span><span id="line-419">        } catch (SQLException e) {</span>
+<span class="source-line-no">420</span><span id="line-420">            throw new IOException(e);</span>
+<span class="source-line-no">421</span><span id="line-421">        }</span>
+<span class="source-line-no">422</span><span id="line-422">    }</span>
+<span class="source-line-no">423</span><span id="line-423"></span>
+<span class="source-line-no">424</span><span id="line-424">    /**</span>
+<span class="source-line-no">425</span><span id="line-425">     * Get if the config is closed</span>
+<span class="source-line-no">426</span><span id="line-426">     *</span>
+<span class="source-line-no">427</span><span id="line-427">     * @return If the config is closed</span>
+<span class="source-line-no">428</span><span id="line-428">     *</span>
+<span class="source-line-no">429</span><span id="line-429">     * @since 1.0.0</span>
+<span class="source-line-no">430</span><span id="line-430">     */</span>
+<span class="source-line-no">431</span><span id="line-431">    public boolean isClosed() {</span>
+<span class="source-line-no">432</span><span id="line-432">        return this.closed;</span>
+<span class="source-line-no">433</span><span id="line-433">    }</span>
+<span class="source-line-no">434</span><span id="line-434"></span>
+<span class="source-line-no">435</span><span id="line-435">    /**</span>
+<span class="source-line-no">436</span><span id="line-436">     * A builder class for creating new {@link StructuredMySQLConfig}s</span>
+<span class="source-line-no">437</span><span id="line-437">     *</span>
+<span class="source-line-no">438</span><span id="line-438">     * @param &lt;T&gt; The type of the data to be stored</span>
 <span class="source-line-no">439</span><span id="line-439">     *</span>
-<span class="source-line-no">440</span><span id="line-440">     * @return If the config is closed</span>
-<span class="source-line-no">441</span><span id="line-441">     *</span>
-<span class="source-line-no">442</span><span id="line-442">     * @since 1.0.0</span>
-<span class="source-line-no">443</span><span id="line-443">     */</span>
-<span class="source-line-no">444</span><span id="line-444">    public boolean isClosed() {</span>
-<span class="source-line-no">445</span><span id="line-445">        return this.closed;</span>
-<span class="source-line-no">446</span><span id="line-446">    }</span>
-<span class="source-line-no">447</span><span id="line-447"></span>
-<span class="source-line-no">448</span><span id="line-448">    /**</span>
-<span class="source-line-no">449</span><span id="line-449">     * A builder class for creating new {@link StructuredMySQLConfig}s</span>
-<span class="source-line-no">450</span><span id="line-450">     *</span>
-<span class="source-line-no">451</span><span id="line-451">     * @param &lt;T&gt; The type of the data to be stored</span>
-<span class="source-line-no">452</span><span id="line-452">     *</span>
-<span class="source-line-no">453</span><span id="line-453">     * @version 5.0.0</span>
-<span class="source-line-no">454</span><span id="line-454">     * @since 4.0.0</span>
-<span class="source-line-no">455</span><span id="line-455">     */</span>
-<span class="source-line-no">456</span><span id="line-456">    public static class Builder&lt;T&gt; {</span>
-<span class="source-line-no">457</span><span id="line-457">        /**</span>
-<span class="source-line-no">458</span><span id="line-458">         * The class of the data being stored</span>
-<span class="source-line-no">459</span><span id="line-459">         *</span>
-<span class="source-line-no">460</span><span id="line-460">         * @since 4.0.0</span>
-<span class="source-line-no">461</span><span id="line-461">         */</span>
-<span class="source-line-no">462</span><span id="line-462">        protected final @NotNull Class&lt;T&gt; clazz;</span>
-<span class="source-line-no">463</span><span id="line-463"></span>
-<span class="source-line-no">464</span><span id="line-464">        /**</span>
-<span class="source-line-no">465</span><span id="line-465">         * The ObjectProcessor to use for serialization/deserialization</span>
-<span class="source-line-no">466</span><span id="line-466">         *</span>
-<span class="source-line-no">467</span><span id="line-467">         * @since 4.0.0</span>
-<span class="source-line-no">468</span><span id="line-468">         */</span>
-<span class="source-line-no">469</span><span id="line-469">        protected @NotNull ObjectProcessor processor;</span>
-<span class="source-line-no">470</span><span id="line-470"></span>
-<span class="source-line-no">471</span><span id="line-471">        /**</span>
-<span class="source-line-no">472</span><span id="line-472">         * The host of the server</span>
-<span class="source-line-no">473</span><span id="line-473">         *</span>
-<span class="source-line-no">474</span><span id="line-474">         * @since 4.0.0</span>
-<span class="source-line-no">475</span><span id="line-475">         */</span>
-<span class="source-line-no">476</span><span id="line-476">        protected @NotNull InetSocketAddress address;</span>
-<span class="source-line-no">477</span><span id="line-477"></span>
-<span class="source-line-no">478</span><span id="line-478">        /**</span>
-<span class="source-line-no">479</span><span id="line-479">         * The database on the server</span>
-<span class="source-line-no">480</span><span id="line-480">         *</span>
-<span class="source-line-no">481</span><span id="line-481">         * @since 4.0.0</span>
-<span class="source-line-no">482</span><span id="line-482">         */</span>
-<span class="source-line-no">483</span><span id="line-483">        protected @NotNull String database;</span>
-<span class="source-line-no">484</span><span id="line-484"></span>
-<span class="source-line-no">485</span><span id="line-485">        /**</span>
-<span class="source-line-no">486</span><span id="line-486">         * The table of the database</span>
-<span class="source-line-no">487</span><span id="line-487">         *</span>
-<span class="source-line-no">488</span><span id="line-488">         * @since 4.0.0</span>
-<span class="source-line-no">489</span><span id="line-489">         */</span>
-<span class="source-line-no">490</span><span id="line-490">        protected @NotNull String table;</span>
-<span class="source-line-no">491</span><span id="line-491"></span>
-<span class="source-line-no">492</span><span id="line-492">        /**</span>
-<span class="source-line-no">493</span><span id="line-493">         * The username to the server</span>
-<span class="source-line-no">494</span><span id="line-494">         * &lt;p&gt;</span>
-<span class="source-line-no">495</span><span id="line-495">         * Default is null</span>
-<span class="source-line-no">496</span><span id="line-496">         *</span>
-<span class="source-line-no">497</span><span id="line-497">         * @since 4.0.0</span>
-<span class="source-line-no">498</span><span id="line-498">         */</span>
-<span class="source-line-no">499</span><span id="line-499">        protected @Nullable String username = null;</span>
-<span class="source-line-no">500</span><span id="line-500"></span>
-<span class="source-line-no">501</span><span id="line-501">        /**</span>
-<span class="source-line-no">502</span><span id="line-502">         * The password to the server</span>
-<span class="source-line-no">503</span><span id="line-503">         * &lt;p&gt;</span>
-<span class="source-line-no">504</span><span id="line-504">         * Default is null</span>
-<span class="source-line-no">505</span><span id="line-505">         *</span>
-<span class="source-line-no">506</span><span id="line-506">         * @since 4.0.0</span>
-<span class="source-line-no">507</span><span id="line-507">         */</span>
-<span class="source-line-no">508</span><span id="line-508">        protected @Nullable String password = null;</span>
-<span class="source-line-no">509</span><span id="line-509"></span>
-<span class="source-line-no">510</span><span id="line-510">        /**</span>
-<span class="source-line-no">511</span><span id="line-511">         * Weather to use the MariaDB driver</span>
-<span class="source-line-no">512</span><span id="line-512">         * &lt;p&gt;</span>
-<span class="source-line-no">513</span><span id="line-513">         * Default is false</span>
-<span class="source-line-no">514</span><span id="line-514">         *</span>
-<span class="source-line-no">515</span><span id="line-515">         * @since 4.0.0</span>
-<span class="source-line-no">516</span><span id="line-516">         */</span>
-<span class="source-line-no">517</span><span id="line-517">        protected boolean useMariadb = false;</span>
-<span class="source-line-no">518</span><span id="line-518"></span>
-<span class="source-line-no">519</span><span id="line-519">        /**</span>
-<span class="source-line-no">520</span><span id="line-520">         * How long to cache the config in memory</span>
-<span class="source-line-no">521</span><span id="line-521">         * &lt;p&gt;</span>
-<span class="source-line-no">522</span><span id="line-522">         * Default is 3s</span>
-<span class="source-line-no">523</span><span id="line-523">         *</span>
-<span class="source-line-no">524</span><span id="line-524">         * @since 4.0.0</span>
-<span class="source-line-no">525</span><span id="line-525">         */</span>
-<span class="source-line-no">526</span><span id="line-526">        protected @NotNull Duration cacheLength = Duration.ofMillis(1000);</span>
+<span class="source-line-no">440</span><span id="line-440">     * @version 5.0.0</span>
+<span class="source-line-no">441</span><span id="line-441">     * @since 4.0.0</span>
+<span class="source-line-no">442</span><span id="line-442">     */</span>
+<span class="source-line-no">443</span><span id="line-443">    public static class Builder&lt;T&gt; {</span>
+<span class="source-line-no">444</span><span id="line-444">        /**</span>
+<span class="source-line-no">445</span><span id="line-445">         * The class of the data being stored</span>
+<span class="source-line-no">446</span><span id="line-446">         *</span>
+<span class="source-line-no">447</span><span id="line-447">         * @since 4.0.0</span>
+<span class="source-line-no">448</span><span id="line-448">         */</span>
+<span class="source-line-no">449</span><span id="line-449">        protected final @NotNull Class&lt;T&gt; clazz;</span>
+<span class="source-line-no">450</span><span id="line-450"></span>
+<span class="source-line-no">451</span><span id="line-451">        /**</span>
+<span class="source-line-no">452</span><span id="line-452">         * The ObjectProcessor to use for serialization/deserialization</span>
+<span class="source-line-no">453</span><span id="line-453">         *</span>
+<span class="source-line-no">454</span><span id="line-454">         * @since 4.0.0</span>
+<span class="source-line-no">455</span><span id="line-455">         */</span>
+<span class="source-line-no">456</span><span id="line-456">        protected @NotNull ObjectProcessor processor;</span>
+<span class="source-line-no">457</span><span id="line-457"></span>
+<span class="source-line-no">458</span><span id="line-458">        /**</span>
+<span class="source-line-no">459</span><span id="line-459">         * The host of the server</span>
+<span class="source-line-no">460</span><span id="line-460">         *</span>
+<span class="source-line-no">461</span><span id="line-461">         * @since 4.0.0</span>
+<span class="source-line-no">462</span><span id="line-462">         */</span>
+<span class="source-line-no">463</span><span id="line-463">        protected @NotNull InetSocketAddress address;</span>
+<span class="source-line-no">464</span><span id="line-464"></span>
+<span class="source-line-no">465</span><span id="line-465">        /**</span>
+<span class="source-line-no">466</span><span id="line-466">         * The database on the server</span>
+<span class="source-line-no">467</span><span id="line-467">         *</span>
+<span class="source-line-no">468</span><span id="line-468">         * @since 4.0.0</span>
+<span class="source-line-no">469</span><span id="line-469">         */</span>
+<span class="source-line-no">470</span><span id="line-470">        protected @NotNull String database;</span>
+<span class="source-line-no">471</span><span id="line-471"></span>
+<span class="source-line-no">472</span><span id="line-472">        /**</span>
+<span class="source-line-no">473</span><span id="line-473">         * The table of the database</span>
+<span class="source-line-no">474</span><span id="line-474">         *</span>
+<span class="source-line-no">475</span><span id="line-475">         * @since 4.0.0</span>
+<span class="source-line-no">476</span><span id="line-476">         */</span>
+<span class="source-line-no">477</span><span id="line-477">        protected @NotNull String table;</span>
+<span class="source-line-no">478</span><span id="line-478"></span>
+<span class="source-line-no">479</span><span id="line-479">        /**</span>
+<span class="source-line-no">480</span><span id="line-480">         * The username to the server</span>
+<span class="source-line-no">481</span><span id="line-481">         * &lt;p&gt;</span>
+<span class="source-line-no">482</span><span id="line-482">         * Default is null</span>
+<span class="source-line-no">483</span><span id="line-483">         *</span>
+<span class="source-line-no">484</span><span id="line-484">         * @since 4.0.0</span>
+<span class="source-line-no">485</span><span id="line-485">         */</span>
+<span class="source-line-no">486</span><span id="line-486">        protected @Nullable String username = null;</span>
+<span class="source-line-no">487</span><span id="line-487"></span>
+<span class="source-line-no">488</span><span id="line-488">        /**</span>
+<span class="source-line-no">489</span><span id="line-489">         * The password to the server</span>
+<span class="source-line-no">490</span><span id="line-490">         * &lt;p&gt;</span>
+<span class="source-line-no">491</span><span id="line-491">         * Default is null</span>
+<span class="source-line-no">492</span><span id="line-492">         *</span>
+<span class="source-line-no">493</span><span id="line-493">         * @since 4.0.0</span>
+<span class="source-line-no">494</span><span id="line-494">         */</span>
+<span class="source-line-no">495</span><span id="line-495">        protected @Nullable String password = null;</span>
+<span class="source-line-no">496</span><span id="line-496"></span>
+<span class="source-line-no">497</span><span id="line-497">        /**</span>
+<span class="source-line-no">498</span><span id="line-498">         * Whether to use the MariaDB driver</span>
+<span class="source-line-no">499</span><span id="line-499">         * &lt;p&gt;</span>
+<span class="source-line-no">500</span><span id="line-500">         * Default is false</span>
+<span class="source-line-no">501</span><span id="line-501">         *</span>
+<span class="source-line-no">502</span><span id="line-502">         * @since 4.0.0</span>
+<span class="source-line-no">503</span><span id="line-503">         */</span>
+<span class="source-line-no">504</span><span id="line-504">        protected boolean useMariadb = false;</span>
+<span class="source-line-no">505</span><span id="line-505"></span>
+<span class="source-line-no">506</span><span id="line-506">        /**</span>
+<span class="source-line-no">507</span><span id="line-507">         * How long to cache the config in memory</span>
+<span class="source-line-no">508</span><span id="line-508">         * &lt;p&gt;</span>
+<span class="source-line-no">509</span><span id="line-509">         * Default is 3s</span>
+<span class="source-line-no">510</span><span id="line-510">         *</span>
+<span class="source-line-no">511</span><span id="line-511">         * @since 4.0.0</span>
+<span class="source-line-no">512</span><span id="line-512">         */</span>
+<span class="source-line-no">513</span><span id="line-513">        protected @NotNull Duration cacheLength = Duration.ofMillis(1000);</span>
+<span class="source-line-no">514</span><span id="line-514"></span>
+<span class="source-line-no">515</span><span id="line-515">        /**</span>
+<span class="source-line-no">516</span><span id="line-516">         * Create an {@link StructuredMySQLConfig} builder</span>
+<span class="source-line-no">517</span><span id="line-517">         *</span>
+<span class="source-line-no">518</span><span id="line-518">         * @param clazz    The class of the data being stored</span>
+<span class="source-line-no">519</span><span id="line-519">         * @param address  The address of the server</span>
+<span class="source-line-no">520</span><span id="line-520">         * @param database The database on the server</span>
+<span class="source-line-no">521</span><span id="line-521">         * @param table    The table of the database</span>
+<span class="source-line-no">522</span><span id="line-522">         *</span>
+<span class="source-line-no">523</span><span id="line-523">         * @since 4.0.0</span>
+<span class="source-line-no">524</span><span id="line-524">         */</span>
+<span class="source-line-no">525</span><span id="line-525">        public Builder(@NotNull Class&lt;T&gt; clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table) {</span>
+<span class="source-line-no">526</span><span id="line-526">            this.clazz = clazz;</span>
 <span class="source-line-no">527</span><span id="line-527"></span>
-<span class="source-line-no">528</span><span id="line-528">        /**</span>
-<span class="source-line-no">529</span><span id="line-529">         * Create an {@link StructuredMySQLConfig} builder</span>
-<span class="source-line-no">530</span><span id="line-530">         *</span>
-<span class="source-line-no">531</span><span id="line-531">         * @param clazz    The class of the data being stored</span>
-<span class="source-line-no">532</span><span id="line-532">         * @param address  The address of the server</span>
-<span class="source-line-no">533</span><span id="line-533">         * @param database The database on the server</span>
-<span class="source-line-no">534</span><span id="line-534">         * @param table    The table of the database</span>
-<span class="source-line-no">535</span><span id="line-535">         *</span>
-<span class="source-line-no">536</span><span id="line-536">         * @since 4.0.0</span>
-<span class="source-line-no">537</span><span id="line-537">         */</span>
-<span class="source-line-no">538</span><span id="line-538">        public Builder(@NotNull Class&lt;T&gt; clazz, @NotNull InetSocketAddress address, @NotNull String database, @NotNull String table) {</span>
-<span class="source-line-no">539</span><span id="line-539">            this.clazz = clazz;</span>
-<span class="source-line-no">540</span><span id="line-540"></span>
-<span class="source-line-no">541</span><span id="line-541">            this.processor = new ObjectProcessor.Builder().build();</span>
-<span class="source-line-no">542</span><span id="line-542"></span>
-<span class="source-line-no">543</span><span id="line-543">            this.address = address;</span>
-<span class="source-line-no">544</span><span id="line-544"></span>
-<span class="source-line-no">545</span><span id="line-545">            this.database = database;</span>
-<span class="source-line-no">546</span><span id="line-546">            this.table = table;</span>
-<span class="source-line-no">547</span><span id="line-547">        }</span>
-<span class="source-line-no">548</span><span id="line-548"></span>
-<span class="source-line-no">549</span><span id="line-549">        /**</span>
-<span class="source-line-no">550</span><span id="line-550">         * Create an {@link StructuredMySQLConfig} builder</span>
-<span class="source-line-no">551</span><span id="line-551">         *</span>
-<span class="source-line-no">552</span><span id="line-552">         * @param clazz    The class of the data being stored</span>
-<span class="source-line-no">553</span><span id="line-553">         * @param host     The host of the server</span>
-<span class="source-line-no">554</span><span id="line-554">         * @param port     The port of the server</span>
-<span class="source-line-no">555</span><span id="line-555">         * @param database The database on the server</span>
-<span class="source-line-no">556</span><span id="line-556">         * @param table    The table of the database</span>
-<span class="source-line-no">557</span><span id="line-557">         *</span>
-<span class="source-line-no">558</span><span id="line-558">         * @since 4.0.0</span>
-<span class="source-line-no">559</span><span id="line-559">         * @deprecated Use {@link #Builder(Class, InetSocketAddress, String, String)} instead</span>
-<span class="source-line-no">560</span><span id="line-560">         */</span>
-<span class="source-line-no">561</span><span id="line-561">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">562</span><span id="line-562">        public Builder(@NotNull Class&lt;T&gt; clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table) {</span>
-<span class="source-line-no">563</span><span id="line-563">            this.clazz = clazz;</span>
-<span class="source-line-no">564</span><span id="line-564"></span>
-<span class="source-line-no">565</span><span id="line-565">            this.processor = new ObjectProcessor.Builder().build();</span>
-<span class="source-line-no">566</span><span id="line-566"></span>
-<span class="source-line-no">567</span><span id="line-567">            this.address = new InetSocketAddress(host, port);</span>
-<span class="source-line-no">568</span><span id="line-568"></span>
-<span class="source-line-no">569</span><span id="line-569">            this.database = database;</span>
-<span class="source-line-no">570</span><span id="line-570">            this.table = table;</span>
-<span class="source-line-no">571</span><span id="line-571">        }</span>
-<span class="source-line-no">572</span><span id="line-572"></span>
-<span class="source-line-no">573</span><span id="line-573">        /**</span>
-<span class="source-line-no">574</span><span id="line-574">         * Get the class of the data being stored</span>
+<span class="source-line-no">528</span><span id="line-528">            this.processor = new ObjectProcessor.Builder().build();</span>
+<span class="source-line-no">529</span><span id="line-529"></span>
+<span class="source-line-no">530</span><span id="line-530">            this.address = address;</span>
+<span class="source-line-no">531</span><span id="line-531"></span>
+<span class="source-line-no">532</span><span id="line-532">            this.database = database;</span>
+<span class="source-line-no">533</span><span id="line-533">            this.table = table;</span>
+<span class="source-line-no">534</span><span id="line-534">        }</span>
+<span class="source-line-no">535</span><span id="line-535"></span>
+<span class="source-line-no">536</span><span id="line-536">        /**</span>
+<span class="source-line-no">537</span><span id="line-537">         * Create an {@link StructuredMySQLConfig} builder</span>
+<span class="source-line-no">538</span><span id="line-538">         *</span>
+<span class="source-line-no">539</span><span id="line-539">         * @param clazz    The class of the data being stored</span>
+<span class="source-line-no">540</span><span id="line-540">         * @param host     The host of the server</span>
+<span class="source-line-no">541</span><span id="line-541">         * @param port     The port of the server</span>
+<span class="source-line-no">542</span><span id="line-542">         * @param database The database on the server</span>
+<span class="source-line-no">543</span><span id="line-543">         * @param table    The table of the database</span>
+<span class="source-line-no">544</span><span id="line-544">         *</span>
+<span class="source-line-no">545</span><span id="line-545">         * @since 4.0.0</span>
+<span class="source-line-no">546</span><span id="line-546">         * @deprecated Use {@link #Builder(Class, InetSocketAddress, String, String)} instead</span>
+<span class="source-line-no">547</span><span id="line-547">         */</span>
+<span class="source-line-no">548</span><span id="line-548">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">549</span><span id="line-549">        public Builder(@NotNull Class&lt;T&gt; clazz, @NotNull String host, short port, @NotNull String database, @NotNull String table) {</span>
+<span class="source-line-no">550</span><span id="line-550">            this.clazz = clazz;</span>
+<span class="source-line-no">551</span><span id="line-551"></span>
+<span class="source-line-no">552</span><span id="line-552">            this.processor = new ObjectProcessor.Builder().build();</span>
+<span class="source-line-no">553</span><span id="line-553"></span>
+<span class="source-line-no">554</span><span id="line-554">            this.address = new InetSocketAddress(host, port);</span>
+<span class="source-line-no">555</span><span id="line-555"></span>
+<span class="source-line-no">556</span><span id="line-556">            this.database = database;</span>
+<span class="source-line-no">557</span><span id="line-557">            this.table = table;</span>
+<span class="source-line-no">558</span><span id="line-558">        }</span>
+<span class="source-line-no">559</span><span id="line-559"></span>
+<span class="source-line-no">560</span><span id="line-560">        /**</span>
+<span class="source-line-no">561</span><span id="line-561">         * Get the class of the data being stored</span>
+<span class="source-line-no">562</span><span id="line-562">         *</span>
+<span class="source-line-no">563</span><span id="line-563">         * @return The class of the data being stored</span>
+<span class="source-line-no">564</span><span id="line-564">         *</span>
+<span class="source-line-no">565</span><span id="line-565">         * @since 4.0.0</span>
+<span class="source-line-no">566</span><span id="line-566">         */</span>
+<span class="source-line-no">567</span><span id="line-567">        public @NotNull Class&lt;T&gt; getClazz() {</span>
+<span class="source-line-no">568</span><span id="line-568">            return this.clazz;</span>
+<span class="source-line-no">569</span><span id="line-569">        }</span>
+<span class="source-line-no">570</span><span id="line-570"></span>
+<span class="source-line-no">571</span><span id="line-571">        /**</span>
+<span class="source-line-no">572</span><span id="line-572">         * Get the ObjectProcessor to use for serialization/deserialization</span>
+<span class="source-line-no">573</span><span id="line-573">         *</span>
+<span class="source-line-no">574</span><span id="line-574">         * @return The ObjectProcessor to use for serialization/deserialization</span>
 <span class="source-line-no">575</span><span id="line-575">         *</span>
-<span class="source-line-no">576</span><span id="line-576">         * @return The class of the data being stored</span>
-<span class="source-line-no">577</span><span id="line-577">         *</span>
-<span class="source-line-no">578</span><span id="line-578">         * @since 4.0.0</span>
-<span class="source-line-no">579</span><span id="line-579">         */</span>
-<span class="source-line-no">580</span><span id="line-580">        public @NotNull Class&lt;T&gt; getClazz() {</span>
-<span class="source-line-no">581</span><span id="line-581">            return this.clazz;</span>
-<span class="source-line-no">582</span><span id="line-582">        }</span>
-<span class="source-line-no">583</span><span id="line-583"></span>
-<span class="source-line-no">584</span><span id="line-584">        /**</span>
-<span class="source-line-no">585</span><span id="line-585">         * Get the ObjectProcessor to use for serialization/deserialization</span>
+<span class="source-line-no">576</span><span id="line-576">         * @since 4.0.0</span>
+<span class="source-line-no">577</span><span id="line-577">         */</span>
+<span class="source-line-no">578</span><span id="line-578">        public @NotNull ObjectProcessor getProcessor() {</span>
+<span class="source-line-no">579</span><span id="line-579">            return this.processor;</span>
+<span class="source-line-no">580</span><span id="line-580">        }</span>
+<span class="source-line-no">581</span><span id="line-581"></span>
+<span class="source-line-no">582</span><span id="line-582">        /**</span>
+<span class="source-line-no">583</span><span id="line-583">         * Set the ObjectProcessor to use for serialization/deserialization</span>
+<span class="source-line-no">584</span><span id="line-584">         *</span>
+<span class="source-line-no">585</span><span id="line-585">         * @param processor The ObjectProcessor to use for serialization/deserialization</span>
 <span class="source-line-no">586</span><span id="line-586">         *</span>
-<span class="source-line-no">587</span><span id="line-587">         * @return The ObjectProcessor to use for serialization/deserialization</span>
+<span class="source-line-no">587</span><span id="line-587">         * @return Self for chaining</span>
 <span class="source-line-no">588</span><span id="line-588">         *</span>
 <span class="source-line-no">589</span><span id="line-589">         * @since 4.0.0</span>
 <span class="source-line-no">590</span><span id="line-590">         */</span>
-<span class="source-line-no">591</span><span id="line-591">        public @NotNull ObjectProcessor getProcessor() {</span>
-<span class="source-line-no">592</span><span id="line-592">            return this.processor;</span>
-<span class="source-line-no">593</span><span id="line-593">        }</span>
-<span class="source-line-no">594</span><span id="line-594"></span>
-<span class="source-line-no">595</span><span id="line-595">        /**</span>
-<span class="source-line-no">596</span><span id="line-596">         * Set the ObjectProcessor to use for serialization/deserialization</span>
-<span class="source-line-no">597</span><span id="line-597">         *</span>
-<span class="source-line-no">598</span><span id="line-598">         * @param processor The ObjectProcessor to use for serialization/deserialization</span>
-<span class="source-line-no">599</span><span id="line-599">         *</span>
-<span class="source-line-no">600</span><span id="line-600">         * @return Self for chaining</span>
-<span class="source-line-no">601</span><span id="line-601">         *</span>
-<span class="source-line-no">602</span><span id="line-602">         * @since 4.0.0</span>
-<span class="source-line-no">603</span><span id="line-603">         */</span>
-<span class="source-line-no">604</span><span id="line-604">        public @NotNull Builder&lt;T&gt; setProcessor(@NotNull ObjectProcessor processor) {</span>
-<span class="source-line-no">605</span><span id="line-605">            this.processor = processor;</span>
-<span class="source-line-no">606</span><span id="line-606">            return this;</span>
-<span class="source-line-no">607</span><span id="line-607">        }</span>
-<span class="source-line-no">608</span><span id="line-608"></span>
-<span class="source-line-no">609</span><span id="line-609">        /**</span>
-<span class="source-line-no">610</span><span id="line-610">         * Get the address of the server</span>
+<span class="source-line-no">591</span><span id="line-591">        public @NotNull Builder&lt;T&gt; setProcessor(@NotNull ObjectProcessor processor) {</span>
+<span class="source-line-no">592</span><span id="line-592">            this.processor = processor;</span>
+<span class="source-line-no">593</span><span id="line-593">            return this;</span>
+<span class="source-line-no">594</span><span id="line-594">        }</span>
+<span class="source-line-no">595</span><span id="line-595"></span>
+<span class="source-line-no">596</span><span id="line-596">        /**</span>
+<span class="source-line-no">597</span><span id="line-597">         * Get the address of the server</span>
+<span class="source-line-no">598</span><span id="line-598">         *</span>
+<span class="source-line-no">599</span><span id="line-599">         * @return The address of the server</span>
+<span class="source-line-no">600</span><span id="line-600">         *</span>
+<span class="source-line-no">601</span><span id="line-601">         * @since 4.0.0</span>
+<span class="source-line-no">602</span><span id="line-602">         */</span>
+<span class="source-line-no">603</span><span id="line-603">        public @NotNull InetSocketAddress getAddress() {</span>
+<span class="source-line-no">604</span><span id="line-604">            return this.address;</span>
+<span class="source-line-no">605</span><span id="line-605">        }</span>
+<span class="source-line-no">606</span><span id="line-606"></span>
+<span class="source-line-no">607</span><span id="line-607">        /**</span>
+<span class="source-line-no">608</span><span id="line-608">         * Set the address of the server</span>
+<span class="source-line-no">609</span><span id="line-609">         *</span>
+<span class="source-line-no">610</span><span id="line-610">         * @param address The address of the server</span>
 <span class="source-line-no">611</span><span id="line-611">         *</span>
-<span class="source-line-no">612</span><span id="line-612">         * @return The address of the server</span>
+<span class="source-line-no">612</span><span id="line-612">         * @return Self for chaining</span>
 <span class="source-line-no">613</span><span id="line-613">         *</span>
 <span class="source-line-no">614</span><span id="line-614">         * @since 4.0.0</span>
 <span class="source-line-no">615</span><span id="line-615">         */</span>
-<span class="source-line-no">616</span><span id="line-616">        public @NotNull InetSocketAddress getAddress() {</span>
-<span class="source-line-no">617</span><span id="line-617">            return this.address;</span>
-<span class="source-line-no">618</span><span id="line-618">        }</span>
-<span class="source-line-no">619</span><span id="line-619"></span>
-<span class="source-line-no">620</span><span id="line-620">        /**</span>
-<span class="source-line-no">621</span><span id="line-621">         * Set the address of the server</span>
-<span class="source-line-no">622</span><span id="line-622">         *</span>
-<span class="source-line-no">623</span><span id="line-623">         * @param address The address of the server</span>
-<span class="source-line-no">624</span><span id="line-624">         *</span>
-<span class="source-line-no">625</span><span id="line-625">         * @return Self for chaining</span>
-<span class="source-line-no">626</span><span id="line-626">         *</span>
-<span class="source-line-no">627</span><span id="line-627">         * @since 4.0.0</span>
+<span class="source-line-no">616</span><span id="line-616">        public @NotNull Builder&lt;T&gt; setAddress(@NotNull InetSocketAddress address) {</span>
+<span class="source-line-no">617</span><span id="line-617">            this.address = address;</span>
+<span class="source-line-no">618</span><span id="line-618">            return this;</span>
+<span class="source-line-no">619</span><span id="line-619">        }</span>
+<span class="source-line-no">620</span><span id="line-620"></span>
+<span class="source-line-no">621</span><span id="line-621">        /**</span>
+<span class="source-line-no">622</span><span id="line-622">         * Get the host of the server</span>
+<span class="source-line-no">623</span><span id="line-623">         *</span>
+<span class="source-line-no">624</span><span id="line-624">         * @return The host of the server</span>
+<span class="source-line-no">625</span><span id="line-625">         *</span>
+<span class="source-line-no">626</span><span id="line-626">         * @since 4.0.0</span>
+<span class="source-line-no">627</span><span id="line-627">         * @deprecated Use {@link #getAddress()} instead</span>
 <span class="source-line-no">628</span><span id="line-628">         */</span>
-<span class="source-line-no">629</span><span id="line-629">        public @NotNull Builder&lt;T&gt; setAddress(@NotNull InetSocketAddress address) {</span>
-<span class="source-line-no">630</span><span id="line-630">            this.address = address;</span>
-<span class="source-line-no">631</span><span id="line-631">            return this;</span>
+<span class="source-line-no">629</span><span id="line-629">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">630</span><span id="line-630">        public @NotNull String getHost() {</span>
+<span class="source-line-no">631</span><span id="line-631">            return this.address.getHostString();</span>
 <span class="source-line-no">632</span><span id="line-632">        }</span>
 <span class="source-line-no">633</span><span id="line-633"></span>
 <span class="source-line-no">634</span><span id="line-634">        /**</span>
-<span class="source-line-no">635</span><span id="line-635">         * Get the host of the server</span>
+<span class="source-line-no">635</span><span id="line-635">         * Set the host of the server</span>
 <span class="source-line-no">636</span><span id="line-636">         *</span>
-<span class="source-line-no">637</span><span id="line-637">         * @return The host of the server</span>
+<span class="source-line-no">637</span><span id="line-637">         * @param host The host of the server</span>
 <span class="source-line-no">638</span><span id="line-638">         *</span>
-<span class="source-line-no">639</span><span id="line-639">         * @since 4.0.0</span>
-<span class="source-line-no">640</span><span id="line-640">         * @deprecated Use {@link #getAddress()} instead</span>
-<span class="source-line-no">641</span><span id="line-641">         */</span>
-<span class="source-line-no">642</span><span id="line-642">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">643</span><span id="line-643">        public @NotNull String getHost() {</span>
-<span class="source-line-no">644</span><span id="line-644">            return this.address.getHostString();</span>
-<span class="source-line-no">645</span><span id="line-645">        }</span>
-<span class="source-line-no">646</span><span id="line-646"></span>
-<span class="source-line-no">647</span><span id="line-647">        /**</span>
-<span class="source-line-no">648</span><span id="line-648">         * Set the host of the server</span>
-<span class="source-line-no">649</span><span id="line-649">         *</span>
-<span class="source-line-no">650</span><span id="line-650">         * @param host The host of the server</span>
-<span class="source-line-no">651</span><span id="line-651">         *</span>
-<span class="source-line-no">652</span><span id="line-652">         * @return Self for chaining</span>
-<span class="source-line-no">653</span><span id="line-653">         *</span>
-<span class="source-line-no">654</span><span id="line-654">         * @since 4.0.0</span>
-<span class="source-line-no">655</span><span id="line-655">         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead</span>
-<span class="source-line-no">656</span><span id="line-656">         */</span>
-<span class="source-line-no">657</span><span id="line-657">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">658</span><span id="line-658">        public @NotNull Builder&lt;T&gt; setHost(@NotNull String host) {</span>
-<span class="source-line-no">659</span><span id="line-659">            this.address = new InetSocketAddress(host, this.address.getPort());</span>
-<span class="source-line-no">660</span><span id="line-660">            return this;</span>
+<span class="source-line-no">639</span><span id="line-639">         * @return Self for chaining</span>
+<span class="source-line-no">640</span><span id="line-640">         *</span>
+<span class="source-line-no">641</span><span id="line-641">         * @since 4.0.0</span>
+<span class="source-line-no">642</span><span id="line-642">         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead</span>
+<span class="source-line-no">643</span><span id="line-643">         */</span>
+<span class="source-line-no">644</span><span id="line-644">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">645</span><span id="line-645">        public @NotNull Builder&lt;T&gt; setHost(@NotNull String host) {</span>
+<span class="source-line-no">646</span><span id="line-646">            this.address = new InetSocketAddress(host, this.address.getPort());</span>
+<span class="source-line-no">647</span><span id="line-647">            return this;</span>
+<span class="source-line-no">648</span><span id="line-648">        }</span>
+<span class="source-line-no">649</span><span id="line-649"></span>
+<span class="source-line-no">650</span><span id="line-650">        /**</span>
+<span class="source-line-no">651</span><span id="line-651">         * Get the port of the server</span>
+<span class="source-line-no">652</span><span id="line-652">         *</span>
+<span class="source-line-no">653</span><span id="line-653">         * @return The port of the server</span>
+<span class="source-line-no">654</span><span id="line-654">         *</span>
+<span class="source-line-no">655</span><span id="line-655">         * @since 4.0.0</span>
+<span class="source-line-no">656</span><span id="line-656">         * @deprecated Use {@link #getAddress()} instead</span>
+<span class="source-line-no">657</span><span id="line-657">         */</span>
+<span class="source-line-no">658</span><span id="line-658">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">659</span><span id="line-659">        public short getPort() {</span>
+<span class="source-line-no">660</span><span id="line-660">            return (short) this.address.getPort();</span>
 <span class="source-line-no">661</span><span id="line-661">        }</span>
 <span class="source-line-no">662</span><span id="line-662"></span>
 <span class="source-line-no">663</span><span id="line-663">        /**</span>
-<span class="source-line-no">664</span><span id="line-664">         * Get the port of the server</span>
+<span class="source-line-no">664</span><span id="line-664">         * Set the port of the server</span>
 <span class="source-line-no">665</span><span id="line-665">         *</span>
-<span class="source-line-no">666</span><span id="line-666">         * @return The port of the server</span>
+<span class="source-line-no">666</span><span id="line-666">         * @param port The port of the server</span>
 <span class="source-line-no">667</span><span id="line-667">         *</span>
-<span class="source-line-no">668</span><span id="line-668">         * @since 4.0.0</span>
-<span class="source-line-no">669</span><span id="line-669">         * @deprecated Use {@link #getAddress()} instead</span>
-<span class="source-line-no">670</span><span id="line-670">         */</span>
-<span class="source-line-no">671</span><span id="line-671">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">672</span><span id="line-672">        public short getPort() {</span>
-<span class="source-line-no">673</span><span id="line-673">            return (short) this.address.getPort();</span>
-<span class="source-line-no">674</span><span id="line-674">        }</span>
-<span class="source-line-no">675</span><span id="line-675"></span>
-<span class="source-line-no">676</span><span id="line-676">        /**</span>
-<span class="source-line-no">677</span><span id="line-677">         * Set the port of the server</span>
-<span class="source-line-no">678</span><span id="line-678">         *</span>
-<span class="source-line-no">679</span><span id="line-679">         * @param port The port of the server</span>
-<span class="source-line-no">680</span><span id="line-680">         *</span>
-<span class="source-line-no">681</span><span id="line-681">         * @return Self for chaining</span>
-<span class="source-line-no">682</span><span id="line-682">         *</span>
-<span class="source-line-no">683</span><span id="line-683">         * @since 4.0.0</span>
-<span class="source-line-no">684</span><span id="line-684">         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead</span>
+<span class="source-line-no">668</span><span id="line-668">         * @return Self for chaining</span>
+<span class="source-line-no">669</span><span id="line-669">         *</span>
+<span class="source-line-no">670</span><span id="line-670">         * @since 4.0.0</span>
+<span class="source-line-no">671</span><span id="line-671">         * @deprecated Use {@link #setAddress(InetSocketAddress)} instead</span>
+<span class="source-line-no">672</span><span id="line-672">         */</span>
+<span class="source-line-no">673</span><span id="line-673">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">674</span><span id="line-674">        public @NotNull Builder&lt;T&gt; setPort(short port) {</span>
+<span class="source-line-no">675</span><span id="line-675">            this.address = new InetSocketAddress(this.address.getAddress(), port);</span>
+<span class="source-line-no">676</span><span id="line-676">            return this;</span>
+<span class="source-line-no">677</span><span id="line-677">        }</span>
+<span class="source-line-no">678</span><span id="line-678"></span>
+<span class="source-line-no">679</span><span id="line-679">        /**</span>
+<span class="source-line-no">680</span><span id="line-680">         * Get the database on the server</span>
+<span class="source-line-no">681</span><span id="line-681">         *</span>
+<span class="source-line-no">682</span><span id="line-682">         * @return The database on the server</span>
+<span class="source-line-no">683</span><span id="line-683">         *</span>
+<span class="source-line-no">684</span><span id="line-684">         * @since 4.0.0</span>
 <span class="source-line-no">685</span><span id="line-685">         */</span>
-<span class="source-line-no">686</span><span id="line-686">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">687</span><span id="line-687">        public @NotNull Builder&lt;T&gt; setPort(short port) {</span>
-<span class="source-line-no">688</span><span id="line-688">            this.address = new InetSocketAddress(this.address.getAddress(), port);</span>
-<span class="source-line-no">689</span><span id="line-689">            return this;</span>
-<span class="source-line-no">690</span><span id="line-690">        }</span>
-<span class="source-line-no">691</span><span id="line-691"></span>
-<span class="source-line-no">692</span><span id="line-692">        /**</span>
-<span class="source-line-no">693</span><span id="line-693">         * Get the database on the server</span>
+<span class="source-line-no">686</span><span id="line-686">        public @NotNull String getDatabase() {</span>
+<span class="source-line-no">687</span><span id="line-687">            return this.database;</span>
+<span class="source-line-no">688</span><span id="line-688">        }</span>
+<span class="source-line-no">689</span><span id="line-689"></span>
+<span class="source-line-no">690</span><span id="line-690">        /**</span>
+<span class="source-line-no">691</span><span id="line-691">         * Set the database on the server</span>
+<span class="source-line-no">692</span><span id="line-692">         *</span>
+<span class="source-line-no">693</span><span id="line-693">         * @param database The database on the server</span>
 <span class="source-line-no">694</span><span id="line-694">         *</span>
-<span class="source-line-no">695</span><span id="line-695">         * @return The database on the server</span>
+<span class="source-line-no">695</span><span id="line-695">         * @return Self for chaining</span>
 <span class="source-line-no">696</span><span id="line-696">         *</span>
 <span class="source-line-no">697</span><span id="line-697">         * @since 4.0.0</span>
 <span class="source-line-no">698</span><span id="line-698">         */</span>
-<span class="source-line-no">699</span><span id="line-699">        public @NotNull String getDatabase() {</span>
-<span class="source-line-no">700</span><span id="line-700">            return this.database;</span>
-<span class="source-line-no">701</span><span id="line-701">        }</span>
-<span class="source-line-no">702</span><span id="line-702"></span>
-<span class="source-line-no">703</span><span id="line-703">        /**</span>
-<span class="source-line-no">704</span><span id="line-704">         * Set the database on the server</span>
-<span class="source-line-no">705</span><span id="line-705">         *</span>
-<span class="source-line-no">706</span><span id="line-706">         * @param database The database on the server</span>
-<span class="source-line-no">707</span><span id="line-707">         *</span>
-<span class="source-line-no">708</span><span id="line-708">         * @return Self for chaining</span>
-<span class="source-line-no">709</span><span id="line-709">         *</span>
-<span class="source-line-no">710</span><span id="line-710">         * @since 4.0.0</span>
-<span class="source-line-no">711</span><span id="line-711">         */</span>
-<span class="source-line-no">712</span><span id="line-712">        public @NotNull Builder&lt;T&gt; setDatabase(@NotNull String database) {</span>
-<span class="source-line-no">713</span><span id="line-713">            this.database = database;</span>
-<span class="source-line-no">714</span><span id="line-714">            return this;</span>
-<span class="source-line-no">715</span><span id="line-715">        }</span>
-<span class="source-line-no">716</span><span id="line-716"></span>
-<span class="source-line-no">717</span><span id="line-717">        /**</span>
-<span class="source-line-no">718</span><span id="line-718">         * Get the table of the database</span>
+<span class="source-line-no">699</span><span id="line-699">        public @NotNull Builder&lt;T&gt; setDatabase(@NotNull String database) {</span>
+<span class="source-line-no">700</span><span id="line-700">            this.database = database;</span>
+<span class="source-line-no">701</span><span id="line-701">            return this;</span>
+<span class="source-line-no">702</span><span id="line-702">        }</span>
+<span class="source-line-no">703</span><span id="line-703"></span>
+<span class="source-line-no">704</span><span id="line-704">        /**</span>
+<span class="source-line-no">705</span><span id="line-705">         * Get the table of the database</span>
+<span class="source-line-no">706</span><span id="line-706">         *</span>
+<span class="source-line-no">707</span><span id="line-707">         * @return The table of the database</span>
+<span class="source-line-no">708</span><span id="line-708">         *</span>
+<span class="source-line-no">709</span><span id="line-709">         * @since 4.0.0</span>
+<span class="source-line-no">710</span><span id="line-710">         */</span>
+<span class="source-line-no">711</span><span id="line-711">        public @NotNull String getTable() {</span>
+<span class="source-line-no">712</span><span id="line-712">            return this.table;</span>
+<span class="source-line-no">713</span><span id="line-713">        }</span>
+<span class="source-line-no">714</span><span id="line-714"></span>
+<span class="source-line-no">715</span><span id="line-715">        /**</span>
+<span class="source-line-no">716</span><span id="line-716">         * Set the table of the database</span>
+<span class="source-line-no">717</span><span id="line-717">         *</span>
+<span class="source-line-no">718</span><span id="line-718">         * @param table The table of the database</span>
 <span class="source-line-no">719</span><span id="line-719">         *</span>
-<span class="source-line-no">720</span><span id="line-720">         * @return The table of the database</span>
+<span class="source-line-no">720</span><span id="line-720">         * @return Self for chaining</span>
 <span class="source-line-no">721</span><span id="line-721">         *</span>
 <span class="source-line-no">722</span><span id="line-722">         * @since 4.0.0</span>
 <span class="source-line-no">723</span><span id="line-723">         */</span>
-<span class="source-line-no">724</span><span id="line-724">        public @NotNull String getTable() {</span>
-<span class="source-line-no">725</span><span id="line-725">            return this.table;</span>
-<span class="source-line-no">726</span><span id="line-726">        }</span>
-<span class="source-line-no">727</span><span id="line-727"></span>
-<span class="source-line-no">728</span><span id="line-728">        /**</span>
-<span class="source-line-no">729</span><span id="line-729">         * Set the table of the database</span>
-<span class="source-line-no">730</span><span id="line-730">         *</span>
-<span class="source-line-no">731</span><span id="line-731">         * @param table The table of the database</span>
-<span class="source-line-no">732</span><span id="line-732">         *</span>
-<span class="source-line-no">733</span><span id="line-733">         * @return Self for chaining</span>
-<span class="source-line-no">734</span><span id="line-734">         *</span>
-<span class="source-line-no">735</span><span id="line-735">         * @since 4.0.0</span>
-<span class="source-line-no">736</span><span id="line-736">         */</span>
-<span class="source-line-no">737</span><span id="line-737">        public @NotNull Builder&lt;T&gt; setTable(@NotNull String table) {</span>
-<span class="source-line-no">738</span><span id="line-738">            this.table = table;</span>
-<span class="source-line-no">739</span><span id="line-739">            return this;</span>
+<span class="source-line-no">724</span><span id="line-724">        public @NotNull Builder&lt;T&gt; setTable(@NotNull String table) {</span>
+<span class="source-line-no">725</span><span id="line-725">            this.table = table;</span>
+<span class="source-line-no">726</span><span id="line-726">            return this;</span>
+<span class="source-line-no">727</span><span id="line-727">        }</span>
+<span class="source-line-no">728</span><span id="line-728"></span>
+<span class="source-line-no">729</span><span id="line-729">        /**</span>
+<span class="source-line-no">730</span><span id="line-730">         * Get the username to the server</span>
+<span class="source-line-no">731</span><span id="line-731">         * &lt;p&gt;</span>
+<span class="source-line-no">732</span><span id="line-732">         * Default is null</span>
+<span class="source-line-no">733</span><span id="line-733">         *</span>
+<span class="source-line-no">734</span><span id="line-734">         * @return The username to the server</span>
+<span class="source-line-no">735</span><span id="line-735">         *</span>
+<span class="source-line-no">736</span><span id="line-736">         * @since 4.0.0</span>
+<span class="source-line-no">737</span><span id="line-737">         */</span>
+<span class="source-line-no">738</span><span id="line-738">        public @Nullable String getUsername() {</span>
+<span class="source-line-no">739</span><span id="line-739">            return this.username;</span>
 <span class="source-line-no">740</span><span id="line-740">        }</span>
 <span class="source-line-no">741</span><span id="line-741"></span>
 <span class="source-line-no">742</span><span id="line-742">        /**</span>
-<span class="source-line-no">743</span><span id="line-743">         * Get the username to the server</span>
+<span class="source-line-no">743</span><span id="line-743">         * Set the username to the server</span>
 <span class="source-line-no">744</span><span id="line-744">         * &lt;p&gt;</span>
 <span class="source-line-no">745</span><span id="line-745">         * Default is null</span>
 <span class="source-line-no">746</span><span id="line-746">         *</span>
-<span class="source-line-no">747</span><span id="line-747">         * @return The username to the server</span>
+<span class="source-line-no">747</span><span id="line-747">         * @param username The username to the server</span>
 <span class="source-line-no">748</span><span id="line-748">         *</span>
-<span class="source-line-no">749</span><span id="line-749">         * @since 4.0.0</span>
-<span class="source-line-no">750</span><span id="line-750">         */</span>
-<span class="source-line-no">751</span><span id="line-751">        public @Nullable String getUsername() {</span>
-<span class="source-line-no">752</span><span id="line-752">            return this.username;</span>
-<span class="source-line-no">753</span><span id="line-753">        }</span>
-<span class="source-line-no">754</span><span id="line-754"></span>
-<span class="source-line-no">755</span><span id="line-755">        /**</span>
-<span class="source-line-no">756</span><span id="line-756">         * Set the username to the server</span>
-<span class="source-line-no">757</span><span id="line-757">         * &lt;p&gt;</span>
-<span class="source-line-no">758</span><span id="line-758">         * Default is null</span>
-<span class="source-line-no">759</span><span id="line-759">         *</span>
-<span class="source-line-no">760</span><span id="line-760">         * @param username The username to the server</span>
-<span class="source-line-no">761</span><span id="line-761">         *</span>
-<span class="source-line-no">762</span><span id="line-762">         * @return Self for chaining</span>
-<span class="source-line-no">763</span><span id="line-763">         *</span>
-<span class="source-line-no">764</span><span id="line-764">         * @since 4.0.0</span>
-<span class="source-line-no">765</span><span id="line-765">         */</span>
-<span class="source-line-no">766</span><span id="line-766">        public @NotNull Builder&lt;T&gt; setUsername(@Nullable String username) {</span>
-<span class="source-line-no">767</span><span id="line-767">            this.username = username;</span>
-<span class="source-line-no">768</span><span id="line-768">            return this;</span>
+<span class="source-line-no">749</span><span id="line-749">         * @return Self for chaining</span>
+<span class="source-line-no">750</span><span id="line-750">         *</span>
+<span class="source-line-no">751</span><span id="line-751">         * @since 4.0.0</span>
+<span class="source-line-no">752</span><span id="line-752">         */</span>
+<span class="source-line-no">753</span><span id="line-753">        public @NotNull Builder&lt;T&gt; setUsername(@Nullable String username) {</span>
+<span class="source-line-no">754</span><span id="line-754">            this.username = username;</span>
+<span class="source-line-no">755</span><span id="line-755">            return this;</span>
+<span class="source-line-no">756</span><span id="line-756">        }</span>
+<span class="source-line-no">757</span><span id="line-757"></span>
+<span class="source-line-no">758</span><span id="line-758">        /**</span>
+<span class="source-line-no">759</span><span id="line-759">         * Get the password to the server</span>
+<span class="source-line-no">760</span><span id="line-760">         * &lt;p&gt;</span>
+<span class="source-line-no">761</span><span id="line-761">         * Default is null</span>
+<span class="source-line-no">762</span><span id="line-762">         *</span>
+<span class="source-line-no">763</span><span id="line-763">         * @return The password to the server</span>
+<span class="source-line-no">764</span><span id="line-764">         *</span>
+<span class="source-line-no">765</span><span id="line-765">         * @since 4.0.0</span>
+<span class="source-line-no">766</span><span id="line-766">         */</span>
+<span class="source-line-no">767</span><span id="line-767">        public @Nullable String getPassword() {</span>
+<span class="source-line-no">768</span><span id="line-768">            return this.password;</span>
 <span class="source-line-no">769</span><span id="line-769">        }</span>
 <span class="source-line-no">770</span><span id="line-770"></span>
 <span class="source-line-no">771</span><span id="line-771">        /**</span>
-<span class="source-line-no">772</span><span id="line-772">         * Get the password to the server</span>
+<span class="source-line-no">772</span><span id="line-772">         * Set the password to the server</span>
 <span class="source-line-no">773</span><span id="line-773">         * &lt;p&gt;</span>
 <span class="source-line-no">774</span><span id="line-774">         * Default is null</span>
 <span class="source-line-no">775</span><span id="line-775">         *</span>
-<span class="source-line-no">776</span><span id="line-776">         * @return The password to the server</span>
+<span class="source-line-no">776</span><span id="line-776">         * @param password The password to the server</span>
 <span class="source-line-no">777</span><span id="line-777">         *</span>
-<span class="source-line-no">778</span><span id="line-778">         * @since 4.0.0</span>
-<span class="source-line-no">779</span><span id="line-779">         */</span>
-<span class="source-line-no">780</span><span id="line-780">        public @Nullable String getPassword() {</span>
-<span class="source-line-no">781</span><span id="line-781">            return this.password;</span>
-<span class="source-line-no">782</span><span id="line-782">        }</span>
-<span class="source-line-no">783</span><span id="line-783"></span>
-<span class="source-line-no">784</span><span id="line-784">        /**</span>
-<span class="source-line-no">785</span><span id="line-785">         * Set the password to the server</span>
-<span class="source-line-no">786</span><span id="line-786">         * &lt;p&gt;</span>
-<span class="source-line-no">787</span><span id="line-787">         * Default is null</span>
-<span class="source-line-no">788</span><span id="line-788">         *</span>
-<span class="source-line-no">789</span><span id="line-789">         * @param password The password to the server</span>
-<span class="source-line-no">790</span><span id="line-790">         *</span>
-<span class="source-line-no">791</span><span id="line-791">         * @return Self for chaining</span>
-<span class="source-line-no">792</span><span id="line-792">         *</span>
-<span class="source-line-no">793</span><span id="line-793">         * @since 4.0.0</span>
-<span class="source-line-no">794</span><span id="line-794">         */</span>
-<span class="source-line-no">795</span><span id="line-795">        public @NotNull Builder&lt;T&gt; setPassword(@Nullable String password) {</span>
-<span class="source-line-no">796</span><span id="line-796">            this.password = password;</span>
-<span class="source-line-no">797</span><span id="line-797">            return this;</span>
+<span class="source-line-no">778</span><span id="line-778">         * @return Self for chaining</span>
+<span class="source-line-no">779</span><span id="line-779">         *</span>
+<span class="source-line-no">780</span><span id="line-780">         * @since 4.0.0</span>
+<span class="source-line-no">781</span><span id="line-781">         */</span>
+<span class="source-line-no">782</span><span id="line-782">        public @NotNull Builder&lt;T&gt; setPassword(@Nullable String password) {</span>
+<span class="source-line-no">783</span><span id="line-783">            this.password = password;</span>
+<span class="source-line-no">784</span><span id="line-784">            return this;</span>
+<span class="source-line-no">785</span><span id="line-785">        }</span>
+<span class="source-line-no">786</span><span id="line-786"></span>
+<span class="source-line-no">787</span><span id="line-787">        /**</span>
+<span class="source-line-no">788</span><span id="line-788">         * Get weather to use the MariaDB driver</span>
+<span class="source-line-no">789</span><span id="line-789">         * &lt;p&gt;</span>
+<span class="source-line-no">790</span><span id="line-790">         * Default is false</span>
+<span class="source-line-no">791</span><span id="line-791">         *</span>
+<span class="source-line-no">792</span><span id="line-792">         * @return Whether to use the MariaDB driver</span>
+<span class="source-line-no">793</span><span id="line-793">         *</span>
+<span class="source-line-no">794</span><span id="line-794">         * @since 4.0.0</span>
+<span class="source-line-no">795</span><span id="line-795">         */</span>
+<span class="source-line-no">796</span><span id="line-796">        public boolean getUseMariadb() {</span>
+<span class="source-line-no">797</span><span id="line-797">            return this.useMariadb;</span>
 <span class="source-line-no">798</span><span id="line-798">        }</span>
 <span class="source-line-no">799</span><span id="line-799"></span>
 <span class="source-line-no">800</span><span id="line-800">        /**</span>
-<span class="source-line-no">801</span><span id="line-801">         * Get weather to use the MariaDB driver</span>
+<span class="source-line-no">801</span><span id="line-801">         * Set weather to use the MariaDB driver</span>
 <span class="source-line-no">802</span><span id="line-802">         * &lt;p&gt;</span>
 <span class="source-line-no">803</span><span id="line-803">         * Default is false</span>
 <span class="source-line-no">804</span><span id="line-804">         *</span>
-<span class="source-line-no">805</span><span id="line-805">         * @return Weather to use the MariaDB driver</span>
+<span class="source-line-no">805</span><span id="line-805">         * @param useMariadb Whether to use the MariaDB driver</span>
 <span class="source-line-no">806</span><span id="line-806">         *</span>
-<span class="source-line-no">807</span><span id="line-807">         * @since 4.0.0</span>
-<span class="source-line-no">808</span><span id="line-808">         */</span>
-<span class="source-line-no">809</span><span id="line-809">        public boolean getUseMariadb() {</span>
-<span class="source-line-no">810</span><span id="line-810">            return this.useMariadb;</span>
-<span class="source-line-no">811</span><span id="line-811">        }</span>
-<span class="source-line-no">812</span><span id="line-812"></span>
-<span class="source-line-no">813</span><span id="line-813">        /**</span>
-<span class="source-line-no">814</span><span id="line-814">         * Set weather to use the MariaDB driver</span>
-<span class="source-line-no">815</span><span id="line-815">         * &lt;p&gt;</span>
-<span class="source-line-no">816</span><span id="line-816">         * Default is false</span>
-<span class="source-line-no">817</span><span id="line-817">         *</span>
-<span class="source-line-no">818</span><span id="line-818">         * @param useMariadb Weather to use the MariaDB driver</span>
-<span class="source-line-no">819</span><span id="line-819">         *</span>
-<span class="source-line-no">820</span><span id="line-820">         * @return Self for chaining</span>
-<span class="source-line-no">821</span><span id="line-821">         *</span>
-<span class="source-line-no">822</span><span id="line-822">         * @since 4.0.0</span>
-<span class="source-line-no">823</span><span id="line-823">         */</span>
-<span class="source-line-no">824</span><span id="line-824">        public @NotNull Builder&lt;T&gt; setUseMariadb(boolean useMariadb) {</span>
-<span class="source-line-no">825</span><span id="line-825">            this.useMariadb = useMariadb;</span>
-<span class="source-line-no">826</span><span id="line-826">            return this;</span>
+<span class="source-line-no">807</span><span id="line-807">         * @return Self for chaining</span>
+<span class="source-line-no">808</span><span id="line-808">         *</span>
+<span class="source-line-no">809</span><span id="line-809">         * @since 4.0.0</span>
+<span class="source-line-no">810</span><span id="line-810">         */</span>
+<span class="source-line-no">811</span><span id="line-811">        public @NotNull Builder&lt;T&gt; setUseMariadb(boolean useMariadb) {</span>
+<span class="source-line-no">812</span><span id="line-812">            this.useMariadb = useMariadb;</span>
+<span class="source-line-no">813</span><span id="line-813">            return this;</span>
+<span class="source-line-no">814</span><span id="line-814">        }</span>
+<span class="source-line-no">815</span><span id="line-815"></span>
+<span class="source-line-no">816</span><span id="line-816">        /**</span>
+<span class="source-line-no">817</span><span id="line-817">         * Get how long to cache the config in memory</span>
+<span class="source-line-no">818</span><span id="line-818">         * &lt;p&gt;</span>
+<span class="source-line-no">819</span><span id="line-819">         * Default is 3s</span>
+<span class="source-line-no">820</span><span id="line-820">         *</span>
+<span class="source-line-no">821</span><span id="line-821">         * @return How long to cache the config in memory</span>
+<span class="source-line-no">822</span><span id="line-822">         *</span>
+<span class="source-line-no">823</span><span id="line-823">         * @since 4.0.0</span>
+<span class="source-line-no">824</span><span id="line-824">         */</span>
+<span class="source-line-no">825</span><span id="line-825">        public @NotNull Duration getCacheLength() {</span>
+<span class="source-line-no">826</span><span id="line-826">            return this.cacheLength;</span>
 <span class="source-line-no">827</span><span id="line-827">        }</span>
 <span class="source-line-no">828</span><span id="line-828"></span>
 <span class="source-line-no">829</span><span id="line-829">        /**</span>
-<span class="source-line-no">830</span><span id="line-830">         * Get how long to cache the config in memory</span>
+<span class="source-line-no">830</span><span id="line-830">         * Set how long to cache the config in memory</span>
 <span class="source-line-no">831</span><span id="line-831">         * &lt;p&gt;</span>
-<span class="source-line-no">832</span><span id="line-832">         * Default is 3s</span>
+<span class="source-line-no">832</span><span id="line-832">         * Default is 1s</span>
 <span class="source-line-no">833</span><span id="line-833">         *</span>
-<span class="source-line-no">834</span><span id="line-834">         * @return How long to cache the config in memory</span>
+<span class="source-line-no">834</span><span id="line-834">         * @param cacheLength How long to cache the config in memory</span>
 <span class="source-line-no">835</span><span id="line-835">         *</span>
-<span class="source-line-no">836</span><span id="line-836">         * @since 4.0.0</span>
-<span class="source-line-no">837</span><span id="line-837">         */</span>
-<span class="source-line-no">838</span><span id="line-838">        public @NotNull Duration getCacheLength() {</span>
-<span class="source-line-no">839</span><span id="line-839">            return this.cacheLength;</span>
-<span class="source-line-no">840</span><span id="line-840">        }</span>
-<span class="source-line-no">841</span><span id="line-841"></span>
-<span class="source-line-no">842</span><span id="line-842">        /**</span>
-<span class="source-line-no">843</span><span id="line-843">         * Set how long to cache the config in memory</span>
-<span class="source-line-no">844</span><span id="line-844">         * &lt;p&gt;</span>
-<span class="source-line-no">845</span><span id="line-845">         * Default is 1s</span>
-<span class="source-line-no">846</span><span id="line-846">         *</span>
-<span class="source-line-no">847</span><span id="line-847">         * @param cacheLength How long to cache the config in memory</span>
-<span class="source-line-no">848</span><span id="line-848">         *</span>
-<span class="source-line-no">849</span><span id="line-849">         * @return Self for chaining</span>
-<span class="source-line-no">850</span><span id="line-850">         *</span>
-<span class="source-line-no">851</span><span id="line-851">         * @since 4.0.0</span>
-<span class="source-line-no">852</span><span id="line-852">         */</span>
-<span class="source-line-no">853</span><span id="line-853">        public @NotNull Builder&lt;T&gt; setCacheLength(@NotNull Duration cacheLength) {</span>
-<span class="source-line-no">854</span><span id="line-854">            this.cacheLength = cacheLength;</span>
-<span class="source-line-no">855</span><span id="line-855">            return this;</span>
-<span class="source-line-no">856</span><span id="line-856">        }</span>
-<span class="source-line-no">857</span><span id="line-857"></span>
-<span class="source-line-no">858</span><span id="line-858">        /**</span>
-<span class="source-line-no">859</span><span id="line-859">         * Set how long to cache the config in memory</span>
-<span class="source-line-no">860</span><span id="line-860">         * &lt;p&gt;</span>
-<span class="source-line-no">861</span><span id="line-861">         * Default is 1s</span>
-<span class="source-line-no">862</span><span id="line-862">         *</span>
-<span class="source-line-no">863</span><span id="line-863">         * @param cacheLength How long to cache the config in memory</span>
-<span class="source-line-no">864</span><span id="line-864">         *</span>
-<span class="source-line-no">865</span><span id="line-865">         * @return Self for chaining</span>
-<span class="source-line-no">866</span><span id="line-866">         *</span>
-<span class="source-line-no">867</span><span id="line-867">         * @since 4.0.0</span>
-<span class="source-line-no">868</span><span id="line-868">         * @deprecated Use {@link #setCacheLength(Duration)} instead</span>
+<span class="source-line-no">836</span><span id="line-836">         * @return Self for chaining</span>
+<span class="source-line-no">837</span><span id="line-837">         *</span>
+<span class="source-line-no">838</span><span id="line-838">         * @since 4.0.0</span>
+<span class="source-line-no">839</span><span id="line-839">         */</span>
+<span class="source-line-no">840</span><span id="line-840">        public @NotNull Builder&lt;T&gt; setCacheLength(@NotNull Duration cacheLength) {</span>
+<span class="source-line-no">841</span><span id="line-841">            this.cacheLength = cacheLength;</span>
+<span class="source-line-no">842</span><span id="line-842">            return this;</span>
+<span class="source-line-no">843</span><span id="line-843">        }</span>
+<span class="source-line-no">844</span><span id="line-844"></span>
+<span class="source-line-no">845</span><span id="line-845">        /**</span>
+<span class="source-line-no">846</span><span id="line-846">         * Set how long to cache the config in memory</span>
+<span class="source-line-no">847</span><span id="line-847">         * &lt;p&gt;</span>
+<span class="source-line-no">848</span><span id="line-848">         * Default is 1s</span>
+<span class="source-line-no">849</span><span id="line-849">         *</span>
+<span class="source-line-no">850</span><span id="line-850">         * @param cacheLength How long to cache the config in memory</span>
+<span class="source-line-no">851</span><span id="line-851">         *</span>
+<span class="source-line-no">852</span><span id="line-852">         * @return Self for chaining</span>
+<span class="source-line-no">853</span><span id="line-853">         *</span>
+<span class="source-line-no">854</span><span id="line-854">         * @since 4.0.0</span>
+<span class="source-line-no">855</span><span id="line-855">         * @deprecated Use {@link #setCacheLength(Duration)} instead</span>
+<span class="source-line-no">856</span><span id="line-856">         */</span>
+<span class="source-line-no">857</span><span id="line-857">        @Deprecated(since="5.0.0")</span>
+<span class="source-line-no">858</span><span id="line-858">        public @NotNull Builder&lt;T&gt; setCacheLength(long cacheLength) {</span>
+<span class="source-line-no">859</span><span id="line-859">            this.cacheLength = Duration.ofMillis(cacheLength);</span>
+<span class="source-line-no">860</span><span id="line-860">            return this;</span>
+<span class="source-line-no">861</span><span id="line-861">        }</span>
+<span class="source-line-no">862</span><span id="line-862"></span>
+<span class="source-line-no">863</span><span id="line-863">        /**</span>
+<span class="source-line-no">864</span><span id="line-864">         * Creating a new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}</span>
+<span class="source-line-no">865</span><span id="line-865">         *</span>
+<span class="source-line-no">866</span><span id="line-866">         * @return A new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}</span>
+<span class="source-line-no">867</span><span id="line-867">         *</span>
+<span class="source-line-no">868</span><span id="line-868">         * @since 4.0.0</span>
 <span class="source-line-no">869</span><span id="line-869">         */</span>
-<span class="source-line-no">870</span><span id="line-870">        @Deprecated(since="5.0.0")</span>
-<span class="source-line-no">871</span><span id="line-871">        public @NotNull Builder&lt;T&gt; setCacheLength(long cacheLength) {</span>
-<span class="source-line-no">872</span><span id="line-872">            this.cacheLength = Duration.ofMillis(cacheLength);</span>
-<span class="source-line-no">873</span><span id="line-873">            return this;</span>
-<span class="source-line-no">874</span><span id="line-874">        }</span>
-<span class="source-line-no">875</span><span id="line-875"></span>
-<span class="source-line-no">876</span><span id="line-876">        /**</span>
-<span class="source-line-no">877</span><span id="line-877">         * Creating a new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}</span>
-<span class="source-line-no">878</span><span id="line-878">         *</span>
-<span class="source-line-no">879</span><span id="line-879">         * @return A new {@link io.github.kale_ko.ejcl.mysql.StructuredMySQLConfig}</span>
-<span class="source-line-no">880</span><span id="line-880">         *</span>
-<span class="source-line-no">881</span><span id="line-881">         * @since 4.0.0</span>
-<span class="source-line-no">882</span><span id="line-882">         */</span>
-<span class="source-line-no">883</span><span id="line-883">        public @NotNull StructuredMySQLConfig&lt;T&gt; build() {</span>
-<span class="source-line-no">884</span><span id="line-884">            return new StructuredMySQLConfig&lt;&gt;(this.clazz, this.address, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);</span>
-<span class="source-line-no">885</span><span id="line-885">        }</span>
-<span class="source-line-no">886</span><span id="line-886">    }</span>
-<span class="source-line-no">887</span><span id="line-887">}</span>
+<span class="source-line-no">870</span><span id="line-870">        public @NotNull StructuredMySQLConfig&lt;T&gt; build() {</span>
+<span class="source-line-no">871</span><span id="line-871">            return new StructuredMySQLConfig&lt;&gt;(this.clazz, this.address, this.database, this.table, this.username, this.password, this.useMariadb, this.cacheLength, this.processor);</span>
+<span class="source-line-no">872</span><span id="line-872">        }</span>
+<span class="source-line-no">873</span><span id="line-873">    }</span>
+<span class="source-line-no">874</span><span id="line-874">}</span>
 
 
 
